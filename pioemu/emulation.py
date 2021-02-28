@@ -22,7 +22,7 @@ def emulate_opcodes(opcodes):
 
         if instruction == 0x0:
             yield partial(jmp_always, data_field)
-        if instruction == 0x2020:
+        elif instruction == 0x2020:
             yield partial(wait_for_gpio_low, data_field)
         elif instruction == 0x2080:
             yield partial(wait_for_gpio_high, data_field)
