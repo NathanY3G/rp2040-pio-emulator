@@ -13,6 +13,7 @@ Limitations
 
 2. Limited set of operations supported:
 
+   * JMP (unconditional)
    * SET
    * WAIT (IRQ variant not implemented)
 

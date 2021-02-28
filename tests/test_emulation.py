@@ -39,6 +39,14 @@ def test_emulation_stops_after_last_opcode():
     assert state.x_register == 3
 
 
+def test_jump_always():
+    instruction = emulate_opcode(0x0007)  # jmp
+
+    new_state = instruction(State())
+
+    assert new_state.program_counter == 7
+
+
 def test_set_pins_directions():
     instruction = emulate_opcode(0xFF81)  # set pindirs, 1 [31]
 

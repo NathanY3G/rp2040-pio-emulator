@@ -20,6 +20,8 @@ def emulate_opcodes(opcodes):
         instruction = opcode & 0xE0E0
         data_field = opcode & 0x1F
 
+        if instruction == 0x0:
+            yield partial(jmp_always, data_field)
         if instruction == 0x2020:
             yield partial(wait_for_gpio_low, data_field)
         elif instruction == 0x2080:
@@ -38,6 +40,10 @@ def emulate_opcodes(opcodes):
 
 def next_instruction(state):
     return replace(state, program_counter=state.program_counter + 1)
+
+
+def jmp_always(address, state):
+    return replace(state, program_counter=address)
 
 
 def set_pins(data, state):
