@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import pytest
 from pioemu import emulate_opcodes, State
 
 
@@ -68,6 +69,36 @@ def test_set_y_register():
     state = instruction(State())
 
     assert state.y_register == 2
+
+
+@pytest.mark.parametrize(
+    "opcode, initial_state",
+    [
+        pytest.param(0x2080, State(pin_values=0), id="wait 1 gpio, 0"),
+        pytest.param(0x2020, State(pin_values=1), id="wait 0 pin, 0"),
+    ],
+)
+def test_wait_stalls_when_condition_not_met(opcode, initial_state):
+    instruction = emulate_opcode(opcode)
+
+    new_state = instruction(initial_state)
+
+    assert new_state.program_counter == 0
+
+
+@pytest.mark.parametrize(
+    "opcode, initial_state",
+    [
+        pytest.param(0x2080, State(pin_values=1), id="wait 1 gpio, 0"),
+        pytest.param(0x2020, State(pin_values=0), id="wait 0 pin, 0"),
+    ],
+)
+def test_wait_advances_when_condition_met(opcode, initial_state):
+    instruction = emulate_opcode(opcode)
+
+    new_state = instruction(initial_state)
+
+    assert new_state.program_counter == 1
 
 
 def emulate_opcode(opcode):

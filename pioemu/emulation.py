@@ -20,7 +20,11 @@ def emulate_opcodes(opcodes):
         instruction = opcode & 0xE0E0
         data_field = opcode & 0x1F
 
-        if instruction == 0xE080:
+        if instruction == 0x2020:
+            yield partial(wait_for_gpio_low, data_field)
+        elif instruction == 0x2080:
+            yield partial(wait_for_gpio_high, data_field)
+        elif instruction == 0xE080:
             yield partial(set_pindirs, data_field)
         elif instruction == 0xE000:
             yield partial(set_pins, data_field)
@@ -52,3 +56,21 @@ def set_x(data, state):
 
 def set_y(data, state):
     return next_instruction(replace(state, y_register=data))
+
+
+def wait_for_gpio_low(pin_number, state):
+    bit_mask = 1 << pin_number
+
+    if not state.pin_values & bit_mask:
+        return next_instruction(state)
+    else:
+        return state
+
+
+def wait_for_gpio_high(pin_number, state):
+    bit_mask = 1 << pin_number
+
+    if state.pin_values & bit_mask:
+        return next_instruction(state)
+    else:
+        return state

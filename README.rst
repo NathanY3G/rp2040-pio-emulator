@@ -13,4 +13,7 @@ Limitations
 
 2. Limited set of operations supported:
 
-   * SET (PINDIRS, PINS, X and Y registers)
+   * SET
+   * WAIT (IRQ variant not implemented)
+
+3. No support for pin sets
