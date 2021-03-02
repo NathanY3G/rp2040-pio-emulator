@@ -15,30 +15,16 @@ from dataclasses import replace
 
 
 def emulate_opcodes(opcodes, initial_state):
+    instruction_lookup = map_opcodes_to_callables()
+
     current_state = initial_state
 
     for opcode in opcodes:
         previous_state = current_state
 
-        masked_opcode = opcode & 0xE0E0
         data_field = opcode & 0x1F
 
-        if masked_opcode == 0x0:
-            instruction = jmp_always
-        elif masked_opcode == 0x2020:
-            instruction = wait_for_gpio_low
-        elif masked_opcode == 0x2080:
-            instruction = wait_for_gpio_high
-        elif masked_opcode == 0xE080:
-            instruction = set_pindirs
-        elif masked_opcode == 0xE000:
-            instruction = set_pins
-        elif masked_opcode == 0xE020:
-            instruction = set_x
-        elif masked_opcode == 0xE040:
-            instruction = set_y
-        else:
-            instruction = None
+        instruction = instruction_lookup.get(opcode & 0xE0E0, None)
 
         if instruction is not None:
             current_state = instruction(data_field, current_state)
@@ -87,3 +73,15 @@ def wait_for_gpio_high(pin_number, state):
         return next_instruction(state)
     else:
         return state
+
+
+def map_opcodes_to_callables():
+    return {
+        0x0000: jmp_always,
+        0x2020: wait_for_gpio_low,
+        0x2080: wait_for_gpio_high,
+        0xE080: set_pindirs,
+        0xE000: set_pins,
+        0xE020: set_x,
+        0xE040: set_y,
+    }
