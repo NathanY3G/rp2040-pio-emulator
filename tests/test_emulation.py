@@ -15,68 +15,68 @@ import pytest
 from pioemu import emulate_opcodes, State
 
 
-def test_none_is_returned_for_unsupported_opcodes():
-    instruction = emulate_opcode(0xE0E0)
-    assert instruction is None
+def test_emulation_stops_when_unsupported_opcode_is_reached():
+    with pytest.raises(StopIteration):
+        emulate_opcode(0xE0E0, State())
 
 
 def test_program_counter_is_incremented():
-    state = State(program_counter=0)
-    instruction = emulate_opcode(0xE081)  # set pindirs, 1
+    initial_state = State(program_counter=0)
 
-    state = instruction(state)
+    new_state = emulate_opcode(0xE081, initial_state)  # set pindirs, 1
 
-    assert state.program_counter == 1
+    assert new_state.program_counter == 1
 
 
 def test_emulation_stops_after_last_opcode():
     opcodes = [0xE021, 0xE022, 0xE023]  # set x, 1 to 3 inclusive
-    state = State()
+    initial_state = State()
 
-    for instruction in emulate_opcodes(opcodes):
-        state = instruction(state)
+    x_register_changes = [
+        state.x_register for _, state in emulate_opcodes(opcodes, initial_state)
+    ]
 
-    assert state.x_register == 3
+    assert x_register_changes == [1, 2, 3]
 
 
-def test_jump_always():
-    instruction = emulate_opcode(0x0007)  # jmp
+def test_jump_always_forward():
+    initial_state = State(program_counter=3)
 
-    new_state = instruction(State())
+    new_state = emulate_opcode(0x0007, initial_state)  # jmp
 
     assert new_state.program_counter == 7
 
 
 def test_set_pins_directions():
-    instruction = emulate_opcode(0xFF81)  # set pindirs, 1 [31]
+    initial_state = State(pin_directions=0x1F)
 
-    state = instruction(State())
+    new_state = emulate_opcode(0xFF81, initial_state)  # set pindirs, 1 [31]
 
-    assert state.pin_directions == 1
+    assert new_state.pin_directions == 1
 
 
 def test_set_pins_values():
-    instruction = emulate_opcode(0xFF1F)  # set pins, 31 [31]
+    initial_state = State(pin_values=30)
 
-    state = instruction(State())
+    new_state = emulate_opcode(0xFF1F, initial_state)  # set pins, 31 [31]
 
-    assert state.pin_values == 31
+    assert new_state.pin_values == 31
 
 
 def test_set_x_register():
-    instruction = emulate_opcode(0xE03F)  # set x, 31
+    initial_state = State(x_register=0)
 
-    state = instruction(State())
+    new_state = emulate_opcode(0xE03F, initial_state)  # set x, 31
 
-    assert state.x_register == 31
+    assert new_state.x_register == 31
 
 
 def test_set_y_register():
-    instruction = emulate_opcode(0xE042)  # set y, 2
+    initial_state = State(y_register=0)
 
-    state = instruction(State())
+    new_state = emulate_opcode(0xE042, initial_state)  # set y, 2
 
-    assert state.y_register == 2
+    assert new_state.y_register == 2
 
 
 @pytest.mark.parametrize(
@@ -87,9 +87,7 @@ def test_set_y_register():
     ],
 )
 def test_wait_stalls_when_condition_not_met(opcode, initial_state):
-    instruction = emulate_opcode(opcode)
-
-    new_state = instruction(initial_state)
+    new_state = emulate_opcode(opcode, initial_state)
 
     assert new_state.program_counter == 0
 
@@ -102,12 +100,11 @@ def test_wait_stalls_when_condition_not_met(opcode, initial_state):
     ],
 )
 def test_wait_advances_when_condition_met(opcode, initial_state):
-    instruction = emulate_opcode(opcode)
-
-    new_state = instruction(initial_state)
+    new_state = emulate_opcode(opcode, initial_state)
 
     assert new_state.program_counter == 1
 
 
-def emulate_opcode(opcode):
-    return next(emulate_opcodes([opcode]))
+def emulate_opcode(opcode, initial_state):
+    _, new_state = next(emulate_opcodes([opcode], initial_state))
+    return new_state

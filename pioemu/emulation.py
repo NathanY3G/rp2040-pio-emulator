@@ -12,30 +12,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import replace
-from functools import partial
 
 
-def emulate_opcodes(opcodes):
+def emulate_opcodes(opcodes, initial_state):
+    current_state = initial_state
+
     for opcode in opcodes:
-        instruction = opcode & 0xE0E0
+        previous_state = current_state
+
+        masked_opcode = opcode & 0xE0E0
         data_field = opcode & 0x1F
 
-        if instruction == 0x0:
-            yield partial(jmp_always, data_field)
-        elif instruction == 0x2020:
-            yield partial(wait_for_gpio_low, data_field)
-        elif instruction == 0x2080:
-            yield partial(wait_for_gpio_high, data_field)
-        elif instruction == 0xE080:
-            yield partial(set_pindirs, data_field)
-        elif instruction == 0xE000:
-            yield partial(set_pins, data_field)
-        elif instruction == 0xE020:
-            yield partial(set_x, data_field)
-        elif instruction == 0xE040:
-            yield partial(set_y, data_field)
+        if masked_opcode == 0x0:
+            instruction = jmp_always
+        elif masked_opcode == 0x2020:
+            instruction = wait_for_gpio_low
+        elif masked_opcode == 0x2080:
+            instruction = wait_for_gpio_high
+        elif masked_opcode == 0xE080:
+            instruction = set_pindirs
+        elif masked_opcode == 0xE000:
+            instruction = set_pins
+        elif masked_opcode == 0xE020:
+            instruction = set_x
+        elif masked_opcode == 0xE040:
+            instruction = set_y
         else:
-            yield None
+            instruction = None
+
+        if instruction is not None:
+            current_state = instruction(data_field, current_state)
+            yield (previous_state, current_state)
+        else:
+            return (previous_state, None)
 
 
 def next_instruction(state):
@@ -47,13 +56,11 @@ def jmp_always(address, state):
 
 
 def set_pins(data, state):
-    return next_instruction(replace(state, pin_values=(state.pin_values | data) & 0x1F))
+    return next_instruction(replace(state, pin_values=data))
 
 
 def set_pindirs(data, state):
-    return next_instruction(
-        replace(state, pin_directions=(state.pin_directions | data) & 0x1F)
-    )
+    return next_instruction(replace(state, pin_directions=data))
 
 
 def set_x(data, state):
