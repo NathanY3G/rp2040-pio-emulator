@@ -12,22 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import replace
+from .state import State
 
 
-def emulate_opcodes(opcodes, initial_state):
+def emulate_opcodes(opcodes, *, initial_state=State(), max_clock_cycles=None):
+    def run_conditions_met(state):
+        return max_clock_cycles is None or state.clock < max_clock_cycles
+
     instruction_lookup = map_opcodes_to_callables()
 
     current_state = initial_state
 
-    for opcode in opcodes:
+    while run_conditions_met(current_state):
         previous_state = current_state
 
+        opcode = opcodes[current_state.program_counter]
         data_field = opcode & 0x1F
-
         instruction = instruction_lookup.get(opcode & 0xE0E0, None)
 
         if instruction is not None:
             current_state = instruction(data_field, current_state)
+            current_state = replace(current_state, clock=current_state.clock + 1)
             yield (previous_state, current_state)
         else:
             return (previous_state, None)

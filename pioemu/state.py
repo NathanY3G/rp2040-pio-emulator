@@ -16,6 +16,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class State:
+    clock: int = 0
     program_counter: int = 0
     pin_directions: int = 0
     pin_values: int = 0

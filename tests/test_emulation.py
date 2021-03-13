@@ -28,23 +28,28 @@ def test_program_counter_is_incremented():
     assert new_state.program_counter == 1
 
 
-def test_emulation_stops_after_last_opcode():
-    opcodes = [0xE021, 0xE022, 0xE023]  # set x, 1 to 3 inclusive
-    initial_state = State()
+def test_runs_until_maximum_clock_cycles_reached():
+    opcodes = [0xE042, 0x0000]  # set y, 2 and jmp
 
-    x_register_changes = [
-        state.x_register for _, state in emulate_opcodes(opcodes, initial_state)
+    state_changes = [state for _, state in emulate_opcodes(opcodes, max_clock_cycles=3)]
+
+    assert state_changes == [
+        State(clock=1, program_counter=1, y_register=2),  # after set y, 2
+        State(clock=2, program_counter=0, y_register=2),  # after jmp
+        State(clock=3, program_counter=1, y_register=2),  # after set y, 2
     ]
-
-    assert x_register_changes == [1, 2, 3]
 
 
 def test_jump_always_forward():
-    initial_state = State(program_counter=3)
-
-    new_state = emulate_opcode(0x0007, initial_state)  # jmp
+    new_state = emulate_opcode(0x0007, State())  # jmp
 
     assert new_state.program_counter == 7
+
+
+def test_jump_consumes_one_clock_cycle():
+    new_state = emulate_opcode(0x0000, State())  # jmp
+
+    assert new_state.clock == 1
 
 
 def test_set_pins_directions():
@@ -80,6 +85,19 @@ def test_set_y_register():
 
 
 @pytest.mark.parametrize(
+    "opcode",
+    [
+        pytest.param(0xE03F, id="set x, 31"),
+        pytest.param(0xE042, id="set y, 2"),
+    ],
+)
+def test_set_consumes_one_clock_cycle(opcode):
+    new_state = emulate_opcode(opcode, State())
+
+    assert new_state.clock == 1
+
+
+@pytest.mark.parametrize(
     "opcode, initial_state",
     [
         pytest.param(0x2080, State(pin_values=0), id="wait 1 gpio, 0"),
@@ -106,5 +124,7 @@ def test_wait_advances_when_condition_met(opcode, initial_state):
 
 
 def emulate_opcode(opcode, initial_state):
-    _, new_state = next(emulate_opcodes([opcode], initial_state))
+    _, new_state = next(
+        emulate_opcodes([opcode], initial_state=initial_state, max_clock_cycles=1)
+    )
     return new_state
