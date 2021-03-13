@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from pioemu import emulate_opcodes, State
+from pioemu import emulate, State
 
 
 def test_set_pins_directions():
@@ -62,7 +62,7 @@ def test_set_consumes_one_clock_cycle(opcode):
 
 def emulate_opcode(opcode, initial_state):
     _, new_state = next(
-        emulate_opcodes([opcode], initial_state=initial_state, max_clock_cycles=1)
+        emulate([opcode], initial_state=initial_state, max_clock_cycles=1)
     )
 
     return new_state

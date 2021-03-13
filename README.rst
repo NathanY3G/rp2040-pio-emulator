@@ -9,7 +9,7 @@ the Raspberry Pi Foundation's RP2040 Microcontroller.
 
 Limitations
 ===========
-1. Emulates a State Machine within a PIO block and not an entire PIO block.
+1. Emulates a State Machine within a PIO block and not an entire PIO block
 
 2. Limited set of operations supported:
 
@@ -19,4 +19,4 @@ Limitations
 
 3. No support for pin sets
 
-4. No support for delay values.
+4. No support for delay values

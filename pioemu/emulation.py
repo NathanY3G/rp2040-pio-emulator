@@ -15,7 +15,7 @@ from dataclasses import replace
 from .state import State
 
 
-def emulate_opcodes(opcodes, *, initial_state=State(), max_clock_cycles=None):
+def emulate(opcodes, *, initial_state=State(), max_clock_cycles=None):
     def run_conditions_met(state):
         return max_clock_cycles is None or state.clock < max_clock_cycles
 

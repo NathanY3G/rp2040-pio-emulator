@@ -12,20 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from pioemu import emulate_opcodes, State
+from pioemu import emulate, State
 
 
 def test_emulation_stops_when_unsupported_opcode_is_reached():
     with pytest.raises(StopIteration):
-        next(emulate_opcodes([0xE0E0]))
+        next(emulate([0xE0E0]))
 
 
 def test_program_counter_is_incremented():
     opcodes = [0xE042, 0x0000]  # set y, 2 and jmp
 
     program_counter_changes = [
-        state.program_counter
-        for _, state in emulate_opcodes(opcodes, max_clock_cycles=3)
+        state.program_counter for _, state in emulate(opcodes, max_clock_cycles=3)
     ]
 
     assert program_counter_changes == [1, 0, 1]
@@ -34,8 +33,6 @@ def test_program_counter_is_incremented():
 def test_runs_until_maximum_clock_cycles_reached():
     opcodes = [0xE042, 0x0000]  # set y, 2 and jmp
 
-    clock_changes = [
-        state.clock for _, state in emulate_opcodes(opcodes, max_clock_cycles=3)
-    ]
+    clock_changes = [state.clock for _, state in emulate(opcodes, max_clock_cycles=3)]
 
     assert clock_changes == [1, 2, 3]
