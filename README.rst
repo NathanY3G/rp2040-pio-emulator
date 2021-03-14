@@ -4,8 +4,17 @@ Emulator for the PIO Blocks within the Raspberry Pi Microcontroller (Python Edit
 
 About
 =====
-An emulator for the Programmable Input/Output blocks that are present within
-the Raspberry Pi Foundation's RP2040 Microcontroller.
+A proof-of-concept emulator for the Programmable Input/Output blocks that are
+present within the Raspberry Pi Foundation's RP2040 Microcontroller.
+
+Example Jupyter Notebook
+========================
+The emulator can even be used from within Jupyter Notebooks to visualize the
+output of PIO programs. The screenshot below is taken from the ``square_wave_example.ipynb``
+notebook that is included in this repository.
+
+.. image:: ./docs/images/jupyter_example.png
+   :alt: Screenshot of Jupyter Notebook example
 
 Limitations
 ===========
