@@ -28,14 +28,31 @@ def emulate(opcodes, *, initial_state=State(), max_clock_cycles=None):
 
         opcode = opcodes[current_state.program_counter]
         data_field = opcode & 0x1F
-        instruction = instruction_lookup.get(opcode & 0xE0E0, None)
+        delay_value = (opcode >> 8) & 0x1F
 
-        if instruction is not None:
-            current_state = instruction(data_field, current_state)
-            current_state = replace(current_state, clock=current_state.clock + 1)
-            yield (previous_state, current_state)
+        instruction = instruction_lookup.get(opcode & 0xE0E0, None)
+        if instruction is None:
+            return
+
+        current_state = instruction(data_field, current_state)
+
+        if is_instruction_stalled(previous_state, current_state, instruction):
+            clock_cycles_consumed = 1
         else:
-            return (previous_state, None)
+            clock_cycles_consumed = 1 + delay_value
+
+        current_state = replace(
+            current_state, clock=current_state.clock + clock_cycles_consumed
+        )
+
+        yield (previous_state, current_state)
+
+
+def is_instruction_stalled(previous_state, current_state, instruction):
+    if instruction in [wait_for_gpio_low, wait_for_gpio_high]:
+        return current_state.program_counter == previous_state.program_counter
+    else:
+        return False
 
 
 def next_instruction(state):

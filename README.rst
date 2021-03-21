@@ -27,5 +27,3 @@ Limitations
    * WAIT (IRQ variant not implemented)
 
 3. No support for pin sets
-
-4. No support for delay values
