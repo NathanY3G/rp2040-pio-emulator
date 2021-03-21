@@ -11,22 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pytest
 from pioemu import emulate, State
-from .support import emulate_single_instruction
 
 
-def test_jump_always_forward():
-    new_state = emulate_single_instruction(0x0007)  # jmp 7
+def emulate_single_instruction(opcode, initial_state=None):
+    if initial_state is not None:
+        instruction_generator = emulate(
+            [opcode], initial_state=initial_state, max_clock_cycles=1
+        )
+    else:
+        instruction_generator = emulate([opcode], max_clock_cycles=1)
 
-    assert new_state.program_counter == 7
+    _, new_state = next(instruction_generator)
 
-
-@pytest.mark.parametrize(
-    "opcode, expected_clock_cycles",
-    [pytest.param(0x0000, 1, id="jmp 0"), pytest.param(0x0102, 2, id="jmp 1 [1]"),],
-)
-def test_jump_consumes_expected_clock_cycles(opcode, expected_clock_cycles):
-    new_state = emulate_single_instruction(opcode)
-
-    assert new_state.clock == expected_clock_cycles
+    return new_state
