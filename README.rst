@@ -22,7 +22,7 @@ Limitations
 
 2. Limited set of operations supported:
 
-   * JMP (unconditional and x/y non-zero post-decrement)
+   * JMP (unconditional, x/y equal zero and x/y are non-zero with post-decrement)
    * SET
    * WAIT (IRQ variant not implemented)
 

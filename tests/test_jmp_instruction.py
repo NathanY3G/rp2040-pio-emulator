@@ -33,6 +33,23 @@ def test_jump_when_x_is_non_zero_post_decrement():
     assert state_changes == [(1, 3), (1, 2), (1, 1), (1, 0), (2, -1)]
 
 
+@pytest.mark.parametrize(
+    "opcode, initial_state, expected_program_counter",
+    [
+        pytest.param(0x0020, State(x_register=0), 0, id="jmp !x 0 when x is zero"),
+        pytest.param(0x0020, State(x_register=1), 1, id="jmp !x 0 when x is not zero"),
+        pytest.param(0x0062, State(y_register=0), 2, id="jmp !y 2 when y is zero"),
+        pytest.param(0x0062, State(y_register=1), 1, id="jmp !y 2 when y is not zero"),
+    ],
+)
+def test_jump_when_scratch_register_is_zero(
+    opcode, initial_state, expected_program_counter
+):
+    new_state = emulate_single_instruction(opcode, initial_state)
+
+    assert new_state.program_counter == expected_program_counter
+
+
 def test_jump_when_y_is_non_zero_post_decrement():
     opcodes = [0xE043, 0x0081]  # set y, 3 and jmp y--
 
