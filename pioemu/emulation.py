@@ -99,6 +99,13 @@ def jmp_y_non_zero_post_decrement(address, state):
     )
 
 
+def jmp_x_not_equal_to_y(address, state):
+    if state.x_register != state.y_register:
+        return replace(state, program_counter=address)
+    else:
+        return replace(state, program_counter=state.program_counter + 1)
+
+
 def set_pins(data, state):
     return next_instruction(replace(state, pin_values=data))
 
@@ -140,6 +147,7 @@ def map_opcodes_to_callables():
         0x0040: jmp_x_non_zero_post_decrement,
         0x0060: jmp_y_zero,
         0x0080: jmp_y_non_zero_post_decrement,
+        0x00A0: jmp_x_not_equal_to_y,
         0x2020: wait_for_gpio_low,
         0x2080: wait_for_gpio_high,
         0xE080: set_pindirs,
