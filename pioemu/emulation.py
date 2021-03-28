@@ -63,6 +63,28 @@ def jmp_always(address, state):
     return replace(state, program_counter=address)
 
 
+def jmp_x_non_zero_post_decrement(address, state):
+    if state.x_register == 0:
+        new_program_counter = state.program_counter + 1
+    else:
+        new_program_counter = address
+
+    return replace(
+        state, program_counter=new_program_counter, x_register=state.x_register - 1
+    )
+
+
+def jmp_y_non_zero_post_decrement(address, state):
+    if state.y_register == 0:
+        new_program_counter = state.program_counter + 1
+    else:
+        new_program_counter = address
+
+    return replace(
+        state, program_counter=new_program_counter, y_register=state.y_register - 1
+    )
+
+
 def set_pins(data, state):
     return next_instruction(replace(state, pin_values=data))
 
@@ -100,6 +122,8 @@ def wait_for_gpio_high(pin_number, state):
 def map_opcodes_to_callables():
     return {
         0x0000: jmp_always,
+        0x0040: jmp_x_non_zero_post_decrement,
+        0x0080: jmp_y_non_zero_post_decrement,
         0x2020: wait_for_gpio_low,
         0x2080: wait_for_gpio_high,
         0xE080: set_pindirs,
