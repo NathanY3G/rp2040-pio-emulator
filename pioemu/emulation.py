@@ -23,15 +23,14 @@ from .conditions import (
 )
 
 
-def emulate(opcodes, *, initial_state=State(), max_clock_cycles=None):
-    def run_conditions_met(state):
-        return max_clock_cycles is None or state.clock < max_clock_cycles
+def emulate(opcodes, *, initial_state=State(), stop_condition=None):
+    stop_condition = stop_condition or (lambda state: False)
 
     instruction_lookup = map_opcodes_to_callables()
 
     current_state = initial_state
 
-    while run_conditions_met(current_state):
+    while not stop_condition(current_state):
         previous_state = current_state
 
         opcode = opcodes[current_state.program_counter]

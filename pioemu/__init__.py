@@ -13,5 +13,6 @@
 # limitations under the License.
 __version__ = "0.1.0"
 
+from .conditions import clock_cycles_reached
 from .emulation import emulate
 from .state import State
