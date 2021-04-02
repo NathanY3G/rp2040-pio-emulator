@@ -74,13 +74,15 @@ def test_jump_when_y_is_non_zero_post_decrement():
 
 
 @pytest.mark.parametrize(
-    "opcode, expected_clock_cycles",
+    "opcode, initial_state, expected_clock_cycles",
     [
-        pytest.param(0x0000, 1, id="jmp 0"),
-        pytest.param(0x0102, 2, id="jmp 1 [1]"),
+        pytest.param(0x0000, State(), 1, id="jmp 0"),
+        pytest.param(0x0102, State(), 2, id="jmp 1 [1]"),
+        pytest.param(0x0A80, State(y_register=0), 11, id="jmp y-- [10]"),
+        pytest.param(0x0A80, State(y_register=3), 11, id="jmp y-- [10]"),
     ],
 )
-def test_jump_consumes_expected_clock_cycles(opcode, expected_clock_cycles):
-    new_state = emulate_single_instruction(opcode)
+def test_jump_consumes_expected_clock_cycles(opcode, initial_state, expected_clock_cycles):
+    new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state.clock == expected_clock_cycles
