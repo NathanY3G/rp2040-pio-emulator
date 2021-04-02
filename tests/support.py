@@ -11,16 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pioemu import emulate, State
+from pioemu import clock_cycles_reached, emulate, State
 
 
 def emulate_single_instruction(opcode, initial_state=None):
     if initial_state is not None:
         instruction_generator = emulate(
-            [opcode], initial_state=initial_state, max_clock_cycles=1
+            [opcode],
+            initial_state=initial_state,
+            stop_condition=clock_cycles_reached(1),
         )
     else:
-        instruction_generator = emulate([opcode], max_clock_cycles=1)
+        instruction_generator = emulate(
+            [opcode], stop_condition=clock_cycles_reached(1)
+        )
 
     _, new_state = next(instruction_generator)
 

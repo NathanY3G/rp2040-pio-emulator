@@ -11,6 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+def clock_cycles_reached(target_value):
+    return lambda state: state.clock >= target_value
+
+
 def x_register_equals_zero(state):
     return state.x_register == 0
 

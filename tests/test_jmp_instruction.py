@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from pioemu import emulate, State
+from pioemu import clock_cycles_reached, emulate, State
 from .support import emulate_single_instruction
 
 
@@ -54,23 +54,27 @@ def test_jump_for_scratch_register_conditions(
 def test_jump_when_x_is_non_zero_post_decrement():
     opcodes = [0xE023, 0x0041]  # set x, 3 and jmp x--
 
-    state_changes = [
-        (state.program_counter, state.x_register)
-        for _, state in emulate(opcodes, max_clock_cycles=5)
+    x_register_series = [
+        state.x_register
+        for state, _ in emulate(
+            opcodes, stop_condition=lambda state: state.program_counter == 2
+        )
     ]
 
-    assert state_changes == [(1, 3), (1, 2), (1, 1), (1, 0), (2, -1)]
+    assert x_register_series == [0, 3, 2, 1, 0]
 
 
 def test_jump_when_y_is_non_zero_post_decrement():
     opcodes = [0xE043, 0x0081]  # set y, 3 and jmp y--
 
-    state_changes = [
-        (state.program_counter, state.y_register)
-        for _, state in emulate(opcodes, max_clock_cycles=5)
+    y_register_series = [
+        state.y_register
+        for state, _ in emulate(
+            opcodes, stop_condition=lambda state: state.program_counter == 2
+        )
     ]
 
-    assert state_changes == [(1, 3), (1, 2), (1, 1), (1, 0), (2, -1)]
+    assert y_register_series == [0, 3, 2, 1, 0]
 
 
 @pytest.mark.parametrize(
@@ -82,7 +86,9 @@ def test_jump_when_y_is_non_zero_post_decrement():
         pytest.param(0x0A80, State(y_register=3), 11, id="jmp y-- [10]"),
     ],
 )
-def test_jump_consumes_expected_clock_cycles(opcode, initial_state, expected_clock_cycles):
+def test_jump_consumes_expected_clock_cycles(
+    opcode, initial_state, expected_clock_cycles
+):
     new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state.clock == expected_clock_cycles
