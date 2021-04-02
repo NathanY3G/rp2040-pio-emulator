@@ -12,7 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import replace
+from functools import partial
 from .state import State
+from .conditions import (
+    x_register_equals_zero,
+    x_register_not_equal_to_y_register,
+    x_register_not_equal_to_zero,
+    y_register_equals_zero,
+    y_register_not_equal_to_zero,
+)
 
 
 def emulate(opcodes, *, initial_state=State(), max_clock_cycles=None):
@@ -59,8 +67,25 @@ def next_instruction(state):
     return replace(state, program_counter=state.program_counter + 1)
 
 
-def jmp_always(address, state):
-    return replace(state, program_counter=address)
+def jump(condition, address, state):
+    if condition(state):
+        return replace(state, program_counter=address)
+    else:
+        return next_instruction(state)
+
+
+def jump_when_x_is_non_zero_and_post_decrement(address, state):
+    return replace(
+        jump(x_register_not_equal_to_zero, address, state),
+        x_register=state.x_register - 1,
+    )
+
+
+def jump_when_y_is_non_zero_and_post_decrement(address, state):
+    return replace(
+        jump(y_register_not_equal_to_zero, address, state),
+        y_register=state.y_register - 1,
+    )
 
 
 def set_pins(data, state):
@@ -81,25 +106,22 @@ def set_y(data, state):
 
 def wait_for_gpio_low(pin_number, state):
     bit_mask = 1 << pin_number
-
-    if not state.pin_values & bit_mask:
-        return next_instruction(state)
-    else:
-        return state
+    return next_instruction(state) if not state.pin_values & bit_mask else state
 
 
 def wait_for_gpio_high(pin_number, state):
     bit_mask = 1 << pin_number
-
-    if state.pin_values & bit_mask:
-        return next_instruction(state)
-    else:
-        return state
+    return next_instruction(state) if state.pin_values & bit_mask else state
 
 
 def map_opcodes_to_callables():
     return {
-        0x0000: jmp_always,
+        0x0000: partial(jump, lambda state: True),
+        0x0020: partial(jump, x_register_equals_zero),
+        0x0040: jump_when_x_is_non_zero_and_post_decrement,
+        0x0060: partial(jump, y_register_equals_zero),
+        0x0080: jump_when_y_is_non_zero_and_post_decrement,
+        0x00A0: partial(jump, x_register_not_equal_to_y_register),
         0x2020: wait_for_gpio_low,
         0x2080: wait_for_gpio_high,
         0xE080: set_pindirs,
