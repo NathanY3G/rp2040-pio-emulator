@@ -56,7 +56,7 @@ def emulate(opcodes, *, initial_state=State(), stop_condition=None):
 
 
 def is_instruction_stalled(previous_state, current_state, instruction):
-    if instruction in [wait_for_gpio_low, wait_for_gpio_high]:
+    if instruction in [pull_blocking, wait_for_gpio_low, wait_for_gpio_high]:
         return current_state.program_counter == previous_state.program_counter
     else:
         return False
@@ -85,6 +85,20 @@ def jump_when_y_is_non_zero_and_post_decrement(address, state):
         jump(y_register_not_equal_to_zero, address, state),
         y_register=state.y_register - 1,
     )
+
+
+def pull_blocking(not_used, state):
+    if len(state.transmit_fifo) > 0:
+        return next_instruction(replace(state, output_shift_register=state.transmit_fifo.pop()))
+    else:
+        return state
+
+
+def pull_nonblocking(not_used, state):
+    if len(state.transmit_fifo) > 0:
+        return next_instruction(replace(state, output_shift_register=state.transmit_fifo.pop()))
+    else:
+        return next_instruction(replace(state, output_shift_register=state.x_register))
 
 
 def set_pins(data, state):
@@ -123,6 +137,8 @@ def map_opcodes_to_callables():
         0x00A0: partial(jump, x_register_not_equal_to_y_register),
         0x2020: wait_for_gpio_low,
         0x2080: wait_for_gpio_high,
+        0x8080: pull_nonblocking,
+        0x80A0: pull_blocking,
         0xE080: set_pindirs,
         0xE000: set_pins,
         0xE020: set_x,
