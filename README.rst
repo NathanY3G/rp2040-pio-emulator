@@ -23,6 +23,7 @@ Limitations
 2. Limited set of operations supported:
 
    * JMP (PIN and !OSRE variants not implemented)
+   * OUT (NULL, PC, ISR and EXEC destinations not implemented)
    * PULL (IfEmpty not implemented)
    * SET
    * WAIT (IRQ variant not implemented)
