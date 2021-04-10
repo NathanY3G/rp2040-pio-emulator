@@ -15,6 +15,7 @@ from collections import deque
 from dataclasses import dataclass
 from typing import Deque
 
+
 @dataclass(frozen=True)
 class State:
     clock: int = 0
@@ -23,5 +24,6 @@ class State:
     pin_values: int = 0
     transmit_fifo: Deque = deque()
     output_shift_register: int = 0
+    output_shift_counter: int = 32
     x_register: int = 0
     y_register: int = 0

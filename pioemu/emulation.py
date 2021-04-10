@@ -87,16 +87,94 @@ def jump_when_y_is_non_zero_and_post_decrement(address, state):
     )
 
 
+def _shift_output_shift_register(register_value, counter_value, bit_count):
+    if bit_count == 0:
+        bit_count = 32
+
+    bit_mask = (1 << bit_count) - 1
+    shift_result = register_value & bit_mask
+
+    return (
+        register_value >> bit_count,
+        counter_value + bit_count,
+        shift_result,
+    )
+
+
+def out_pindirs(bit_count, state):
+    new_register_value, new_counter_value, shift_result = _shift_output_shift_register(
+        state.output_shift_register, state.output_shift_counter, bit_count
+    )
+
+    return replace(
+        state,
+        pin_directions=shift_result,
+        output_shift_register=new_register_value,
+        output_shift_counter=new_counter_value,
+    )
+
+
+def out_pins(bit_count, state):
+    new_register_value, new_counter_value, shift_result = _shift_output_shift_register(
+        state.output_shift_register, state.output_shift_counter, bit_count
+    )
+
+    return replace(
+        state,
+        pin_values=shift_result,
+        output_shift_register=new_register_value,
+        output_shift_counter=new_counter_value,
+    )
+
+
+def out_x(bit_count, state):
+    new_register_value, new_counter_value, shift_result = _shift_output_shift_register(
+        state.output_shift_register, state.output_shift_counter, bit_count
+    )
+
+    return replace(
+        state,
+        x_register=shift_result,
+        output_shift_register=new_register_value,
+        output_shift_counter=new_counter_value,
+    )
+
+
+def out_y(bit_count, state):
+    new_register_value, new_counter_value, shift_result = _shift_output_shift_register(
+        state.output_shift_register, state.output_shift_counter, bit_count
+    )
+
+    return replace(
+        state,
+        y_register=shift_result,
+        output_shift_register=new_register_value,
+        output_shift_counter=new_counter_value,
+    )
+
+
 def pull_blocking(not_used, state):
     if len(state.transmit_fifo) > 0:
-        return next_instruction(replace(state, output_shift_register=state.transmit_fifo.pop()))
+        return next_instruction(
+            replace(
+                state,
+                output_shift_register=state.transmit_fifo.pop(),
+                output_shift_counter=0,
+            )
+        )
     else:
         return state
 
 
 def pull_nonblocking(not_used, state):
     if len(state.transmit_fifo) > 0:
-        return next_instruction(replace(state, output_shift_register=state.transmit_fifo.pop()))
+        return next_instruction(
+            replace(
+                state,
+                output_shift_register=state.transmit_fifo.pop(),
+                output_shift_counter=0,
+            )
+        )
     else:
         return next_instruction(replace(state, output_shift_register=state.x_register))
 
@@ -137,6 +215,10 @@ def map_opcodes_to_callables():
         0x00A0: partial(jump, x_register_not_equal_to_y_register),
         0x2020: wait_for_gpio_low,
         0x2080: wait_for_gpio_high,
+        0x6000: out_pins,
+        0x6020: out_x,
+        0x6040: out_y,
+        0x6080: out_pindirs,
         0x8080: pull_nonblocking,
         0x80A0: pull_blocking,
         0xE080: set_pindirs,
