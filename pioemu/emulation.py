@@ -106,11 +106,13 @@ def out_pindirs(bit_count, state):
         state.output_shift_register, state.output_shift_counter, bit_count
     )
 
-    return replace(
-        state,
-        pin_directions=shift_result,
-        output_shift_register=new_register_value,
-        output_shift_counter=new_counter_value,
+    return next_instruction(
+        replace(
+            state,
+            pin_directions=shift_result,
+            output_shift_register=new_register_value,
+            output_shift_counter=new_counter_value,
+        )
     )
 
 
@@ -119,11 +121,13 @@ def out_pins(bit_count, state):
         state.output_shift_register, state.output_shift_counter, bit_count
     )
 
-    return replace(
-        state,
-        pin_values=shift_result,
-        output_shift_register=new_register_value,
-        output_shift_counter=new_counter_value,
+    return next_instruction(
+        replace(
+            state,
+            pin_values=shift_result,
+            output_shift_register=new_register_value,
+            output_shift_counter=new_counter_value,
+        )
     )
 
 
@@ -132,11 +136,13 @@ def out_x(bit_count, state):
         state.output_shift_register, state.output_shift_counter, bit_count
     )
 
-    return replace(
-        state,
-        x_register=shift_result,
-        output_shift_register=new_register_value,
-        output_shift_counter=new_counter_value,
+    return next_instruction(
+        replace(
+            state,
+            x_register=shift_result,
+            output_shift_register=new_register_value,
+            output_shift_counter=new_counter_value,
+        )
     )
 
 
@@ -145,11 +151,13 @@ def out_y(bit_count, state):
         state.output_shift_register, state.output_shift_counter, bit_count
     )
 
-    return replace(
-        state,
-        y_register=shift_result,
-        output_shift_register=new_register_value,
-        output_shift_counter=new_counter_value,
+    return next_instruction(
+        replace(
+            state,
+            y_register=shift_result,
+            output_shift_register=new_register_value,
+            output_shift_counter=new_counter_value,
+        )
     )
 
 
