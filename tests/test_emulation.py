@@ -13,6 +13,7 @@
 # limitations under the License.
 import pytest
 from pioemu import clock_cycles_reached, emulate, State
+from .support import emulate_single_instruction
 
 
 def test_emulation_stops_when_unsupported_opcode_is_reached():
@@ -20,17 +21,22 @@ def test_emulation_stops_when_unsupported_opcode_is_reached():
         next(emulate([0xE0E0]))
 
 
-def test_program_counter_is_incremented():
-    opcodes = [0xE021, 0xE022, 0xE022]  # set x, 1 to 3
+@pytest.mark.parametrize(
+    "opcode",
+    [
+        pytest.param(0xE022, id="set x, 2"),
+        pytest.param(0x6283, id="out pindirs, 3 [2]"),
+        pytest.param(0x6708, id="out pins, 8 [7]"),
+        pytest.param(0x6023, id="out x, 3"),
+        pytest.param(0x7F40, id="out y, 32 [31]"),
+    ],
+)
+def test_program_counter_is_incremented(opcode):
+    initial_state=State(program_counter=0)
 
-    program_counter_changes = [
-        state.program_counter
-        for state, _ in emulate(
-            opcodes, stop_condition=lambda state: state.program_counter > 2
-        )
-    ]
+    new_state = emulate_single_instruction(opcode, initial_state)
 
-    assert program_counter_changes == [0, 1, 2]
+    assert new_state.program_counter == 1
 
 
 def test_executes_instructions_until_stop_condition_met():

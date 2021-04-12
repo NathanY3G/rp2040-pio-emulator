@@ -11,7 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from collections import deque
 from dataclasses import dataclass
+from typing import Deque
 
 
 @dataclass(frozen=True)
@@ -20,5 +22,8 @@ class State:
     program_counter: int = 0
     pin_directions: int = 0
     pin_values: int = 0
+    transmit_fifo: Deque = deque()
+    output_shift_register: int = 0
+    output_shift_counter: int = 32
     x_register: int = 0
     y_register: int = 0
