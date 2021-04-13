@@ -101,6 +101,11 @@ def _shift_output_shift_register(register_value, counter_value, bit_count):
     )
 
 
+def nop(not_used, state):
+    """No operation"""
+    return next_instruction(state)
+
+
 def out_pindirs(bit_count, state):
     new_register_value, new_counter_value, shift_result = _shift_output_shift_register(
         state.output_shift_register, state.output_shift_counter, bit_count
@@ -229,6 +234,7 @@ def map_opcodes_to_callables():
         0x6080: out_pindirs,
         0x8080: pull_nonblocking,
         0x80A0: pull_blocking,
+        0xA040: nop,
         0xE080: set_pindirs,
         0xE000: set_pins,
         0xE020: set_x,
