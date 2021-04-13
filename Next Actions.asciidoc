@@ -1,0 +1,6 @@
+Next Actions
+============
+
+* Refactor test approach? Try with implementation of MOV? How to test PC advance?
+* Refactor OSR - remove duplication
+* Add docstrings
