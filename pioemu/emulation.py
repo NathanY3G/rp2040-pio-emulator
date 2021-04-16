@@ -101,9 +101,16 @@ def _shift_output_shift_register(register_value, counter_value, bit_count):
     )
 
 
-def mov(not_used, state):
+def mov(source_and_operation, state):
     """Copy data from source to destination"""
-    return next_instruction(replace(state, x_register=state.y_register))
+    source = source_and_operation & 7
+
+    if source == 0:
+        state = replace(state, x_register=state.pin_values)
+    else:
+        state = replace(state, x_register=state.y_register)
+
+    return next_instruction(state)
 
 
 def nop(not_used, state):
