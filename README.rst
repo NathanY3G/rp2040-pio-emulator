@@ -23,7 +23,7 @@ Limitations
 2. Limited set of operations supported:
 
    * JMP (PIN and !OSRE variants not implemented)
-   * MOV (only Y -> X implemented)
+   * MOV (only some variants implemented)
    * NOP (MOV Y, Y)
    * OUT (NULL, PC, ISR and EXEC destinations not implemented)
    * PULL (IfEmpty not implemented)

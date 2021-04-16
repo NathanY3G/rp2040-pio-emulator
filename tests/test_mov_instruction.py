@@ -37,6 +37,18 @@ instructions_to_test = [
         State(clock=2, program_counter=1, pin_values=2, x_register=2),
         id="mov x, pins [1]",
     ),
+    pytest.param(
+        0xA0E1,
+        State(x_register=0xFFFF_FFFF),
+        State(
+            clock=1,
+            program_counter=1,
+            output_shift_register=0xFFFF_FFFF,
+            output_shift_counter=0,
+            x_register=0xFFFF_FFFF,
+        ),
+        id="mov osr, x",
+    ),
 ]
 
 

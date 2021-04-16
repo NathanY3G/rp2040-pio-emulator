@@ -37,7 +37,11 @@ def emulate(opcodes, *, initial_state=State(), stop_condition=None):
         data_field = opcode & 0x1F
         delay_value = (opcode >> 8) & 0x1F
 
-        instruction = instruction_lookup.get(opcode & 0xE0E0, None)
+        if (opcode >> 13) == 5:
+            instruction = instruction_lookup.get(opcode & 0xE0E7, None)
+        else:
+            instruction = instruction_lookup.get(opcode & 0xE0E0, None)
+
         if instruction is None:
             return
 
@@ -101,18 +105,21 @@ def _shift_output_shift_register(register_value, counter_value, bit_count):
     )
 
 
-def mov(source_and_operation, state):
-    """Copy data from source to destination"""
-    source = source_and_operation & 7
+def mov_osr_x(not_used, state):
+    """Copy data from X to output shift register"""
+    return next_instruction(
+        replace(state, output_shift_register=state.x_register, output_shift_counter=0)
+    )
 
-    if source == 0:
-        state = replace(state, x_register=state.pin_values)
-    elif source == 2:
-        state = replace(state, x_register=state.y_register)
-    else:
-        pass
 
-    return next_instruction(state)
+def mov_x_pins(not_used, state):
+    """Copy data from pins to X"""
+    return next_instruction(replace(state, x_register=state.pin_values))
+
+
+def mov_x_y(not_used, state):
+    """Copy data from Y to X"""
+    return next_instruction(replace(state, x_register=state.y_register))
 
 
 def nop(not_used, state):
@@ -248,8 +255,11 @@ def map_opcodes_to_callables():
         0x6080: out_pindirs,
         0x8080: pull_nonblocking,
         0x80A0: pull_blocking,
-        0xA020: mov,
-        0xA040: nop,
+        0xA020: mov_x_pins,
+        0xA021: nop,
+        0xA022: mov_x_y,
+        0xA042: nop,
+        0xA0E1: mov_osr_x,
         0xE080: set_pindirs,
         0xE000: set_pins,
         0xE020: set_x,
