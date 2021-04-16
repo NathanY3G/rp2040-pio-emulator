@@ -107,8 +107,10 @@ def mov(source_and_operation, state):
 
     if source == 0:
         state = replace(state, x_register=state.pin_values)
-    else:
+    elif source == 2:
         state = replace(state, x_register=state.y_register)
+    else:
+        pass
 
     return next_instruction(state)
 

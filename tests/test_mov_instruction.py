@@ -20,6 +20,12 @@ instructions_to_test = [
     pytest.param(0xA042, State(), State(clock=1, program_counter=1), id="nop"),
     pytest.param(0xBF42, State(), State(clock=32, program_counter=1), id="nop [31]"),
     pytest.param(
+        0xA021,
+        State(x_register=1),
+        State(clock=1, program_counter=1, x_register=1),
+        id="mov x, x",
+    ),
+    pytest.param(
         0xA022,
         State(y_register=1),
         State(clock=1, program_counter=1, x_register=1, y_register=1),
