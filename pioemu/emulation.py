@@ -112,6 +112,11 @@ def mov_osr_x(not_used, state):
     )
 
 
+def mov_pins_x(not_used, state):
+    """Copy data from X to pins"""
+    return next_instruction(replace(state, pin_values=state.x_register))
+
+
 def mov_x_pins(not_used, state):
     """Copy data from pins to X"""
     return next_instruction(replace(state, x_register=state.pin_values))
@@ -255,6 +260,7 @@ def map_opcodes_to_callables():
         0x6080: out_pindirs,
         0x8080: pull_nonblocking,
         0x80A0: pull_blocking,
+        0xA001: mov_pins_x,
         0xA020: mov_x_pins,
         0xA021: nop,
         0xA022: mov_x_y,

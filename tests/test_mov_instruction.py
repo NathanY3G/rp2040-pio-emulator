@@ -32,6 +32,12 @@ instructions_to_test = [
         id="mov x, y",
     ),
     pytest.param(
+        0xA001,
+        State(x_register=3),
+        State(clock=1, program_counter=1, pin_values=3, x_register=3),
+        id="mov pins, x",
+    ),
+    pytest.param(
         0xA120,
         State(pin_values=2),
         State(clock=2, program_counter=1, pin_values=2, x_register=2),
