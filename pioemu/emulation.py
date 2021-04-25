@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import replace
+from enum import Enum, unique
 from functools import partial
 from .state import State
 from .conditions import (
@@ -21,6 +22,14 @@ from .conditions import (
     y_register_equals_zero,
     y_register_not_equal_to_zero,
 )
+
+
+@unique
+class MoveSource(Enum):
+    PINS = 0
+    X_REGISTER = 1
+    Y_REGISTER = 2
+    OSR = 7
 
 
 def emulate(opcodes, *, initial_state=State(), stop_condition=None):
@@ -34,13 +43,14 @@ def emulate(opcodes, *, initial_state=State(), stop_condition=None):
         previous_state = current_state
 
         opcode = opcodes[current_state.program_counter]
-        data_field = opcode & 0x1F
         delay_value = (opcode >> 8) & 0x1F
 
         if (opcode >> 13) == 5:
-            instruction = instruction_lookup.get(opcode & 0xE0E7, None)
+            data_field = _read_source(MoveSource(opcode & 7), current_state)
         else:
-            instruction = instruction_lookup.get(opcode & 0xE0E0, None)
+            data_field = opcode & 0x1F
+
+        instruction = instruction_lookup.get(opcode & 0xE0E0, None)
 
         if instruction is None:
             return
@@ -57,6 +67,20 @@ def emulate(opcodes, *, initial_state=State(), stop_condition=None):
         )
 
         yield (previous_state, current_state)
+
+
+def _read_source(source, state):
+    # TODO: Consider using the new match statement when widely available
+    if source == MoveSource.PINS:
+        value = state.pin_values
+    elif source == MoveSource.X_REGISTER:
+        value = state.x_register
+    elif source == MoveSource.Y_REGISTER:
+        value = state.y_register
+    else:
+        value = None
+
+    return value
 
 
 def is_instruction_stalled(previous_state, current_state, instruction):
@@ -105,26 +129,21 @@ def _shift_output_shift_register(register_value, counter_value, bit_count):
     )
 
 
-def mov_osr_x(not_used, state):
-    """Copy data from X to output shift register"""
+def mov_into_osr(source_value, state):
+    """Copy data from source to output shift register"""
     return next_instruction(
-        replace(state, output_shift_register=state.x_register, output_shift_counter=0)
+        replace(state, output_shift_register=source_value, output_shift_counter=0)
     )
 
 
-def mov_pins_x(not_used, state):
-    """Copy data from X to pins"""
-    return next_instruction(replace(state, pin_values=state.x_register))
+def mov_into_pins(source_value, state):
+    """Copy data from source to pins"""
+    return next_instruction(replace(state, pin_values=source_value))
 
 
-def mov_x_pins(not_used, state):
-    """Copy data from pins to X"""
-    return next_instruction(replace(state, x_register=state.pin_values))
-
-
-def mov_x_y(not_used, state):
-    """Copy data from Y to X"""
-    return next_instruction(replace(state, x_register=state.y_register))
+def mov_into_x(source_value, state):
+    """Copy data from source to X"""
+    return next_instruction(replace(state, x_register=source_value))
 
 
 def nop(not_used, state):
@@ -260,12 +279,10 @@ def map_opcodes_to_callables():
         0x6080: out_pindirs,
         0x8080: pull_nonblocking,
         0x80A0: pull_blocking,
-        0xA001: mov_pins_x,
-        0xA020: mov_x_pins,
-        0xA021: nop,
-        0xA022: mov_x_y,
-        0xA042: nop,
-        0xA0E1: mov_osr_x,
+        0xA000: mov_into_pins,
+        0xA020: mov_into_x,
+        0xA040: nop,
+        0xA0E0: mov_into_osr,
         0xE080: set_pindirs,
         0xE000: set_pins,
         0xE020: set_x,
