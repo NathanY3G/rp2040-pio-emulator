@@ -17,8 +17,6 @@ from .support import emulate_single_instruction
 
 
 instructions_to_test = [
-    pytest.param(0xA042, State(), State(clock=1, program_counter=1), id="nop"),
-    pytest.param(0xBF42, State(), State(clock=32, program_counter=1), id="nop [31]"),
     pytest.param(
         0xA021,
         State(x_register=1),
@@ -32,6 +30,18 @@ instructions_to_test = [
         id="mov x, y",
     ),
     pytest.param(
+        0xA041,
+        State(x_register=2),
+        State(clock=1, program_counter=1, x_register=2, y_register=2),
+        id="mov y, x",
+    ),
+    pytest.param(
+        0xA042,
+        State(y_register=3),
+        State(clock=1, program_counter=1, y_register=3),
+        id="mov y, y",
+    ),
+    pytest.param(
         0xA001,
         State(x_register=3),
         State(clock=1, program_counter=1, pin_values=3, x_register=3),
@@ -42,6 +52,18 @@ instructions_to_test = [
         State(pin_values=2),
         State(clock=2, program_counter=1, pin_values=2, x_register=2),
         id="mov x, pins [1]",
+    ),
+    pytest.param(
+        0xA002,
+        State(y_register=3),
+        State(clock=1, program_counter=1, pin_values=3, y_register=3),
+        id="mov pins, y",
+    ),
+    pytest.param(
+        0xA140,
+        State(pin_values=4),
+        State(clock=2, program_counter=1, pin_values=4, y_register=4),
+        id="mov y, pins [1]",
     ),
     pytest.param(
         0xA0E1,

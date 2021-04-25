@@ -146,9 +146,9 @@ def mov_into_x(source_value, state):
     return next_instruction(replace(state, x_register=source_value))
 
 
-def nop(not_used, state):
-    """No operation"""
-    return next_instruction(state)
+def mov_into_y(source_value, state):
+    """Copy data from source to Y"""
+    return next_instruction(replace(state, y_register=source_value))
 
 
 def out_pindirs(bit_count, state):
@@ -281,7 +281,7 @@ def map_opcodes_to_callables():
         0x80A0: pull_blocking,
         0xA000: mov_into_pins,
         0xA020: mov_into_x,
-        0xA040: nop,
+        0xA040: mov_into_y,
         0xA0E0: mov_into_osr,
         0xE080: set_pindirs,
         0xE000: set_pins,
