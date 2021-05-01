@@ -1,26 +1,32 @@
-====================================================================================
-Emulator for the PIO Blocks within the Raspberry Pi Microcontroller (Python Edition)
-====================================================================================
+==============================================================================
+Emulator for the PIO Blocks within the RP2040 Microcontroller (Python Edition)
+==============================================================================
 
-About
-=====
-A proof-of-concept emulator for the Programmable Input/Output blocks that are
-present within the Raspberry Pi Foundation's RP2040 Microcontroller.
+Introduction
+============
+This repository contains an emulator for the Programmable Input/Output (PIO)
+blocks that are present within the Raspberry Pi Foundation's RP2040 Microcontroller.
+It is designed to assist in the analysis of PIO programs and to help you by:
+
+* Enabling unit tests to be written.
+* Answering questions such as: How many clock cycles are being consumed?
+* Supporting the visualization of GPIO outputs over time.
+* Providing alternatives to debugging on real hardware, which can be time consuming.
 
 Example Jupyter Notebook
 ========================
-The emulator can even be used from within Jupyter Notebooks to visualize the
-output of PIO programs. The screenshot below is taken from the ``square_wave_example.ipynb``
-notebook that is included in this repository.
+The emulator can also be used from within Jupyter Notebooks. The screenshot below
+is taken from the ``square_wave_example.ipynb`` notebook that is included within
+this repository.
 
 .. image:: ./docs/images/jupyter_example.png
    :alt: Screenshot of Jupyter Notebook example
 
 Limitations
 ===========
-1. Emulates a State Machine within a PIO block and not an entire PIO block
+This software is under development and currently has limitations - the notable ones are:
 
-2. Limited set of operations supported:
+1. Only supports a sub-set of the available instructions:
 
    * JMP (PIN and !OSRE variants not implemented)
    * MOV (some variants not implemented)
@@ -29,6 +35,7 @@ Limitations
    * SET
    * WAIT (IRQ variant not implemented)
 
-3. No support for pin sets
+2. No support for pin-sets; all pin numbers are with respect to Pin 0
 
-4. Transmit FIFO is not immutable
+3. No direct support for the concurrent running of multiple PIO programs;
+   a single State Machine is emulated and not an entire PIO block.
