@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "raspberrypi-pio-poc"
-version = "0.11.0"
+version = "0.12.0"
 description = "Proof of Concept"
 authors = ["Nathan Young <nathan@::0/128>"]
 license = "Apache-2.0"

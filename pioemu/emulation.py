@@ -22,6 +22,27 @@ from .conditions import (
     y_register_equals_zero,
     y_register_not_equal_to_zero,
 )
+from .instructions import (
+    jmp,
+    jmp_when_x_is_non_zero_and_post_decrement,
+    jmp_when_y_is_non_zero_and_post_decrement,
+    mov_into_osr,
+    mov_into_pins,
+    mov_into_x,
+    mov_into_y,
+    out_pindirs,
+    out_pins,
+    out_x,
+    out_y,
+    pull_blocking,
+    pull_nonblocking,
+    set_pins,
+    set_pindirs,
+    set_x,
+    set_y,
+    wait_for_gpio_low,
+    wait_for_gpio_high,
+)
 
 
 @unique
@@ -90,187 +111,14 @@ def is_instruction_stalled(previous_state, current_state, instruction):
         return False
 
 
-def next_instruction(state):
-    return replace(state, program_counter=state.program_counter + 1)
-
-
-def jump(condition, address, state):
-    if condition(state):
-        return replace(state, program_counter=address)
-    else:
-        return next_instruction(state)
-
-
-def jump_when_x_is_non_zero_and_post_decrement(address, state):
-    return replace(
-        jump(x_register_not_equal_to_zero, address, state),
-        x_register=state.x_register - 1,
-    )
-
-
-def jump_when_y_is_non_zero_and_post_decrement(address, state):
-    return replace(
-        jump(y_register_not_equal_to_zero, address, state),
-        y_register=state.y_register - 1,
-    )
-
-
-def _shift_output_shift_register(register_value, counter_value, bit_count):
-    if bit_count == 0:
-        bit_count = 32
-
-    bit_mask = (1 << bit_count) - 1
-    shift_result = register_value & bit_mask
-
-    return (
-        register_value >> bit_count,
-        counter_value + bit_count,
-        shift_result,
-    )
-
-
-def mov_into_osr(source_value, state):
-    """Copy data from source to output shift register"""
-    return next_instruction(
-        replace(state, output_shift_register=source_value, output_shift_counter=0)
-    )
-
-
-def mov_into_pins(source_value, state):
-    """Copy data from source to pins"""
-    return next_instruction(replace(state, pin_values=source_value))
-
-
-def mov_into_x(source_value, state):
-    """Copy data from source to X"""
-    return next_instruction(replace(state, x_register=source_value))
-
-
-def mov_into_y(source_value, state):
-    """Copy data from source to Y"""
-    return next_instruction(replace(state, y_register=source_value))
-
-
-def out_pindirs(bit_count, state):
-    new_register_value, new_counter_value, shift_result = _shift_output_shift_register(
-        state.output_shift_register, state.output_shift_counter, bit_count
-    )
-
-    return next_instruction(
-        replace(
-            state,
-            pin_directions=shift_result,
-            output_shift_register=new_register_value,
-            output_shift_counter=new_counter_value,
-        )
-    )
-
-
-def out_pins(bit_count, state):
-    new_register_value, new_counter_value, shift_result = _shift_output_shift_register(
-        state.output_shift_register, state.output_shift_counter, bit_count
-    )
-
-    return next_instruction(
-        replace(
-            state,
-            pin_values=shift_result,
-            output_shift_register=new_register_value,
-            output_shift_counter=new_counter_value,
-        )
-    )
-
-
-def out_x(bit_count, state):
-    new_register_value, new_counter_value, shift_result = _shift_output_shift_register(
-        state.output_shift_register, state.output_shift_counter, bit_count
-    )
-
-    return next_instruction(
-        replace(
-            state,
-            x_register=shift_result,
-            output_shift_register=new_register_value,
-            output_shift_counter=new_counter_value,
-        )
-    )
-
-
-def out_y(bit_count, state):
-    new_register_value, new_counter_value, shift_result = _shift_output_shift_register(
-        state.output_shift_register, state.output_shift_counter, bit_count
-    )
-
-    return next_instruction(
-        replace(
-            state,
-            y_register=shift_result,
-            output_shift_register=new_register_value,
-            output_shift_counter=new_counter_value,
-        )
-    )
-
-
-def pull_blocking(not_used, state):
-    if len(state.transmit_fifo) > 0:
-        return next_instruction(
-            replace(
-                state,
-                output_shift_register=state.transmit_fifo.pop(),
-                output_shift_counter=0,
-            )
-        )
-    else:
-        return state
-
-
-def pull_nonblocking(not_used, state):
-    if len(state.transmit_fifo) > 0:
-        return next_instruction(
-            replace(
-                state,
-                output_shift_register=state.transmit_fifo.pop(),
-                output_shift_counter=0,
-            )
-        )
-    else:
-        return next_instruction(replace(state, output_shift_register=state.x_register))
-
-
-def set_pins(data, state):
-    return next_instruction(replace(state, pin_values=data))
-
-
-def set_pindirs(data, state):
-    return next_instruction(replace(state, pin_directions=data))
-
-
-def set_x(data, state):
-    return next_instruction(replace(state, x_register=data))
-
-
-def set_y(data, state):
-    return next_instruction(replace(state, y_register=data))
-
-
-def wait_for_gpio_low(pin_number, state):
-    bit_mask = 1 << pin_number
-    return next_instruction(state) if not state.pin_values & bit_mask else state
-
-
-def wait_for_gpio_high(pin_number, state):
-    bit_mask = 1 << pin_number
-    return next_instruction(state) if state.pin_values & bit_mask else state
-
-
 def map_opcodes_to_callables():
     return {
-        0x0000: partial(jump, lambda state: True),
-        0x0020: partial(jump, x_register_equals_zero),
-        0x0040: jump_when_x_is_non_zero_and_post_decrement,
-        0x0060: partial(jump, y_register_equals_zero),
-        0x0080: jump_when_y_is_non_zero_and_post_decrement,
-        0x00A0: partial(jump, x_register_not_equal_to_y_register),
+        0x0000: partial(jmp, lambda state: True),
+        0x0020: partial(jmp, x_register_equals_zero),
+        0x0040: jmp_when_x_is_non_zero_and_post_decrement,
+        0x0060: partial(jmp, y_register_equals_zero),
+        0x0080: jmp_when_y_is_non_zero_and_post_decrement,
+        0x00A0: partial(jmp, x_register_not_equal_to_y_register),
         0x2020: wait_for_gpio_low,
         0x2080: wait_for_gpio_high,
         0x6000: out_pins,
