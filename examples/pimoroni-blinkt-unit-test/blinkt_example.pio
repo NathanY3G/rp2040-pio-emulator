@@ -1,0 +1,52 @@
+; Example PIO program which sets a Pimoroni Blink! to a single colour.
+;
+; This program is deliberately verbose! Try re-factoring it and checking that
+; its associated unit-test still passes.
+;
+; Set Pin 0 - Data
+; Set Pin 1 - Clock
+.program blinkt_example
+
+  set pindirs, 3
+forever:
+  set x, 31
+start_sequence_loop:
+  set pins, 2 [1]
+  set pins, 0
+  jmp x-- start_sequence_loop
+
+  set y, 7
+led_loop:
+  set x, 7
+brightness_loop:
+  set pins, 3 [1]
+  set pins, 1
+  jmp x-- brightness_loop
+
+  set x, 7
+blue_loop:
+  set pins, 3 [1]
+  set pins, 1
+  jmp x-- blue_loop
+
+  set x, 7
+green_loop:
+  set pins, 2 [1]
+  set pins, 0
+  jmp x-- green_loop
+
+  set x, 7
+red_loop:
+  set pins, 2 [1]
+  set pins, 0
+  jmp x-- red_loop
+
+  jmp y-- led_loop
+
+  set x, 31
+end_sequence_loop:
+  set pins, 2 [1]
+  set pins, 0
+  jmp x-- end_sequence_loop
+
+  jmp forever
