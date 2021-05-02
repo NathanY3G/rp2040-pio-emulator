@@ -16,8 +16,8 @@ It is designed to assist in the analysis of PIO programs and to help you by:
 Example Jupyter Notebook
 ========================
 The emulator can also be used from within Jupyter Notebooks. The screenshot below
-is taken from the ``square_wave_example.ipynb`` notebook that is included within
-this repository.
+is taken from the ``examples/jupyter-notebook/square_wave_example.ipynb`` notebook
+that is included within this repository.
 
 .. image:: ./docs/images/jupyter_example.png
    :alt: Screenshot of Jupyter Notebook example
