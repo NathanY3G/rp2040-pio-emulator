@@ -13,8 +13,19 @@ It is designed to assist in the analysis of PIO programs and to help you by:
 * Supporting the visualization of GPIO outputs over time.
 * Providing alternatives to debugging on real hardware, which can be time consuming.
 
-Example Jupyter Notebook
-========================
+Examples
+========
+
+Pimoroni Blinkt! with Unit Test
+-------------------------------
+An annotated example which demonstrates one approach to writing unit tests for
+PIO programs by using an emulator. The PIO program itself is very primitive and
+sets all eight LEDs of a Pimoroni Blink! to a single hard-coded colour. Perhaps
+you would to like to try re-factoring it? Don't forget to check that the unit-test
+still passes!
+
+Jupyter Notebook
+----------------
 The emulator can also be used from within Jupyter Notebooks. The screenshot below
 is taken from the ``examples/jupyter-notebook/square_wave_example.ipynb`` notebook
 that is included within this repository.
