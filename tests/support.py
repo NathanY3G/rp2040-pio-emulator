@@ -11,7 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pytest import param
+from dataclasses import replace
 from pioemu import clock_cycles_reached, emulate, State
+
+
+def instruction_param(description, opcode, initial_state, expected_state):
+    expected_state = replace(expected_state, clock=1, program_counter=1)
+    return param(opcode, initial_state, expected_state, id=description)
 
 
 def emulate_single_instruction(opcode, initial_state=None):

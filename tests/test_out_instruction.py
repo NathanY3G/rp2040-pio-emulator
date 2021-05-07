@@ -14,65 +14,44 @@
 import pytest
 from collections import deque
 from pioemu import State
-from tests.support import emulate_single_instruction
+from tests.support import emulate_single_instruction, instruction_param
 
 
-@pytest.mark.parametrize(
-    "opcode, expected_register_value, expected_counter_value",
-    [
-        pytest.param(0x6023, 0x1FFF_FFFF, 3, id="out x, 3"),
-        pytest.param(0x6040, 0x0000_0000, 32, id="out y, 32"),
-    ],
-)
-def test_out_updates_shift_register(
-    opcode, expected_register_value, expected_counter_value
-):
-    initial_state = State(output_shift_register=0xFFFF_FFFF, output_shift_counter=0)
+# fmt: off
+instructions_to_test = [
+    instruction_param(
+        "out pindirs, 3",
+        0x6083,
+        State(pin_directions=0x0, output_shift_register=0x0000_0004, output_shift_counter=5),
+        State(pin_directions=0x4, output_shift_register=0x0000_0000, output_shift_counter=8),
+    ),
+    instruction_param(
+        "out pins, 8",
+        0x6008,
+        State(pin_values=0x00, output_shift_register=0x1FF, output_shift_counter=0),
+        State(pin_values=0xFF, output_shift_register=0x001, output_shift_counter=8),
+    ),
+    instruction_param(
+        "out x, 3",
+        0x6023,
+        State(x_register=0x0, output_shift_register=0xFFFF_FFFF, output_shift_counter=0),
+        State(x_register=0x7, output_shift_register=0x1FFF_FFFF, output_shift_counter=3),
+    ),
+    instruction_param(
+        "out y, 32",
+        0x6040,
+        State(y_register=0x0000_0000, output_shift_register=0xFFFF_FFFF, output_shift_counter=0),
+        State(y_register=0xFFFF_FFFF, output_shift_register=0x0000_0000, output_shift_counter=32),  # TODO - Check this
+    ),
+]
+# fmt: on
 
+
+@pytest.mark.parametrize("opcode, initial_state, expected_state", instructions_to_test)
+def test_out_instruction(opcode, initial_state, expected_state):
     new_state = emulate_single_instruction(opcode, initial_state)
 
-    assert new_state.output_shift_register == expected_register_value
-    assert new_state.output_shift_counter == expected_counter_value
-
-
-def test_out_updates_pin_directions():
-    initial_state = State(
-        pin_directions=0, output_shift_register=0x0000_0004, output_shift_counter=0
-    )
-
-    new_state = emulate_single_instruction(0x6083, initial_state)  # out pindirs, 3
-
-    assert new_state.pin_directions == 4
-
-
-def test_out_updates_pin_values():
-    initial_state = State(
-        pin_values=0, output_shift_register=0x0000_01FF, output_shift_counter=0
-    )
-
-    new_state = emulate_single_instruction(0x6008, initial_state)  # out pins, 8
-
-    assert new_state.pin_values == 0xFF
-
-
-def test_out_updates_x_register():
-    initial_state = State(
-        x_register=0, output_shift_register=0xFFFF_FFFF, output_shift_counter=0
-    )
-
-    new_state = emulate_single_instruction(0x6023, initial_state)  # out x, 3
-
-    assert new_state.x_register == 7
-
-
-def test_out_updates_y_register():
-    initial_state = State(
-        y_register=0, output_shift_register=0xFFFF_FFFF, output_shift_counter=0
-    )
-
-    new_state = emulate_single_instruction(0x6040, initial_state)  # out y, 32
-
-    assert new_state.y_register == 0xFFFF_FFFF
+    assert new_state == expected_state
 
 
 @pytest.mark.parametrize(
