@@ -13,7 +13,7 @@
 # limitations under the License.
 import pytest
 from collections import deque
-from pioemu import State
+from pioemu import ShiftRegister, State
 from .support import emulate_single_instruction
 
 
@@ -22,7 +22,7 @@ def test_pull_loads_osr_from_non_empty_fifo():
 
     new_state = emulate_single_instruction(0x8080, initial_state)  # pull noblock
 
-    assert new_state.output_shift_register == 0x1111_1111
+    assert new_state.output_shift_register == ShiftRegister(0x1111_1111, 0)
 
 
 def test_pull_copies_x_to_osr_when_nonblocking_and_fifo_empty():
@@ -30,31 +30,28 @@ def test_pull_copies_x_to_osr_when_nonblocking_and_fifo_empty():
 
     new_state = emulate_single_instruction(0x8080, initial_state)  # pull noblock
 
-    assert new_state.output_shift_register == 0x2222_2222
+    assert new_state.output_shift_register == ShiftRegister(0x2222_2222, 0)
 
 
 def test_pull_stalls_when_blocking_and_fifo_empty():
-    initial_state = State(output_shift_register=0x3333_3333)
+    initial_state = State(output_shift_register=ShiftRegister(0x3333_3333, 0))
 
     new_state = emulate_single_instruction(0x80A0, initial_state)  # pull block
 
     assert new_state.program_counter == 0
-    assert new_state.output_shift_register == 0x3333_3333
+    assert new_state.output_shift_register == ShiftRegister(0x3333_3333, 0)
 
 
 @pytest.mark.parametrize(
     "opcode",
-    [
-        pytest.param(0x8080, id="pull noblock"),
-        pytest.param(0x80A0, id="pull block"),
-    ],
+    [pytest.param(0x8080, id="pull noblock"), pytest.param(0x80A0, id="pull block"),],
 )
 def test_pull_clears_the_output_shift_register(opcode):
     initial_state = State(transmit_fifo=deque([0]))
 
     new_state = emulate_single_instruction(opcode, initial_state)
 
-    assert new_state.output_shift_counter == 0
+    assert new_state.output_shift_register.counter == 0
 
 
 @pytest.mark.parametrize(

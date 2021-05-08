@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from pioemu import State
+from pioemu import ShiftRegister, State
 from .support import emulate_single_instruction, instruction_param
 
 
@@ -46,7 +46,7 @@ instructions_to_test = [
         "mov osr, x",
         0xA0E1,
         State(x_register=0xFFFF_FFFF),
-        State(output_shift_register=0xFFFF_FFFF, output_shift_counter=0, x_register=0xFFFF_FFFF),
+        State(output_shift_register=ShiftRegister(0xFFFF_FFFF, 0), x_register=0xFFFF_FFFF),
     ),
 ]
 # fmt: on

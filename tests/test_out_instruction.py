@@ -13,8 +13,8 @@
 # limitations under the License.
 import pytest
 from collections import deque
-from pioemu import State
-from tests.support import emulate_single_instruction, instruction_param
+from pioemu import ShiftRegister, State
+from .support import emulate_single_instruction, instruction_param
 
 
 # fmt: off
@@ -22,26 +22,26 @@ instructions_to_test = [
     instruction_param(
         "out pindirs, 3",
         0x6083,
-        State(pin_directions=0x0, output_shift_register=0x0000_0004, output_shift_counter=5),
-        State(pin_directions=0x4, output_shift_register=0x0000_0000, output_shift_counter=8),
+        State(pin_directions=0x0, output_shift_register=ShiftRegister(0x0000_0004, 5)),
+        State(pin_directions=0x4, output_shift_register=ShiftRegister(0x0000_0000, 8)),
     ),
     instruction_param(
         "out pins, 8",
         0x6008,
-        State(pin_values=0x00, output_shift_register=0x1FF, output_shift_counter=0),
-        State(pin_values=0xFF, output_shift_register=0x001, output_shift_counter=8),
+        State(pin_values=0x00, output_shift_register=ShiftRegister(0x1FF, 0)),
+        State(pin_values=0xFF, output_shift_register=ShiftRegister(0x001, 8)),
     ),
     instruction_param(
         "out x, 3",
         0x6023,
-        State(x_register=0x0, output_shift_register=0xFFFF_FFFF, output_shift_counter=0),
-        State(x_register=0x7, output_shift_register=0x1FFF_FFFF, output_shift_counter=3),
+        State(x_register=0x0, output_shift_register=ShiftRegister(0xFFFF_FFFF, 0)),
+        State(x_register=0x7, output_shift_register=ShiftRegister(0x1FFF_FFFF, 3)),
     ),
     instruction_param(
         "out y, 32",
         0x6040,
-        State(y_register=0x0000_0000, output_shift_register=0xFFFF_FFFF, output_shift_counter=0),
-        State(y_register=0xFFFF_FFFF, output_shift_register=0x0000_0000, output_shift_counter=32),  # TODO - Check this
+        State(y_register=0x0000_0000, output_shift_register=ShiftRegister(0xFFFF_FFFF, 0)),
+        State(y_register=0xFFFF_FFFF, output_shift_register=ShiftRegister(0x0000_0000, 32)),
     ),
 ]
 # fmt: on
@@ -64,6 +64,6 @@ def test_out_instruction(opcode, initial_state, expected_state):
     ],
 )
 def test_out_consumes_expected_clock_cycles(opcode, expected_clock_cycles):
-    new_state = emulate_single_instruction(opcode, State(output_shift_counter=0))
+    new_state = emulate_single_instruction(opcode)
 
     assert new_state.clock == expected_clock_cycles

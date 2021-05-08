@@ -11,13 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 from dataclasses import replace
+from pioemu.state import ShiftRegister
 from .common import next_instruction
 
 
 def mov_into_osr(source_value, state):
     """Copy data from source to output shift register"""
     return next_instruction(
-        replace(state, output_shift_register=source_value, output_shift_counter=0)
+        replace(state, output_shift_register=ShiftRegister(source_value, 0))
     )
 
 
