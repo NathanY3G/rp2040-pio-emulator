@@ -14,75 +14,49 @@ from dataclasses import replace
 from .common import next_instruction
 
 
-def out_pindirs(bit_count, state):
-    new_register_value, new_counter_value, shift_result = _shift_output_shift_register(
-        state.output_shift_register, state.output_shift_counter, bit_count
-    )
+def out_pindirs(shifter, bit_count, state):
+    new_osr, shift_result = shifter(state.output_shift_register, bit_count)
 
     return next_instruction(
         replace(
             state,
             pin_directions=shift_result,
-            output_shift_register=new_register_value,
-            output_shift_counter=new_counter_value,
+            output_shift_register=new_osr,
         )
     )
 
 
-def out_pins(bit_count, state):
-    new_register_value, new_counter_value, shift_result = _shift_output_shift_register(
-        state.output_shift_register, state.output_shift_counter, bit_count
-    )
+def out_pins(shifter, bit_count, state):
+    new_osr, shift_result = shifter(state.output_shift_register, bit_count)
 
     return next_instruction(
         replace(
             state,
             pin_values=shift_result,
-            output_shift_register=new_register_value,
-            output_shift_counter=new_counter_value,
+            output_shift_register=new_osr,
         )
     )
 
 
-def out_x(bit_count, state):
-    new_register_value, new_counter_value, shift_result = _shift_output_shift_register(
-        state.output_shift_register, state.output_shift_counter, bit_count
-    )
+def out_x(shifter, bit_count, state):
+    new_osr, shift_result = shifter(state.output_shift_register, bit_count)
 
     return next_instruction(
         replace(
             state,
             x_register=shift_result,
-            output_shift_register=new_register_value,
-            output_shift_counter=new_counter_value,
+            output_shift_register=new_osr,
         )
     )
 
 
-def out_y(bit_count, state):
-    new_register_value, new_counter_value, shift_result = _shift_output_shift_register(
-        state.output_shift_register, state.output_shift_counter, bit_count
-    )
+def out_y(shifter, bit_count, state):
+    new_osr, shift_result = shifter(state.output_shift_register, bit_count)
 
     return next_instruction(
         replace(
             state,
             y_register=shift_result,
-            output_shift_register=new_register_value,
-            output_shift_counter=new_counter_value,
+            output_shift_register=new_osr,
         )
-    )
-
-
-def _shift_output_shift_register(register_value, counter_value, bit_count):
-    if bit_count == 0:
-        bit_count = 32
-
-    bit_mask = (1 << bit_count) - 1
-    shift_result = register_value & bit_mask
-
-    return (
-        register_value >> bit_count,
-        counter_value + bit_count,
-        shift_result,
     )

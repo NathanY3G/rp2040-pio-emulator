@@ -12,72 +12,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from pioemu import State
-from .support import emulate_single_instruction
+from pioemu import ShiftRegister, State
+from .support import emulate_single_instruction, instruction_param
 
 
+# fmt: off
 instructions_to_test = [
-    pytest.param(
-        0xA021,
-        State(x_register=1),
-        State(clock=1, program_counter=1, x_register=1),
-        id="mov x, x",
+    instruction_param(
+        "mov x, x", 0xA021, State(x_register=1), State(x_register=1),
     ),
-    pytest.param(
-        0xA022,
-        State(y_register=1),
-        State(clock=1, program_counter=1, x_register=1, y_register=1),
-        id="mov x, y",
+    instruction_param(
+        "mov x, y", 0xA022, State(y_register=1), State(x_register=1, y_register=1),
     ),
-    pytest.param(
-        0xA041,
-        State(x_register=2),
-        State(clock=1, program_counter=1, x_register=2, y_register=2),
-        id="mov y, x",
+    instruction_param(
+        "mov y, x", 0xA041, State(x_register=2), State(x_register=2, y_register=2),
     ),
-    pytest.param(
-        0xA042,
-        State(y_register=3),
-        State(clock=1, program_counter=1, y_register=3),
-        id="mov y, y",
+    instruction_param(
+        "mov y, y", 0xA042, State(y_register=3), State(y_register=3),
     ),
-    pytest.param(
-        0xA001,
-        State(x_register=3),
-        State(clock=1, program_counter=1, pin_values=3, x_register=3),
-        id="mov pins, x",
+    instruction_param(
+        "mov pins, x", 0xA001, State(x_register=3), State(pin_values=3, x_register=3),
     ),
-    pytest.param(
-        0xA120,
-        State(pin_values=2),
-        State(clock=2, program_counter=1, pin_values=2, x_register=2),
-        id="mov x, pins [1]",
+    instruction_param(
+        "mov x, pins", 0xA020, State(pin_values=2), State(pin_values=2, x_register=2),
     ),
-    pytest.param(
-        0xA002,
-        State(y_register=3),
-        State(clock=1, program_counter=1, pin_values=3, y_register=3),
-        id="mov pins, y",
+    instruction_param(
+        "mov pins, y", 0xA002, State(y_register=3), State(pin_values=3, y_register=3),
     ),
-    pytest.param(
-        0xA140,
-        State(pin_values=4),
-        State(clock=2, program_counter=1, pin_values=4, y_register=4),
-        id="mov y, pins [1]",
+    instruction_param(
+        "mov y, pins", 0xA040, State(pin_values=4), State(pin_values=4, y_register=4),
     ),
-    pytest.param(
+    instruction_param(
+        "mov osr, x",
         0xA0E1,
         State(x_register=0xFFFF_FFFF),
-        State(
-            clock=1,
-            program_counter=1,
-            output_shift_register=0xFFFF_FFFF,
-            output_shift_counter=0,
-            x_register=0xFFFF_FFFF,
-        ),
-        id="mov osr, x",
+        State(output_shift_register=ShiftRegister(0xFFFF_FFFF, 0), x_register=0xFFFF_FFFF),
     ),
 ]
+# fmt: on
 
 
 @pytest.mark.parametrize("opcode, initial_state, expected_state", instructions_to_test)
@@ -85,3 +57,16 @@ def test_mov_instruction(opcode, initial_state, expected_state):
     new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state == expected_state
+
+
+@pytest.mark.parametrize(
+    "opcode, expected_clock_cycles",
+    [
+        pytest.param(0xA120, 2, id="mov x, pins [1]"),
+        pytest.param(0xA140, 2, id="mov y, pins [1]"),
+    ],
+)
+def test_mov_consumes_expected_clock_cycles(opcode, expected_clock_cycles):
+    new_state = emulate_single_instruction(opcode)
+
+    assert new_state.clock == expected_clock_cycles

@@ -17,13 +17,18 @@ from typing import Deque
 
 
 @dataclass(frozen=True)
+class ShiftRegister:
+    contents: int
+    counter: int
+
+
+@dataclass(frozen=True)
 class State:
     clock: int = 0
     program_counter: int = 0
     pin_directions: int = 0
     pin_values: int = 0
     transmit_fifo: Deque = deque()
-    output_shift_register: int = 0
-    output_shift_counter: int = 32
+    output_shift_register: ShiftRegister = ShiftRegister(0, 32)
     x_register: int = 0
     y_register: int = 0
