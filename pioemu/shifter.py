@@ -14,8 +14,30 @@
 from .state import ShiftRegister
 
 
+def shift_left(shift_register, bit_count):
+    """Shifts the most significant bits out of the shift register by the given
+    amount.
+
+    Parameters:
+    shift_register (ShiftRegister): The shift register to operate on.
+    bit_count (int): The number of bits to shift out.
+
+    Returns:
+    (ShiftRegister, int): New representation of the register and the result.
+    """
+
+    shift_result = shift_register.contents >> (32 - bit_count)
+    new_contents = (shift_register.contents << bit_count) & 0xFFFF_FFFF
+
+    return (
+        ShiftRegister(new_contents, min(shift_register.counter + bit_count, 32)),
+        shift_result,
+    )
+
+
 def shift_right(shift_register, bit_count):
-    """Shifts the LSB bits out of the shift register by the given amount.
+    """Shifts the least significant bits out of the shift register by the given
+    amount.
 
     Parameters:
     shift_register (ShiftRegister): The shift register to operate on.

@@ -44,7 +44,10 @@ def test_pull_stalls_when_blocking_and_fifo_empty():
 
 @pytest.mark.parametrize(
     "opcode",
-    [pytest.param(0x8080, id="pull noblock"), pytest.param(0x80A0, id="pull block"),],
+    [
+        pytest.param(0x8080, id="pull noblock"),
+        pytest.param(0x80A0, id="pull block"),
+    ],
 )
 def test_pull_clears_the_output_shift_register(opcode):
     initial_state = State(transmit_fifo=deque([0]))

@@ -12,43 +12,51 @@
 # See the License for the specific language governing permissions and
 from dataclasses import replace
 from .common import next_instruction
-import pioemu.shifter as shifter
 
 
-def out_pindirs(bit_count, state):
-    new_osr, shift_result = _shift_right(state.output_shift_register, bit_count)
+def out_pindirs(shifter, bit_count, state):
+    new_osr, shift_result = shifter(state.output_shift_register, bit_count)
 
     return next_instruction(
-        replace(state, pin_directions=shift_result, output_shift_register=new_osr,)
+        replace(
+            state,
+            pin_directions=shift_result,
+            output_shift_register=new_osr,
+        )
     )
 
 
-def out_pins(bit_count, state):
-    new_osr, shift_result = _shift_right(state.output_shift_register, bit_count)
+def out_pins(shifter, bit_count, state):
+    new_osr, shift_result = shifter(state.output_shift_register, bit_count)
 
     return next_instruction(
-        replace(state, pin_values=shift_result, output_shift_register=new_osr,)
+        replace(
+            state,
+            pin_values=shift_result,
+            output_shift_register=new_osr,
+        )
     )
 
 
-def out_x(bit_count, state):
-    new_osr, shift_result = _shift_right(state.output_shift_register, bit_count)
+def out_x(shifter, bit_count, state):
+    new_osr, shift_result = shifter(state.output_shift_register, bit_count)
 
     return next_instruction(
-        replace(state, x_register=shift_result, output_shift_register=new_osr,)
+        replace(
+            state,
+            x_register=shift_result,
+            output_shift_register=new_osr,
+        )
     )
 
 
-def out_y(bit_count, state):
-    new_osr, shift_result = _shift_right(state.output_shift_register, bit_count)
+def out_y(shifter, bit_count, state):
+    new_osr, shift_result = shifter(state.output_shift_register, bit_count)
 
     return next_instruction(
-        replace(state, y_register=shift_result, output_shift_register=new_osr,)
+        replace(
+            state,
+            y_register=shift_result,
+            output_shift_register=new_osr,
+        )
     )
-
-
-def _shift_right(shift_register, bit_count):
-    if bit_count == 0:
-        return shifter.shift_right(shift_register, 32)
-    else:
-        return shifter.shift_right(shift_register, bit_count)

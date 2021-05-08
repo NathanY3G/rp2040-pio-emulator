@@ -13,12 +13,27 @@
 # limitations under the License.
 import pytest
 from collections import deque
-from pioemu import ShiftRegister, State
+from pioemu import clock_cycles_reached, emulate, ShiftRegister, State
 from .support import emulate_single_instruction, instruction_param
 
 
 # fmt: off
-instructions_to_test = [
+instructions_to_test_with_left_shift = [
+    instruction_param(
+        "out pindirs, 3",
+        0x6083,
+        State(pin_directions=0x0000_0000, output_shift_register=ShiftRegister(0x8000_0000, 5)),
+        State(pin_directions=0x0000_0004, output_shift_register=ShiftRegister(0x0000_0000, 8)),
+    ),
+    instruction_param(
+        "out pins, 8",
+        0x6008,
+        State(pin_values=0x0000_0000, output_shift_register=ShiftRegister(0xFFFF_FFFF, 0)),
+        State(pin_values=0x0000_00FF, output_shift_register=ShiftRegister(0xFFFF_FF00, 8)),
+    ),
+]
+
+instructions_to_test_with_right_shift = [
     instruction_param(
         "out pindirs, 3",
         0x6083,
@@ -47,9 +62,34 @@ instructions_to_test = [
 # fmt: on
 
 
-@pytest.mark.parametrize("opcode, initial_state, expected_state", instructions_to_test)
-def test_out_instruction(opcode, initial_state, expected_state):
-    new_state = emulate_single_instruction(opcode, initial_state)
+@pytest.mark.parametrize(
+    "opcode, initial_state, expected_state", instructions_to_test_with_left_shift
+)
+def test_out_instruction_when_shifting_left(opcode, initial_state, expected_state):
+    _, new_state = next(
+        emulate(
+            [opcode],
+            initial_state=initial_state,
+            stop_condition=clock_cycles_reached(1),
+            shift_osr_right=False,
+        )
+    )
+
+    assert new_state == expected_state
+
+
+@pytest.mark.parametrize(
+    "opcode, initial_state, expected_state", instructions_to_test_with_right_shift
+)
+def test_out_instruction_when_shifting_right(opcode, initial_state, expected_state):
+    _, new_state = next(
+        emulate(
+            [opcode],
+            initial_state=initial_state,
+            stop_condition=clock_cycles_reached(1),
+            shift_osr_right=True,
+        )
+    )
 
     assert new_state == expected_state
 

@@ -13,7 +13,35 @@
 # limitations under the License.
 import pytest
 from pioemu import ShiftRegister
-from pioemu.shifter import shift_right
+from pioemu.shifter import shift_left, shift_right
+
+
+# fmt: off
+@pytest.mark.parametrize(
+    "initial_state, bit_count, expected_state, expected_shift_result",
+    [
+        pytest.param(
+            ShiftRegister(0xBEEB_0000, 0), 8, ShiftRegister(0xEB00_0000, 8), 0x0000_00BE,
+        ),
+        pytest.param(
+            ShiftRegister(0xFFFF_FFFF, 0), 32, ShiftRegister(0x0000_0000, 32), 0xFFFF_FFFF,
+        ),
+        pytest.param(
+            ShiftRegister(0x8000_0000, 5), 3, ShiftRegister(0x0000_0000, 8), 4
+        ),
+
+        # TODO - Test the actual behaviour of the RP2040 silicon
+        pytest.param(
+            ShiftRegister(0xA0000_0000, 31), 32, ShiftRegister(0x0000_0000, 32), 0xA0000_0000,
+        ),
+    ],
+)
+# fmt: on
+def test_shift_left(initial_state, bit_count, expected_state, expected_shift_result):
+    new_state, shift_result = shift_left(initial_state, bit_count)
+
+    assert new_state == expected_state
+    assert shift_result == expected_shift_result
 
 
 # fmt: off

@@ -13,7 +13,7 @@
 # limitations under the License.
 from dataclasses import replace
 from enum import Enum, unique
-from functools import partial
+from functools import partial, wraps
 from .state import State
 from .conditions import (
     x_register_equals_zero,
@@ -43,6 +43,7 @@ from .instructions import (
     wait_for_gpio_low,
     wait_for_gpio_high,
 )
+from .shifter import shift_left, shift_right
 
 
 @unique
@@ -53,10 +54,15 @@ class MoveSource(Enum):
     OSR = 7
 
 
-def emulate(opcodes, *, initial_state=State(), stop_condition=None):
+def emulate(
+    opcodes, *, initial_state=State(), stop_condition=None, shift_osr_right=True
+):
     stop_condition = stop_condition or (lambda state: False)
 
-    instruction_lookup = map_opcodes_to_callables()
+    if shift_osr_right:
+        instruction_lookup = map_opcodes_to_callables(shift_right)
+    else:
+        instruction_lookup = map_opcodes_to_callables(shift_left)
 
     current_state = initial_state
 
@@ -90,6 +96,17 @@ def emulate(opcodes, *, initial_state=State(), stop_condition=None):
         yield (previous_state, current_state)
 
 
+def _normalize_bit_count(function):
+    @wraps(function)
+    def wrapper(bit_count, state):
+        if bit_count == 0:
+            return function(32, state)
+        else:
+            return function(bit_count, state)
+
+    return wrapper
+
+
 def _read_source(source, state):
     # TODO: Consider using the new match statement when widely available
     if source == MoveSource.PINS:
@@ -111,7 +128,7 @@ def is_instruction_stalled(previous_state, current_state, instruction):
         return False
 
 
-def map_opcodes_to_callables():
+def map_opcodes_to_callables(shifter_for_osr):
     return {
         0x0000: partial(jmp, lambda state: True),
         0x0020: partial(jmp, x_register_equals_zero),
@@ -121,10 +138,10 @@ def map_opcodes_to_callables():
         0x00A0: partial(jmp, x_register_not_equal_to_y_register),
         0x2020: wait_for_gpio_low,
         0x2080: wait_for_gpio_high,
-        0x6000: out_pins,
-        0x6020: out_x,
-        0x6040: out_y,
-        0x6080: out_pindirs,
+        0x6000: _normalize_bit_count(partial(out_pins, shifter_for_osr)),
+        0x6020: _normalize_bit_count(partial(out_x, shifter_for_osr)),
+        0x6040: _normalize_bit_count(partial(out_y, shifter_for_osr)),
+        0x6080: _normalize_bit_count(partial(out_pindirs, shifter_for_osr)),
         0x8080: pull_nonblocking,
         0x80A0: pull_blocking,
         0xA000: mov_into_pins,
