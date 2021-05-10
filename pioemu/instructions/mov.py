@@ -15,6 +15,13 @@ from pioemu.state import ShiftRegister
 from .common import next_instruction
 
 
+def mov_into_isr(source_value, state):
+    """Copy data from source to input shift register"""
+    return next_instruction(
+        replace(state, input_shift_register=ShiftRegister(source_value, 0))
+    )
+
+
 def mov_into_osr(source_value, state):
     """Copy data from source to output shift register"""
     return next_instruction(

@@ -48,6 +48,18 @@ instructions_to_test = [
         State(x_register=0xFFFF_FFFF),
         State(output_shift_register=ShiftRegister(0xFFFF_FFFF, 0), x_register=0xFFFF_FFFF),
     ),
+    instruction_param(
+        "mov isr, osr",
+        0xA0C7,
+        State(input_shift_register=ShiftRegister(0x0000_0000, 31), output_shift_register=ShiftRegister(0xFFFF_FFFF, 0)),
+        State(input_shift_register=ShiftRegister(0xFFFF_FFFF, 0), output_shift_register=ShiftRegister(0xFFFF_FFFF, 0)),
+    ),
+    instruction_param(
+        "mov osr, isr",
+        0xA0E6,
+        State(output_shift_register=ShiftRegister(0x0000_0000, 31), input_shift_register=ShiftRegister(0xFFFF_FFFF, 0)),
+        State(output_shift_register=ShiftRegister(0xFFFF_FFFF, 0), input_shift_register=ShiftRegister(0xFFFF_FFFF, 0)),
+    ),
 ]
 # fmt: on
 

@@ -26,6 +26,7 @@ from .instructions import (
     jmp,
     jmp_when_x_is_non_zero_and_post_decrement,
     jmp_when_y_is_non_zero_and_post_decrement,
+    mov_into_isr,
     mov_into_osr,
     mov_into_pins,
     mov_into_x,
@@ -51,6 +52,7 @@ class MoveSource(Enum):
     PINS = 0
     X_REGISTER = 1
     Y_REGISTER = 2
+    ISR = 6
     OSR = 7
 
 
@@ -115,8 +117,12 @@ def _read_source(source, state):
         value = state.x_register
     elif source == MoveSource.Y_REGISTER:
         value = state.y_register
+    elif source == MoveSource.ISR:
+        value = state.input_shift_register.contents
+    elif source == MoveSource.OSR:
+        value = state.output_shift_register.contents
     else:
-        value = None
+        raise NotImplementedError("Source for move operation not supported yet")
 
     return value
 
@@ -147,6 +153,7 @@ def map_opcodes_to_callables(shifter_for_osr):
         0xA000: mov_into_pins,
         0xA020: mov_into_x,
         0xA040: mov_into_y,
+        0xA0C0: mov_into_isr,
         0xA0E0: mov_into_osr,
         0xE080: set_pindirs,
         0xE000: set_pins,
