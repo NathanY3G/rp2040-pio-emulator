@@ -60,6 +60,12 @@ instructions_to_test = [
         State(output_shift_register=ShiftRegister(0x0000_0000, 31), input_shift_register=ShiftRegister(0xFFFF_FFFF, 0)),
         State(output_shift_register=ShiftRegister(0xFFFF_FFFF, 0), input_shift_register=ShiftRegister(0xFFFF_FFFF, 0)),
     ),
+    instruction_param(
+        "mov osr, null",
+        0xA0E3,
+        State(output_shift_register=ShiftRegister(0xDEAD_BEEF, 31)),
+        State(output_shift_register=ShiftRegister(0x0000_0000, 0)),
+    ),
 ]
 # fmt: on
 

@@ -31,6 +31,7 @@ from .instructions import (
     mov_into_pins,
     mov_into_x,
     mov_into_y,
+    out_null,
     out_pindirs,
     out_pins,
     out_x,
@@ -52,6 +53,7 @@ class MoveSource(Enum):
     PINS = 0
     X_REGISTER = 1
     Y_REGISTER = 2
+    NULL = 3
     ISR = 6
     OSR = 7
 
@@ -117,6 +119,8 @@ def _read_source(source, state):
         value = state.x_register
     elif source == MoveSource.Y_REGISTER:
         value = state.y_register
+    elif source == MoveSource.NULL:
+        value = 0
     elif source == MoveSource.ISR:
         value = state.input_shift_register.contents
     elif source == MoveSource.OSR:
@@ -147,6 +151,7 @@ def map_opcodes_to_callables(shifter_for_osr):
         0x6000: _normalize_bit_count(partial(out_pins, shifter_for_osr)),
         0x6020: _normalize_bit_count(partial(out_x, shifter_for_osr)),
         0x6040: _normalize_bit_count(partial(out_y, shifter_for_osr)),
+        0x6060: _normalize_bit_count(partial(out_null, shifter_for_osr)),
         0x6080: _normalize_bit_count(partial(out_pindirs, shifter_for_osr)),
         0x8080: pull_nonblocking,
         0x80A0: pull_blocking,

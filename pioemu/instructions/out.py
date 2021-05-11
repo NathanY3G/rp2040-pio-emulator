@@ -14,7 +14,15 @@ from dataclasses import replace
 from .common import next_instruction
 
 
+def out_null(shifter, bit_count, state):
+    """Shift bits out of the output shift register and discard them"""
+    new_osr, _ = shifter(state.output_shift_register, bit_count)
+
+    return next_instruction(replace(state, output_shift_register=new_osr))
+
+
 def out_pindirs(shifter, bit_count, state):
+    """Shift bits out of the output shift register and write those bits to the pin directions"""
     new_osr, shift_result = shifter(state.output_shift_register, bit_count)
 
     return next_instruction(
@@ -27,6 +35,7 @@ def out_pindirs(shifter, bit_count, state):
 
 
 def out_pins(shifter, bit_count, state):
+    """Shift bits out of the output shift register and write those bits to the pins"""
     new_osr, shift_result = shifter(state.output_shift_register, bit_count)
 
     return next_instruction(
@@ -39,6 +48,7 @@ def out_pins(shifter, bit_count, state):
 
 
 def out_x(shifter, bit_count, state):
+    """Shift bits out of the output shift register and write those bits to X"""
     new_osr, shift_result = shifter(state.output_shift_register, bit_count)
 
     return next_instruction(
@@ -51,6 +61,7 @@ def out_x(shifter, bit_count, state):
 
 
 def out_y(shifter, bit_count, state):
+    """Shift bits out of the output shift register and write those bits to Y"""
     new_osr, shift_result = shifter(state.output_shift_register, bit_count)
 
     return next_instruction(
