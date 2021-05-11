@@ -16,7 +16,7 @@ from .jmp import (
     jmp_when_x_is_non_zero_and_post_decrement,
     jmp_when_y_is_non_zero_and_post_decrement,
 )
-from .mov import mov_into_osr, mov_into_pins, mov_into_x, mov_into_y
+from .mov import mov_into_isr, mov_into_osr, mov_into_pins, mov_into_x, mov_into_y
 from .out import out_pindirs, out_pins, out_x, out_y
 from .pull import pull_blocking, pull_nonblocking
 from .set import set_pins, set_pindirs, set_x, set_y

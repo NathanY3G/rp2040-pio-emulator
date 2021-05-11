@@ -29,6 +29,7 @@ class State:
     pin_directions: int = 0
     pin_values: int = 0
     transmit_fifo: Deque = deque()
+    input_shift_register: ShiftRegister = ShiftRegister(0, 0)
     output_shift_register: ShiftRegister = ShiftRegister(0, 32)
     x_register: int = 0
     y_register: int = 0
