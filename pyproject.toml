@@ -1,9 +1,21 @@
 [tool.poetry]
-name = "raspberrypi-pio-poc"
-version = "0.15"
-description = "Proof of Concept"
+name = "rp2040-pio-emulator"
+version = "0.15.0"
+description = "RP2040 emulator for the testing and debugging of PIO programs"
 authors = ["Nathan Young <nathan@::0/128>"]
 license = "Apache-2.0"
+repository = "https://github.com/NathanY3G/rp2040-pio-emulator"
+readme = "README.rst"
+packages = [
+    { include = "pioemu" }
+]
+keywords = [
+    "rp2040",
+    "raspberry-pi-pico",
+    "testing",
+    "tdd",
+    "debugging",
+]
 
 [tool.poetry.dependencies]
 python = "^3.7"
