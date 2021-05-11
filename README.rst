@@ -40,8 +40,8 @@ This software is under development and currently has limitations - the notable o
 1. Only supports a sub-set of the available instructions:
 
    * JMP (PIN and !OSRE variants not implemented)
-   * MOV (some variants not implemented)
-   * OUT (NULL, PC, ISR and EXEC destinations not implemented)
+   * MOV (some variants and operations not implemented)
+   * OUT (PC, ISR and EXEC destinations not implemented)
    * PULL (IfEmpty not implemented)
    * SET
    * WAIT (IRQ variant not implemented)

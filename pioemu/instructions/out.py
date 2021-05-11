@@ -14,6 +14,12 @@ from dataclasses import replace
 from .common import next_instruction
 
 
+def out_null(shifter, bit_count, state):
+    new_osr, _ = shifter(state.output_shift_register, bit_count)
+
+    return next_instruction(replace(state, output_shift_register=new_osr))
+
+
 def out_pindirs(shifter, bit_count, state):
     new_osr, shift_result = shifter(state.output_shift_register, bit_count)
 

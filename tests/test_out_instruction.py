@@ -31,6 +31,12 @@ instructions_to_test_with_left_shift = [
         State(pin_values=0x0000_0000, output_shift_register=ShiftRegister(0xFFFF_FFFF, 0)),
         State(pin_values=0x0000_00FF, output_shift_register=ShiftRegister(0xFFFF_FF00, 8)),
     ),
+    instruction_param(
+        "out null, 3",
+        0x6063,
+        State(output_shift_register=ShiftRegister(0xFFFF_FFFF, 0)),
+        State(output_shift_register=ShiftRegister(0xFFFF_FFF8, 3)),
+    ),
 ]
 
 instructions_to_test_with_right_shift = [
