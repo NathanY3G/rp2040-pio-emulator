@@ -46,7 +46,9 @@ This software is under development and currently has limitations - the notable o
    * SET
    * WAIT (IRQ variant not implemented)
 
-2. No support for pin-sets; all pin numbers are with respect to Pin 0
+2. No support for OUT, SET or IN pin-sets; all pin numbers are with respect to Pin 0.
 
-3. No direct support for the concurrent running of multiple PIO programs;
+3. Pin-sets do not wrap after GPIO 31.
+
+4. No direct support for the concurrent running of multiple PIO programs;
    a single State Machine is emulated and not an entire PIO block.
