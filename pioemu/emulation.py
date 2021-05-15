@@ -59,7 +59,13 @@ class MoveSource(Enum):
 
 
 def emulate(
-    opcodes, *, initial_state=State(), stop_condition=None, shift_osr_right=True
+    opcodes,
+    *,
+    initial_state=State(),
+    stop_condition=None,
+    shift_osr_right=True,
+    side_set_base=0,
+    side_set_count=0
 ):
     stop_condition = stop_condition or (lambda state: False)
 
@@ -72,9 +78,11 @@ def emulate(
 
     while not stop_condition(current_state):
         previous_state = current_state
-
         opcode = opcodes[current_state.program_counter]
-        delay_value = (opcode >> 8) & 0x1F
+
+        (side_set_value, delay_value) = _extract_delay_and_side_set_from_opcode(
+            opcode, side_set_count
+        )
 
         if (opcode >> 13) == 5:
             data_field = _read_source(MoveSource(opcode & 7), current_state)
@@ -93,11 +101,31 @@ def emulate(
         else:
             clock_cycles_consumed = 1 + delay_value
 
+        if side_set_count > 0:
+            current_state = _apply_side_set_to_pin_values(
+                current_state, side_set_base, side_set_count, side_set_value
+            )
+
         current_state = replace(
             current_state, clock=current_state.clock + clock_cycles_consumed
         )
 
         yield (previous_state, current_state)
+
+
+def _extract_delay_and_side_set_from_opcode(opcode, side_set_count):
+    combined_values = (opcode >> 8) & 0x1F
+    bits_for_delay = 5 - side_set_count
+    delay_mask = (1 << bits_for_delay) - 1
+
+    return (combined_values >> bits_for_delay, combined_values & delay_mask)
+
+
+def _apply_side_set_to_pin_values(state, pin_base, pin_count, pin_values):
+    bit_mask = ~(((1 << pin_count) - 1) << pin_base) & 0xFFFF
+    new_pin_values = (state.pin_values & bit_mask) | (pin_values << pin_base)
+
+    return replace(state, pin_values=new_pin_values)
 
 
 def _normalize_bit_count(function):
