@@ -26,6 +26,7 @@ from .instructions import (
     mov_into_pins,
     mov_into_x,
     mov_into_y,
+    next_instruction,
     out_null,
     out_pindirs,
     out_pins,
@@ -39,6 +40,14 @@ from .instructions import (
     set_y,
     wait_for_gpio_low,
     wait_for_gpio_high,
+)
+from .primitive_operations import (
+    copy_data_to_isr,
+    copy_data_to_osr,
+    copy_data_to_pin_directions,
+    copy_data_to_pins,
+    copy_data_to_x,
+    copy_data_to_y,
 )
 
 
@@ -64,7 +73,7 @@ class InstructionDecoder:
         opcode (int): The opcode to decode.
 
         Returns:
-        Callable[[State], State]: Emulates the instruction when invoked.
+        Callable[[int, State], State]: Emulates the instruction when invoked.
         """
 
         return self.lookup_table.get(opcode & 0xE0E0, None)
@@ -86,15 +95,15 @@ class InstructionDecoder:
             0x6080: self._normalize_bit_count(partial(out_pindirs, shifter_for_osr)),
             0x8080: pull_nonblocking,
             0x80A0: pull_blocking,
-            0xA000: mov_into_pins,
-            0xA020: mov_into_x,
-            0xA040: mov_into_y,
-            0xA0C0: mov_into_isr,
-            0xA0E0: mov_into_osr,
-            0xE080: set_pindirs,
-            0xE000: set_pins,
-            0xE020: set_x,
-            0xE040: set_y,
+            0xA000: lambda data, state: next_instruction(copy_data_to_pins(data, state)),
+            0xA020: lambda data, state: next_instruction(copy_data_to_x(data, state)),
+            0xA040: lambda data, state: next_instruction(copy_data_to_y(data, state)),
+            0xA0C0: lambda data, state: next_instruction(copy_data_to_isr(data, state)),
+            0xA0E0: lambda data, state: next_instruction(copy_data_to_osr(data, state)),
+            0xE000: lambda data, state: next_instruction(copy_data_to_pins(data, state)),
+            0xE020: lambda data, state: next_instruction(copy_data_to_x(data, state)),
+            0xE040: lambda data, state: next_instruction(copy_data_to_y(data, state)),
+            0xE080: lambda data, state: next_instruction(copy_data_to_pin_directions(data, state)),
         }
 
     def _normalize_bit_count(self, function):
