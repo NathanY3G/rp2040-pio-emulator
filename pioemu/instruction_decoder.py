@@ -21,11 +21,6 @@ from .instructions import (
     jmp,
     jmp_when_x_is_non_zero_and_post_decrement,
     jmp_when_y_is_non_zero_and_post_decrement,
-    mov_into_isr,
-    mov_into_osr,
-    mov_into_pins,
-    mov_into_x,
-    mov_into_y,
     next_instruction,
     out_null,
     out_pindirs,
@@ -34,10 +29,6 @@ from .instructions import (
     out_y,
     pull_blocking,
     pull_nonblocking,
-    set_pins,
-    set_pindirs,
-    set_x,
-    set_y,
     wait_for_gpio_low,
     wait_for_gpio_high,
 )
@@ -95,15 +86,21 @@ class InstructionDecoder:
             0x6080: self._normalize_bit_count(partial(out_pindirs, shifter_for_osr)),
             0x8080: pull_nonblocking,
             0x80A0: pull_blocking,
-            0xA000: lambda data, state: next_instruction(copy_data_to_pins(data, state)),
+            0xA000: lambda data, state: next_instruction(
+                copy_data_to_pins(data, state)
+            ),
             0xA020: lambda data, state: next_instruction(copy_data_to_x(data, state)),
             0xA040: lambda data, state: next_instruction(copy_data_to_y(data, state)),
             0xA0C0: lambda data, state: next_instruction(copy_data_to_isr(data, state)),
             0xA0E0: lambda data, state: next_instruction(copy_data_to_osr(data, state)),
-            0xE000: lambda data, state: next_instruction(copy_data_to_pins(data, state)),
+            0xE000: lambda data, state: next_instruction(
+                copy_data_to_pins(data, state)
+            ),
             0xE020: lambda data, state: next_instruction(copy_data_to_x(data, state)),
             0xE040: lambda data, state: next_instruction(copy_data_to_y(data, state)),
-            0xE080: lambda data, state: next_instruction(copy_data_to_pin_directions(data, state)),
+            0xE080: lambda data, state: next_instruction(
+                copy_data_to_pin_directions(data, state)
+            ),
         }
 
     def _normalize_bit_count(self, function):
