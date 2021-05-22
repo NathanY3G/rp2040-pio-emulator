@@ -39,6 +39,12 @@ def copy_data_to_pins(data, state):
     return replace(state, pin_values=data)
 
 
+def copy_data_to_program_counter(data, state):
+    """Copies the given data into the program counter."""
+
+    return replace(state, program_counter=data)
+
+
 def copy_data_to_x(data, state):
     """Copies the given data into the X scratch register."""
 

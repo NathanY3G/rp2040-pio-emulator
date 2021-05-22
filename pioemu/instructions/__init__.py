@@ -11,12 +11,5 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from .common import next_instruction
-from .jmp import (
-    jmp,
-    jmp_when_x_is_non_zero_and_post_decrement,
-    jmp_when_y_is_non_zero_and_post_decrement,
-)
 from .out import out_null, out_pindirs, out_pins, out_x, out_y
 from .pull import pull_blocking, pull_nonblocking
-from .wait import wait_for_gpio_low, wait_for_gpio_high

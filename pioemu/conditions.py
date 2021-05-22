@@ -15,6 +15,22 @@ def clock_cycles_reached(target_value):
     return lambda state: state.clock >= target_value
 
 
+def always(state):
+    return True
+
+
+def gpio_low(pin_number, state):
+    return not gpio_high(pin_number, state)
+
+
+def gpio_high(pin_number, state):
+    return state.pin_values & (1 << pin_number)
+
+
+def transmit_fifo_not_empty(state):
+    return len(state.transmit_fifo) > 0
+
+
 def x_register_equals_zero(state):
     return state.x_register == 0
 

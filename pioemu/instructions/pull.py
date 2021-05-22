@@ -12,30 +12,19 @@
 # See the License for the specific language governing permissions and
 from dataclasses import replace
 from pioemu.state import ShiftRegister
-from .common import next_instruction
+from pioemu.conditions import transmit_fifo_not_empty
 
 
 def pull_blocking(not_used, state):
-    if len(state.transmit_fifo) > 0:
-        return next_instruction(
-            replace(
-                state,
-                output_shift_register=ShiftRegister(state.transmit_fifo.pop(), 0),
-            )
-        )
-    else:
-        return state
+    return replace(
+        state, output_shift_register=ShiftRegister(state.transmit_fifo.pop(), 0)
+    )
 
 
 def pull_nonblocking(not_used, state):
-    if len(state.transmit_fifo) > 0:
-        return next_instruction(
-            replace(
-                state,
-                output_shift_register=ShiftRegister(state.transmit_fifo.pop(), 0),
-            )
-        )
+    if transmit_fifo_not_empty(state):
+        new_contents = state.transmit_fifo.pop()
     else:
-        return next_instruction(
-            replace(state, output_shift_register=ShiftRegister(state.x_register, 0))
-        )
+        new_contents = state.x_register
+
+    return replace(state, output_shift_register=ShiftRegister(new_contents, 0))
