@@ -15,11 +15,6 @@ from dataclasses import replace
 from enum import Enum, unique
 from .instruction_decoder import InstructionDecoder
 from .state import State
-from .instructions import (
-    pull_blocking,
-    wait_for_gpio_low,
-    wait_for_gpio_high,
-)
 from .shifter import shift_left, shift_right
 
 
@@ -40,7 +35,7 @@ def emulate(
     stop_condition=None,
     shift_osr_right=True,
     side_set_base=0,
-    side_set_count=0
+    side_set_count=0,
 ):
     stop_condition = stop_condition or (lambda state: False)
 
@@ -59,33 +54,66 @@ def emulate(
             opcode, side_set_count
         )
 
-        if (opcode >> 13) == 5:
-            data_field = _read_source(MoveSource(opcode & 7), current_state)
-        else:
-            data_field = opcode & 0x1F
-
         instruction = instruction_decoder.decode(opcode)
+
+        # TODO: Consider moving this logic into the instruction decoder
+        jump_instruction = (opcode >> 13) == 0
+        move_instruction = (opcode >> 13) == 5
 
         if instruction is None:
             return
 
-        current_state = instruction(data_field, current_state)
-
-        if is_instruction_stalled(previous_state, current_state, instruction):
-            clock_cycles_consumed = 1
+        if move_instruction:
+            data_field = _read_source(MoveSource(opcode & 7), current_state)
         else:
-            clock_cycles_consumed = 1 + delay_value
+            data_field = opcode & 0x1F
 
+        condition_met = instruction.condition(current_state)
+        if condition_met:
+            current_state = instruction.callable(data_field, current_state)
+
+        current_state = _apply_side_effects(opcode, current_state)
+
+        # TODO: Check that the following still applies when an instruction is stalled
         if side_set_count > 0:
             current_state = _apply_side_set_to_pin_values(
                 current_state, side_set_base, side_set_count, side_set_value
             )
 
-        current_state = replace(
-            current_state, clock=current_state.clock + clock_cycles_consumed
+        current_state = _advance_program_counter(
+            condition_met, jump_instruction, current_state
+        )
+
+        current_state = _apply_delay_value(
+            condition_met, jump_instruction, delay_value, current_state
         )
 
         yield (previous_state, current_state)
+
+
+def _advance_program_counter(condition_met, jump_instruction, state):
+    if condition_met and jump_instruction:
+        return state
+    elif not condition_met and not jump_instruction:
+        return state
+    else:
+        return replace(state, program_counter=state.program_counter + 1)
+
+
+def _apply_delay_value(condition_met, jump_instruction, delay_value, state):
+    if jump_instruction or condition_met:
+        return replace(state, clock=state.clock + 1 + delay_value)
+    else:
+        return replace(state, clock=state.clock + 1)
+
+
+def _apply_side_effects(opcode, state):
+    if (opcode & 0xE0E0) == 0x0040:
+        return replace(state, x_register=state.x_register - 1)
+    elif (opcode & 0xE0E0) == 0x0080:
+        return replace(state, y_register=state.y_register - 1)
+    else:
+        return state
 
 
 def _extract_delay_and_side_set_from_opcode(opcode, side_set_count):
@@ -121,10 +149,3 @@ def _read_source(source, state):
         raise NotImplementedError("Source for move operation not supported yet")
 
     return value
-
-
-def is_instruction_stalled(previous_state, current_state, instruction):
-    if instruction in [pull_blocking, wait_for_gpio_low, wait_for_gpio_high]:
-        return current_state.program_counter == previous_state.program_counter
-    else:
-        return False

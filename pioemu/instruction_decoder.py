@@ -13,15 +13,18 @@
 # limitations under the License.
 from functools import partial, wraps
 from .conditions import (
+    always,
+    gpio_low,
+    gpio_high,
+    transmit_fifo_not_empty,
     x_register_equals_zero,
     x_register_not_equal_to_y_register,
+    x_register_not_equal_to_zero,
     y_register_equals_zero,
+    y_register_not_equal_to_zero,
 )
+from .instruction import Instruction
 from .instructions import (
-    jmp,
-    jmp_when_x_is_non_zero_and_post_decrement,
-    jmp_when_y_is_non_zero_and_post_decrement,
-    next_instruction,
     out_null,
     out_pindirs,
     out_pins,
@@ -29,14 +32,13 @@ from .instructions import (
     out_y,
     pull_blocking,
     pull_nonblocking,
-    wait_for_gpio_low,
-    wait_for_gpio_high,
 )
 from .primitive_operations import (
     copy_data_to_isr,
     copy_data_to_osr,
     copy_data_to_pin_directions,
     copy_data_to_pins,
+    copy_data_to_program_counter,
     copy_data_to_x,
     copy_data_to_y,
 )
@@ -64,43 +66,71 @@ class InstructionDecoder:
         opcode (int): The opcode to decode.
 
         Returns:
-        Callable[[int, State], State]: Emulates the instruction when invoked.
+        Instruction: Representation of the instruction or None.
         """
 
-        return self.lookup_table.get(opcode & 0xE0E0, None)
+        instruction = opcode >> 13
+
+        if instruction == 1:  # WAIT
+            return self._decode_wait(opcode)
+        else:
+            return self.lookup_table.get(opcode & 0xE0E0, None)
+
+    def _decode_wait(self, opcode):
+        index = opcode & 0x001F
+
+        if opcode & 0x0080:
+            condition = partial(gpio_high, index)
+        else:
+            condition = partial(gpio_low, index)
+
+        return Instruction(condition, lambda data, state: state)
 
     def _build_lookup_table(self, shifter_for_osr):
         return {
-            0x0000: partial(jmp, lambda state: True),
-            0x0020: partial(jmp, x_register_equals_zero),
-            0x0040: jmp_when_x_is_non_zero_and_post_decrement,
-            0x0060: partial(jmp, y_register_equals_zero),
-            0x0080: jmp_when_y_is_non_zero_and_post_decrement,
-            0x00A0: partial(jmp, x_register_not_equal_to_y_register),
-            0x2020: wait_for_gpio_low,
-            0x2080: wait_for_gpio_high,
-            0x6000: self._normalize_bit_count(partial(out_pins, shifter_for_osr)),
-            0x6020: self._normalize_bit_count(partial(out_x, shifter_for_osr)),
-            0x6040: self._normalize_bit_count(partial(out_y, shifter_for_osr)),
-            0x6060: self._normalize_bit_count(partial(out_null, shifter_for_osr)),
-            0x6080: self._normalize_bit_count(partial(out_pindirs, shifter_for_osr)),
-            0x8080: pull_nonblocking,
-            0x80A0: pull_blocking,
-            0xA000: lambda data, state: next_instruction(
-                copy_data_to_pins(data, state)
+            0x0000: Instruction(always, copy_data_to_program_counter),
+            0x0020: Instruction(x_register_equals_zero, copy_data_to_program_counter),
+            0x0040: Instruction(
+                x_register_not_equal_to_zero, copy_data_to_program_counter
             ),
-            0xA020: lambda data, state: next_instruction(copy_data_to_x(data, state)),
-            0xA040: lambda data, state: next_instruction(copy_data_to_y(data, state)),
-            0xA0C0: lambda data, state: next_instruction(copy_data_to_isr(data, state)),
-            0xA0E0: lambda data, state: next_instruction(copy_data_to_osr(data, state)),
-            0xE000: lambda data, state: next_instruction(
-                copy_data_to_pins(data, state)
+            0x0060: Instruction(y_register_equals_zero, copy_data_to_program_counter),
+            0x0080: Instruction(
+                y_register_not_equal_to_zero, copy_data_to_program_counter
             ),
-            0xE020: lambda data, state: next_instruction(copy_data_to_x(data, state)),
-            0xE040: lambda data, state: next_instruction(copy_data_to_y(data, state)),
-            0xE080: lambda data, state: next_instruction(
-                copy_data_to_pin_directions(data, state)
+            0x00A0: Instruction(
+                x_register_not_equal_to_y_register, copy_data_to_program_counter
             ),
+            0x6000: Instruction(
+                always,
+                self._normalize_bit_count(partial(out_pins, shifter_for_osr)),
+            ),
+            0x6020: Instruction(
+                always,
+                self._normalize_bit_count(partial(out_x, shifter_for_osr)),
+            ),
+            0x6040: Instruction(
+                always,
+                self._normalize_bit_count(partial(out_y, shifter_for_osr)),
+            ),
+            0x6060: Instruction(
+                always,
+                self._normalize_bit_count(partial(out_null, shifter_for_osr)),
+            ),
+            0x6080: Instruction(
+                always,
+                self._normalize_bit_count(partial(out_pindirs, shifter_for_osr)),
+            ),
+            0x8080: Instruction(always, pull_nonblocking),
+            0x80A0: Instruction(transmit_fifo_not_empty, pull_blocking),
+            0xA000: Instruction(always, copy_data_to_pins),
+            0xA020: Instruction(always, copy_data_to_x),
+            0xA040: Instruction(always, copy_data_to_y),
+            0xA0C0: Instruction(always, copy_data_to_isr),
+            0xA0E0: Instruction(always, copy_data_to_osr),
+            0xE000: Instruction(always, copy_data_to_pins),
+            0xE020: Instruction(always, copy_data_to_x),
+            0xE040: Instruction(always, copy_data_to_y),
+            0xE080: Instruction(always, copy_data_to_pin_directions),
         }
 
     def _normalize_bit_count(self, function):
