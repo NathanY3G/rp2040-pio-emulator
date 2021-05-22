@@ -10,18 +10,19 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
+# limitations under the License.
 from dataclasses import replace
 from pioemu.state import ShiftRegister
 from pioemu.conditions import transmit_fifo_not_empty
 
 
-def pull_blocking(not_used, state):
+def pull_blocking(state):
     return replace(
         state, output_shift_register=ShiftRegister(state.transmit_fifo.pop(), 0)
     )
 
 
-def pull_nonblocking(not_used, state):
+def pull_nonblocking(state):
     if transmit_fifo_not_empty(state):
         new_contents = state.transmit_fifo.pop()
     else:
