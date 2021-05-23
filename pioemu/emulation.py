@@ -12,20 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import replace
-from enum import Enum, unique
 from .instruction_decoder import InstructionDecoder
 from .state import State
 from .shifter import shift_left, shift_right
-
-
-@unique
-class MoveSource(Enum):
-    PINS = 0
-    X_REGISTER = 1
-    Y_REGISTER = 2
-    NULL = 3
-    ISR = 6
-    OSR = 7
 
 
 def emulate(
@@ -58,19 +47,13 @@ def emulate(
 
         # TODO: Consider moving this logic into the instruction decoder
         jump_instruction = (opcode >> 13) == 0
-        move_instruction = (opcode >> 13) == 5
 
         if instruction is None:
             return
 
-        if move_instruction:
-            data_field = _read_source(MoveSource(opcode & 7), current_state)
-        else:
-            data_field = opcode & 0x1F
-
         condition_met = instruction.condition(current_state)
         if condition_met:
-            current_state = instruction.callable(data_field, current_state)
+            current_state = instruction.callable(current_state)
 
         current_state = _apply_side_effects(opcode, current_state)
 
@@ -129,23 +112,3 @@ def _apply_side_set_to_pin_values(state, pin_base, pin_count, pin_values):
     new_pin_values = (state.pin_values & bit_mask) | (pin_values << pin_base)
 
     return replace(state, pin_values=new_pin_values)
-
-
-def _read_source(source, state):
-    # TODO: Consider using the new match statement when widely available
-    if source == MoveSource.PINS:
-        value = state.pin_values
-    elif source == MoveSource.X_REGISTER:
-        value = state.x_register
-    elif source == MoveSource.Y_REGISTER:
-        value = state.y_register
-    elif source == MoveSource.NULL:
-        value = 0
-    elif source == MoveSource.ISR:
-        value = state.input_shift_register.contents
-    elif source == MoveSource.OSR:
-        value = state.output_shift_register.contents
-    else:
-        raise NotImplementedError("Source for move operation not supported yet")
-
-    return value

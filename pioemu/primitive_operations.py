@@ -15,43 +15,85 @@ from dataclasses import replace
 from .state import ShiftRegister
 
 
-def copy_data_to_isr(data, state):
+def read_from_isr(state):
+    """Reads the contents of the input shift register."""
+
+    return state.input_shift_register.contents
+
+
+def read_from_osr(state):
+    """Reads the contents of the output shift register."""
+
+    return state.output_shift_register.contents
+
+
+def read_from_pin_directions(state):
+    """Reads the contents of the pin direction register."""
+
+    return state.pin_directions
+
+
+def read_from_pins(state):
+    """Reads the contents of the pin values register."""
+
+    return state.pin_values
+
+
+def read_from_x(state):
+    """Reads the contents of the X scratch register."""
+
+    return state.x_register
+
+
+def read_from_y(state):
+    """Reads the contents of the Y scratch register."""
+
+    return state.y_register
+
+
+def write_to_isr(data_supplier, state):
     """Copies the given data into the input shift register."""
 
-    return replace(state, input_shift_register=ShiftRegister(data, 0))
+    return replace(state, input_shift_register=ShiftRegister(data_supplier(state), 0))
 
 
-def copy_data_to_osr(data, state):
+def write_to_osr(data_supplier, state):
     """Copies the given data into the output shift register."""
 
-    return replace(state, output_shift_register=ShiftRegister(data, 0))
+    return replace(state, output_shift_register=ShiftRegister(data_supplier(state), 0))
 
 
-def copy_data_to_pin_directions(data, state):
+def write_to_pin_directions(data_supplier, state):
     """Copies the given data into the pin directions register."""
 
-    return replace(state, pin_directions=data)
+    return replace(state, pin_directions=data_supplier(state))
 
 
-def copy_data_to_pins(data, state):
+def write_to_pins(data_supplier, state):
     """Copies the given data into the pin values register."""
 
-    return replace(state, pin_values=data)
+    return replace(state, pin_values=data_supplier(state))
 
 
-def copy_data_to_program_counter(data, state):
+def write_to_program_counter(data_supplier, state):
     """Copies the given data into the program counter."""
 
-    return replace(state, program_counter=data)
+    return replace(state, program_counter=data_supplier(state))
 
 
-def copy_data_to_x(data, state):
+def write_to_x(data_supplier, state):
     """Copies the given data into the X scratch register."""
 
-    return replace(state, x_register=data)
+    return replace(state, x_register=data_supplier(state))
 
 
-def copy_data_to_y(data, state):
+def write_to_y(data_supplier, state):
     """Copies the given data into the Y scratch register."""
 
-    return replace(state, y_register=data)
+    return replace(state, y_register=data_supplier(state))
+
+
+def supplies_value(value):
+    """Creates a function that returns the specified value when invoked."""
+
+    return lambda _: value
