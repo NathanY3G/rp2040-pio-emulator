@@ -54,43 +54,43 @@ def read_from_y(state):
 def write_to_isr(data_supplier, state):
     """Copies the given data into the input shift register."""
 
-    return replace(state, input_shift_register=ShiftRegister(data_supplier(state), 0))
+    return replace(state, input_shift_register=ShiftRegister(data_supplier(state) & 0xFFFF_FFFF, 0))
 
 
 def write_to_osr(data_supplier, state):
     """Copies the given data into the output shift register."""
 
-    return replace(state, output_shift_register=ShiftRegister(data_supplier(state), 0))
+    return replace(state, output_shift_register=ShiftRegister(data_supplier(state) & 0xFFFF_FFFF, 0))
 
 
 def write_to_pin_directions(data_supplier, state):
     """Copies the given data into the pin directions register."""
 
-    return replace(state, pin_directions=data_supplier(state))
+    return replace(state, pin_directions=data_supplier(state) & 0xFFFF_FFFF)
 
 
 def write_to_pins(data_supplier, state):
     """Copies the given data into the pin values register."""
 
-    return replace(state, pin_values=data_supplier(state))
+    return replace(state, pin_values=data_supplier(state) & 0xFFFF_FFFF)
 
 
 def write_to_program_counter(data_supplier, state):
     """Copies the given data into the program counter."""
 
-    return replace(state, program_counter=data_supplier(state))
+    return replace(state, program_counter=data_supplier(state) & 0x1F)
 
 
 def write_to_x(data_supplier, state):
     """Copies the given data into the X scratch register."""
 
-    return replace(state, x_register=data_supplier(state))
+    return replace(state, x_register=data_supplier(state) & 0xFFFF_FFFF)
 
 
 def write_to_y(data_supplier, state):
     """Copies the given data into the Y scratch register."""
 
-    return replace(state, y_register=data_supplier(state))
+    return replace(state, y_register=data_supplier(state) & 0xFFFF_FFFF)
 
 
 def supplies_value(value):
