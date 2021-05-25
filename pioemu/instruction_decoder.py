@@ -157,9 +157,15 @@ class InstructionDecoder:
 
     def _decode_mov(self, opcode):
         read_from_source = self.mov_sources[opcode & 7]
+        operation = (opcode >> 3) & 3
+
+        if operation == 1:
+            data_supplier = lambda state: read_from_source(state) ^ 0xFFFF_FFFF
+        else:
+            data_supplier = read_from_source
 
         return self._make_instruction_from_lookup_table(
-            opcode, self.mov_destinations, read_from_source
+            opcode, self.mov_destinations, data_supplier
         )
 
     def _decode_out(self, opcode):
