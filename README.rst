@@ -2,11 +2,13 @@
 Emulator for the PIO Blocks within the RP2040 Microcontroller (Python Edition)
 ==============================================================================
 
+.. image:: https://github.com/NathanY3G/rp2040-pio-emulator/actions/workflows/package-ci.yml/badge.svg
+
 Introduction
 ============
-This repository contains an emulator for the Programmable Input/Output (PIO)
-blocks that are present within the Raspberry Pi Foundation's RP2040 Microcontroller.
-It is designed to assist in the analysis of PIO programs and to help you by:
+pioemu is an emulator for the Programmable Input/Output (PIO) blocks that are
+present within the Raspberry Pi Foundation's RP2040 Microcontroller. It is
+designed to assist in the analysis of PIO programs and to help you by:
 
 * Enabling unit tests to be written.
 * Answering questions such as: How many clock cycles are being consumed?
