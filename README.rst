@@ -3,6 +3,7 @@ Emulator for the PIO Blocks within the RP2040 Microcontroller (Python Edition)
 ==============================================================================
 
 .. image:: https://github.com/NathanY3G/rp2040-pio-emulator/actions/workflows/package-ci.yml/badge.svg
+.. image:: ./docs/images/coverage-badge.svg
 
 Introduction
 ============
