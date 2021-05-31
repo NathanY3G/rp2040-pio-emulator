@@ -33,7 +33,7 @@ function writeCoverageBadge(filename, percentageCovered) {
     label: "coverage",
     message: `${percentageCovered.toFixed(0)}%`,
     color: determineBadgeColour(percentageCovered),
-    style: "plastic",
+    style: "flat",
   }))
 }
 
