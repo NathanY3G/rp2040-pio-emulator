@@ -1,6 +1,6 @@
 # Emulator for the PIO Blocks within the RP2040 Microcontroller (Python Edition)
 
-![Build Status](https://github.com/NathanY3G/rp2040-pio-emulator/actions/workflows/package-ci.yml/badge.svg) ![Coverage](./docs/images/coverage-badge.svg)
+![Build Status](https://github.com/NathanY3G/rp2040-pio-emulator/actions/workflows/package-ci.yml/badge.svg) ![Coverage](./docs/images/coverage-badge.svg) [![PyPI](https://img.shields.io/pypi/v/rp2040-pio-emulator?color=informational)](https://pypi.org/project/rp2040-pio-emulator/)
 
 ## Introduction
 pioemu is an emulator for the Programmable Input/Output (PIO) blocks that are
