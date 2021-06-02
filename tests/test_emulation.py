@@ -16,9 +16,14 @@ from pioemu import clock_cycles_reached, emulate, State
 from .support import emulate_single_instruction
 
 
+def test_stop_when_requires_value():
+    with pytest.raises(ValueError):
+        next(emulate([0x0000], stop_when=None))
+
+
 def test_emulation_stops_when_unsupported_opcode_is_reached():
     with pytest.raises(StopIteration):
-        next(emulate([0xE0E0]))
+        next(emulate([0xE0E0], stop_when=lambda _: False))
 
 
 @pytest.mark.parametrize(

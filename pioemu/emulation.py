@@ -20,13 +20,14 @@ from .shifter import shift_left, shift_right
 def emulate(
     opcodes,
     *,
+    stop_when,
     initial_state=State(),
-    stop_when=None,
     shift_osr_right=True,
     side_set_base=0,
     side_set_count=0,
 ):
-    stop_when = stop_when or (lambda state: False)
+    if stop_when is None:
+        raise ValueError("emulate() missing value for keyword argument: 'stop_when'")
 
     if shift_osr_right:
         instruction_decoder = InstructionDecoder(shift_right)
