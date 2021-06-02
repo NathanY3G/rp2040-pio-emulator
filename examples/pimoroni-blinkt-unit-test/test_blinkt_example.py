@@ -36,7 +36,7 @@ def test_example_generates_blue_pixel_sequence(assembled_program):
     # Each invocation yields a tuple containing two values; the state before
     # the instruction was executed and the state after.
     state_change_generator = emulate(
-        assembled_program, stop_condition=_stop_after_one_iteration
+        assembled_program, stop_when=_stop_after_one_iteration
     )
 
     # Use a list comprehension to extract just the values on the Clock and Data

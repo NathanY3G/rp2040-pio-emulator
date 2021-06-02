@@ -21,12 +21,12 @@ def emulate(
     opcodes,
     *,
     initial_state=State(),
-    stop_condition=None,
+    stop_when=None,
     shift_osr_right=True,
     side_set_base=0,
     side_set_count=0,
 ):
-    stop_condition = stop_condition or (lambda state: False)
+    stop_when = stop_when or (lambda state: False)
 
     if shift_osr_right:
         instruction_decoder = InstructionDecoder(shift_right)
@@ -35,7 +35,7 @@ def emulate(
 
     current_state = initial_state
 
-    while not stop_condition(current_state):
+    while not stop_when(current_state):
         previous_state = current_state
         opcode = opcodes[current_state.program_counter]
 
