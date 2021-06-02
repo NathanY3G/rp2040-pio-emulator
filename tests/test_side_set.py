@@ -21,7 +21,7 @@ def test_side_set_is_not_mistaken_for_delay():
     _, new_state = next(
         emulate(
             [opcode],
-            stop_condition=clock_cycles_reached(1),
+            stop_when=clock_cycles_reached(1),
             side_set_base=1,
             side_set_count=1,
         )
@@ -47,7 +47,7 @@ def test_side_set_changes_pin_values(
         emulate(
             [opcode],
             initial_state=State(pin_values=initial_pin_values),
-            stop_condition=clock_cycles_reached(1),
+            stop_when=clock_cycles_reached(1),
             side_set_base=pin_base,
             side_set_count=pin_count,
         )

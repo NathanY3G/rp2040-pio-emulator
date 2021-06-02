@@ -76,7 +76,7 @@ def test_out_instruction_when_shifting_left(opcode, initial_state, expected_stat
         emulate(
             [opcode],
             initial_state=initial_state,
-            stop_condition=clock_cycles_reached(1),
+            stop_when=clock_cycles_reached(1),
             shift_osr_right=False,
         )
     )
@@ -92,7 +92,7 @@ def test_out_instruction_when_shifting_right(opcode, initial_state, expected_sta
         emulate(
             [opcode],
             initial_state=initial_state,
-            stop_condition=clock_cycles_reached(1),
+            stop_when=clock_cycles_reached(1),
             shift_osr_right=True,
         )
     )

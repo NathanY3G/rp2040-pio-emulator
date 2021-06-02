@@ -43,8 +43,7 @@ def test_executes_instructions_until_stop_condition_met():
     opcodes = [0xE042, 0x0000]  # set y, 2 and jmp
 
     *_, clock_cycles = (
-        state.clock
-        for _, state in emulate(opcodes, stop_condition=clock_cycles_reached(3))
+        state.clock for _, state in emulate(opcodes, stop_when=clock_cycles_reached(3))
     )
 
     assert clock_cycles == 3

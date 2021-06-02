@@ -57,7 +57,7 @@ def test_jump_when_x_is_non_zero_post_decrement():
     x_register_series = [
         state.x_register
         for state, _ in emulate(
-            opcodes, stop_condition=lambda state: state.program_counter == 2
+            opcodes, stop_when=lambda state: state.program_counter == 2
         )
     ]
 
@@ -70,7 +70,7 @@ def test_jump_when_y_is_non_zero_post_decrement():
     y_register_series = [
         state.y_register
         for state, _ in emulate(
-            opcodes, stop_condition=lambda state: state.program_counter == 2
+            opcodes, stop_when=lambda state: state.program_counter == 2
         )
     ]
 

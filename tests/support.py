@@ -26,12 +26,10 @@ def emulate_single_instruction(opcode, initial_state=None):
         instruction_generator = emulate(
             [opcode],
             initial_state=initial_state,
-            stop_condition=clock_cycles_reached(1),
+            stop_when=clock_cycles_reached(1),
         )
     else:
-        instruction_generator = emulate(
-            [opcode], stop_condition=clock_cycles_reached(1)
-        )
+        instruction_generator = emulate([opcode], stop_when=clock_cycles_reached(1))
 
     _, new_state = next(instruction_generator)
 
