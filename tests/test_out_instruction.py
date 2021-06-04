@@ -15,7 +15,7 @@ import pytest
 from collections import deque
 from pioemu import clock_cycles_reached, emulate, ShiftRegister, State
 from .support import emulate_single_instruction, instruction_param
-
+from .opcodes import Opcodes
 
 # fmt: off
 instructions_to_test_with_left_shift = [
@@ -74,7 +74,7 @@ instructions_to_test_with_right_shift = [
 def test_out_instruction_when_shifting_left(opcode, initial_state, expected_state):
     _, new_state = next(
         emulate(
-            [opcode],
+            [opcode, Opcodes.NOP],
             initial_state=initial_state,
             stop_when=clock_cycles_reached(1),
             shift_osr_right=False,
@@ -90,7 +90,7 @@ def test_out_instruction_when_shifting_left(opcode, initial_state, expected_stat
 def test_out_instruction_when_shifting_right(opcode, initial_state, expected_state):
     _, new_state = next(
         emulate(
-            [opcode],
+            [opcode, Opcodes.NOP],
             initial_state=initial_state,
             stop_when=clock_cycles_reached(1),
             shift_osr_right=True,
