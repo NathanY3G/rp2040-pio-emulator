@@ -14,8 +14,8 @@
 import pytest
 from collections import deque
 from pioemu import clock_cycles_reached, emulate, ShiftRegister, State
-from .support import emulate_single_instruction, instruction_param
-from .opcodes import Opcodes
+from ..support import emulate_single_instruction, instruction_param
+from ..opcodes import Opcodes
 
 # fmt: off
 instructions_to_test_with_left_shift = [

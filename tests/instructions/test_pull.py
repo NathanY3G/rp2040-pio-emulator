@@ -14,7 +14,7 @@
 import pytest
 from collections import deque
 from pioemu import ShiftRegister, State
-from .support import emulate_single_instruction
+from ..support import emulate_single_instruction
 
 
 def test_pull_loads_osr_from_non_empty_fifo():

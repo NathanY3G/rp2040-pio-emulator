@@ -13,7 +13,7 @@
 # limitations under the License.
 import pytest
 from pioemu import ShiftRegister, State
-from .support import emulate_single_instruction, instruction_param
+from ..support import emulate_single_instruction, instruction_param
 
 
 # fmt: off
