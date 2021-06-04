@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from collections import deque
 from pioemu import clock_cycles_reached, emulate, ShiftRegister, State
 from ..support import emulate_single_instruction, instruction_param
 from ..opcodes import Opcodes

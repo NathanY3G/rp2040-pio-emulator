@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from pioemu import clock_cycles_reached, emulate, State
+from pioemu import emulate, State
 from .support import emulate_single_instruction
 
 
@@ -23,7 +23,7 @@ def test_stop_when_requires_value():
 
 def test_emulation_stops_when_unsupported_opcode_is_reached():
     with pytest.raises(StopIteration):
-        next(emulate([0xE0E0], stop_when=lambda _: False))
+        next(emulate([0xE0E0], stop_when=lambda opcode, _: False))
 
 
 @pytest.mark.parametrize(
@@ -42,13 +42,3 @@ def test_program_counter_is_incremented(opcode):
     new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state.program_counter == 1
-
-
-def test_executes_instructions_until_stop_condition_met():
-    opcodes = [0xE042, 0x0000]  # set y, 2 and jmp
-
-    *_, clock_cycles = (
-        state.clock for _, state in emulate(opcodes, stop_when=clock_cycles_reached(3))
-    )
-
-    assert clock_cycles == 3

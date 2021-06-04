@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 def clock_cycles_reached(target_value):
-    return lambda state: state.clock >= target_value
+    return lambda _, state: state.clock >= target_value
 
 
 def always(state):
