@@ -34,6 +34,8 @@ def emulate(
     else:
         instruction_decoder = InstructionDecoder(shift_left)
 
+    wrap_top = len(opcodes) - 1
+
     current_state = initial_state
 
     while not stop_when(current_state):
@@ -65,7 +67,7 @@ def emulate(
             )
 
         current_state = _advance_program_counter(
-            condition_met, jump_instruction, current_state
+            condition_met, jump_instruction, 0, wrap_top, current_state
         )
 
         current_state = _apply_delay_value(
@@ -75,11 +77,15 @@ def emulate(
         yield (previous_state, current_state)
 
 
-def _advance_program_counter(condition_met, jump_instruction, state):
+def _advance_program_counter(
+    condition_met, jump_instruction, wrap_bottom, wrap_top, state
+):
     if condition_met and jump_instruction:
         return state
     elif not condition_met and not jump_instruction:
         return state
+    elif state.program_counter == wrap_top:
+        return replace(state, program_counter=wrap_bottom)
     else:
         return replace(state, program_counter=state.program_counter + 1)
 

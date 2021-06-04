@@ -14,6 +14,7 @@
 from pytest import param
 from dataclasses import replace
 from pioemu import clock_cycles_reached, emulate, State
+from .opcodes import Opcodes
 
 
 def instruction_param(description, opcode, initial_state, expected_state):
@@ -24,7 +25,7 @@ def instruction_param(description, opcode, initial_state, expected_state):
 def emulate_single_instruction(opcode, initial_state=None):
     if initial_state is not None:
         instruction_generator = emulate(
-            [opcode],
+            [opcode, Opcodes.NOP],
             initial_state=initial_state,
             stop_when=clock_cycles_reached(1),
         )

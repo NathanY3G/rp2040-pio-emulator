@@ -14,6 +14,7 @@
 import pytest
 from pioemu import clock_cycles_reached, emulate, State
 from .support import emulate_single_instruction
+from .opcodes import Opcodes
 
 
 def test_jump_always_forward():
@@ -52,7 +53,7 @@ def test_jump_for_scratch_register_conditions(
 
 
 def test_jump_when_x_is_non_zero_post_decrement():
-    opcodes = [0xE023, 0x0041]  # set x, 3 and jmp x--
+    opcodes = [0xE023, 0x0041, Opcodes.NOP]  # set x 3, jmp x-- and nop
 
     x_register_series = [
         state.x_register
@@ -65,7 +66,7 @@ def test_jump_when_x_is_non_zero_post_decrement():
 
 
 def test_jump_when_y_is_non_zero_post_decrement():
-    opcodes = [0xE043, 0x0081]  # set y, 3 and jmp y--
+    opcodes = [0xE043, 0x0081, Opcodes.NOP]  # set y 3, jmp y-- and nop
 
     y_register_series = [
         state.y_register
