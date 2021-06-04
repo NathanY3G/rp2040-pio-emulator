@@ -38,7 +38,7 @@ def emulate(
 
     current_state = initial_state
 
-    while not stop_when(current_state):
+    while not stop_when(opcodes[current_state.program_counter], current_state):
         previous_state = current_state
         opcode = opcodes[current_state.program_counter]
 

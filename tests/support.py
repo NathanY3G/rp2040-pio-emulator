@@ -13,7 +13,7 @@
 # limitations under the License.
 from pytest import param
 from dataclasses import replace
-from pioemu import clock_cycles_reached, emulate, State
+from pioemu import clock_cycles_reached, emulate
 from .opcodes import Opcodes
 
 

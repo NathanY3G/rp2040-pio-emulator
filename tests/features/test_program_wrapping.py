@@ -19,7 +19,7 @@ def test_programs_wrap_by_default():
         state.x_register
         for _, state in emulate(
             [0xA029],  # invert all bits in the X register on each invocation
-            stop_when=lambda state: state.clock == 3,
+            stop_when=lambda _, state: state.clock == 3,
             initial_state=State(x_register=0),
         )
     ]

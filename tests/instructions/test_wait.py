@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from pioemu import emulate, State
+from pioemu import State
 from ..support import emulate_single_instruction
 
 

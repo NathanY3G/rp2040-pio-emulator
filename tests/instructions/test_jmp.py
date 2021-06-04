@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from pioemu import clock_cycles_reached, emulate, State
+from pioemu import emulate, State
 from ..support import emulate_single_instruction
 from ..opcodes import Opcodes
 
@@ -58,7 +58,7 @@ def test_jump_when_x_is_non_zero_post_decrement():
     x_register_series = [
         state.x_register
         for state, _ in emulate(
-            opcodes, stop_when=lambda state: state.program_counter == 2
+            opcodes, stop_when=lambda _, state: state.program_counter == 2
         )
     ]
 
@@ -71,7 +71,7 @@ def test_jump_when_y_is_non_zero_post_decrement():
     y_register_series = [
         state.y_register
         for state, _ in emulate(
-            opcodes, stop_when=lambda state: state.program_counter == 2
+            opcodes, stop_when=lambda _, state: state.program_counter == 2
         )
     ]
 
