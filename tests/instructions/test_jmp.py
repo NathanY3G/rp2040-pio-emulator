@@ -13,8 +13,8 @@
 # limitations under the License.
 import pytest
 from pioemu import clock_cycles_reached, emulate, State
-from .support import emulate_single_instruction
-from .opcodes import Opcodes
+from ..support import emulate_single_instruction
+from ..opcodes import Opcodes
 
 
 def test_jump_always_forward():

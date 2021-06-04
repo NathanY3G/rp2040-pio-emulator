@@ -13,7 +13,7 @@
 # limitations under the License.
 import pytest
 from pioemu import emulate, State
-from .support import emulate_single_instruction
+from ..support import emulate_single_instruction
 
 
 @pytest.mark.parametrize(
