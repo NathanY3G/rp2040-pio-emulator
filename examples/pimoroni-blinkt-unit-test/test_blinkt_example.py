@@ -29,7 +29,7 @@ def assembled_program():
 
 
 def test_example_generates_blue_pixel_sequence(assembled_program):
-    def _stop_after_one_iteration(state):
+    def _stop_after_one_iteration(_, state):
         return state.program_counter >= len(assembled_program) - 1
 
     # Create a generator which will emulate a single instruction at a time.
