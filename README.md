@@ -3,32 +3,40 @@
 ![Build Status](https://github.com/NathanY3G/rp2040-pio-emulator/actions/workflows/package-ci.yml/badge.svg) ![Coverage](./docs/images/coverage-badge.svg) [![PyPI](https://img.shields.io/pypi/v/rp2040-pio-emulator?color=informational)](https://pypi.org/project/rp2040-pio-emulator/)
 
 ## Introduction
-pioemu is an emulator for the Programmable Input/Output (PIO) blocks that are
-present within the Raspberry Pi Foundation's RP2040 Microcontroller. It is
-designed to assist in the analysis of PIO programs and to help you by:
+An emulator for the Programmable Input/Output (PIO) blocks that are present
+within the Raspberry Pi Foundation's RP2040 Microcontroller. It is designed
+to assist in the analysis of PIO programs and to help you by:
 
 * Enabling unit tests to be written.
 * Answering questions such as: How many clock cycles are being consumed?
 * Supporting the visualization of GPIO outputs over time.
 * Providing alternatives to debugging on real hardware, which can be time consuming.
 
-## Examples
+## Quick Start
+Below is a slight variation of the example used within the [Quick Start Guide](./docs/Quick%20Start%20Guide.md).
 
-### Pimoroni Blinkt! with Unit Test
-An annotated example which demonstrates one approach to writing unit tests for
-PIO programs by using an emulator. The PIO program itself is very primitive and
-sets all eight LEDs of a Pimoroni Blink! to a single hard-coded colour. Perhaps
-you would to like to try re-factoring it? Don't forget to check that the unit-test
-still passes!
+```python
+from pioemu import emulate
 
-### Jupyter Notebook
-The emulator can also be used from within Jupyter Notebooks. The screenshot below
-is taken from the ``examples/jupyter-notebook/square_wave_example.ipynb`` notebook
-that is included within this repository.
+program = [0xE029, 0x0041, 0x2080]  # Count down from 9 using X register
 
-![Screenshot of Jupyter Notebook example](./docs/images/jupyter_example.png)
+generator = emulate(program, stop_when=lambda _, state: state.x_register < 0)
 
-### Limitations
+for before, after in generator:
+  print(f"X register: {before.x_register} -> {after.x_register}")
+```
+
+## Additional Examples
+Some additional examples include:
+
+1. Visualisation of square wave program using Jupyter Notebooks within the `examples/` directory.
+
+![Screenshot of square-wave program in Jupyter Notebooks](./examples/jupyter-notebook/jupyter_example.png)
+
+2. Example for the Pimoroni Blinkt! with Unit Test within the `examples/` directory.
+3. [pico-pio-examples](https://github.com/NathanY3G/pico-pio-examples)
+
+## Limitations
 This software is under development and currently has limitations - the notable ones are:
 
 1. Only supports a sub-set of the available instructions:
