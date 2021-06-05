@@ -6,3 +6,5 @@ to set all eight LEDs to a single colour.
 
 Try re-factoring the example but don't forget to check that the tests still
 pass!
+
+![Pico with Pimoroni Blinkt!](Pico%20with%20Pimoroni%20Blinkt!.png)
