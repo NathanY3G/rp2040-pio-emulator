@@ -12,16 +12,29 @@ to assist in the analysis of PIO programs and to help you by:
 * Supporting the visualization of GPIO outputs over time.
 * Providing alternatives to debugging on real hardware, which can be time consuming.
 
-## Examples
-This repository includes the following examples:
+## Quick Start
+Below is a slight variation of the example used within the [Quick Start Guide](./docs/Quick%20Start%20Guide.md).
 
-1. Visualisation of square wave program using Jupyter Notebooks
-1. Example for the Pimoroni Blinkt! with Unit Test
+```python
+from pioemu import emulate
 
-In addition, the [pico-pio-examples](https://github.com/NathanY3G/pico-pio-examples)
-repository contains an evolution of the example for the Pimoroni Blinkt!
+program = [0xE029, 0x0041, 0x2080]  # Count down from 9 using X register
+
+generator = emulate(program, stop_when=lambda _, state: state.x_register < 0)
+
+for before, after in generator:
+  print(f"X register: {before.x_register} -> {after.x_register}")
+```
+
+## Additional Examples
+Some additional examples include:
+
+1. Visualisation of square wave program using Jupyter Notebooks within the `examples/` directory.
 
 ![Screenshot of square-wave program in Jupyter Notebooks](./examples/jupyter-notebook/jupyter_example.png)
+
+2. Example for the Pimoroni Blinkt! with Unit Test within the `examples/` directory.
+3. [pico-pio-examples](https://github.com/NathanY3G/pico-pio-examples)
 
 ## Limitations
 This software is under development and currently has limitations - the notable ones are:
