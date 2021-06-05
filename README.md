@@ -3,9 +3,9 @@
 ![Build Status](https://github.com/NathanY3G/rp2040-pio-emulator/actions/workflows/package-ci.yml/badge.svg) ![Coverage](./docs/images/coverage-badge.svg) [![PyPI](https://img.shields.io/pypi/v/rp2040-pio-emulator?color=informational)](https://pypi.org/project/rp2040-pio-emulator/)
 
 ## Introduction
-pioemu is an emulator for the Programmable Input/Output (PIO) blocks that are
-present within the Raspberry Pi Foundation's RP2040 Microcontroller. It is
-designed to assist in the analysis of PIO programs and to help you by:
+An emulator for the Programmable Input/Output (PIO) blocks that are present
+within the Raspberry Pi Foundation's RP2040 Microcontroller. It is designed
+to assist in the analysis of PIO programs and to help you by:
 
 * Enabling unit tests to be written.
 * Answering questions such as: How many clock cycles are being consumed?
@@ -13,22 +13,17 @@ designed to assist in the analysis of PIO programs and to help you by:
 * Providing alternatives to debugging on real hardware, which can be time consuming.
 
 ## Examples
+This repository includes the following examples:
 
-### Pimoroni Blinkt! with Unit Test
-An annotated example which demonstrates one approach to writing unit tests for
-PIO programs by using an emulator. The PIO program itself is very primitive and
-sets all eight LEDs of a Pimoroni Blink! to a single hard-coded colour. Perhaps
-you would to like to try re-factoring it? Don't forget to check that the unit-test
-still passes!
+1. Visualisation of square wave program using Jupyter Notebooks
+1. Example for the Pimoroni Blinkt! with Unit Test
 
-### Jupyter Notebook
-The emulator can also be used from within Jupyter Notebooks. The screenshot below
-is taken from the ``examples/jupyter-notebook/square_wave_example.ipynb`` notebook
-that is included within this repository.
+In addition, the [pico-pio-examples](https://github.com/NathanY3G/pico-pio-examples)
+repository contains an evolution of the example for the Pimoroni Blinkt!
 
-![Screenshot of Jupyter Notebook example](./docs/images/jupyter_example.png)
+![Screenshot of square-wave program in Jupyter Notebooks](./examples/jupyter-notebook/jupyter_example.png)
 
-### Limitations
+## Limitations
 This software is under development and currently has limitations - the notable ones are:
 
 1. Only supports a sub-set of the available instructions:
