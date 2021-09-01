@@ -41,4 +41,4 @@ def write_coverage_badge(filename, percent_covered):
 with open("coverage.json") as file:
     coverage_report = json.load(file)
     percent_covered = coverage_report["totals"]["percent_covered"]
-    write_coverage_badge("docs/coverage-badge.svg", percent_covered)
+    write_coverage_badge("docs/images/coverage-badge.svg", percent_covered)
