@@ -31,22 +31,28 @@ Some additional examples include:
 
 1. Visualisation of square wave program using Jupyter Notebooks within the `examples/` directory.
 
-![Screenshot of square-wave program in Jupyter Notebooks](./examples/jupyter-notebook/jupyter_example.png)
+1. TDD example for the Pimoroni Blinkt! within the `examples/` directory.
 
-2. Example for the Pimoroni Blinkt! with Unit Test within the `examples/` directory.
-3. [pico-pio-examples](https://github.com/NathanY3G/pico-pio-examples)
+1. [pico-pio-examples](https://github.com/NathanY3G/pico-pio-examples)
 
-## Limitations
+## Supported Instructions
+
+Instruction | Supported                         | Notes
+:-----------| :---------------------------------| :----
+JMP         | :heavy_check_mark: :construction: | PIN and !OSRE variants not implemented
+WAIT        | :heavy_check_mark: :warning:      | IRQ variant is not supported
+IN          | :heavy_multiplication_x:          |
+OUT         | :heavy_check_mark: :construction: | PC, ISR and EXEC destinations not implemented
+PUSH        | :heavy_check_mark: :construction: | IfEmpty variant not implemented
+PULL        | :heavy_check_mark: :construction: | IfEmpty variant not implemented
+MOV         | :heavy_check_mark: :construction: | Some variants and operations not implemented
+IRQ         | :heavy_multiplication_x:          |
+SET         | :heavy_check_mark:                |
+
+## Known Limitations
 This software is under development and currently has limitations - the notable ones are:
 
-1. Only supports a sub-set of the available instructions:
-
-   * JMP (PIN and !OSRE variants not implemented)
-   * MOV (some variants and operations not implemented)
-   * OUT (PC, ISR and EXEC destinations not implemented)
-   * PULL (IfEmpty not implemented)
-   * SET
-   * WAIT (IRQ variant not implemented)
+1. Only supports a sub-set of the available instructions - please refer to the table above.
 
 1. No support for OUT, SET or IN pin-sets; all pin numbers are with respect to Pin 0.
 
