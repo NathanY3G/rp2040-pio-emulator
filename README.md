@@ -31,10 +31,9 @@ Some additional examples include:
 
 1. Visualisation of square wave program using Jupyter Notebooks within the `examples/` directory.
 
-![Screenshot of square-wave program in Jupyter Notebooks](./examples/jupyter-notebook/jupyter_example.png)
+1. Example for the Pimoroni Blinkt! with Unit Test within the `examples/` directory.
 
-2. Example for the Pimoroni Blinkt! with Unit Test within the `examples/` directory.
-3. [pico-pio-examples](https://github.com/NathanY3G/pico-pio-examples)
+1. [pico-pio-examples](https://github.com/NathanY3G/pico-pio-examples)
 
 ## Supported Instructions
 
