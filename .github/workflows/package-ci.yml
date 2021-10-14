@@ -28,12 +28,12 @@ jobs:
           coverage run --source=pioemu -m pytest --tb=short tests/
 
       - name: Coverage report
-        if: ${{ matrix.python-version == "3.10.0" }}
+        if: ${{ matrix.python-version == 3.9 }}
         run: |
           coverage json
 
       - name: Update badges
-        if: ${{ matrix.python-version == "3.10.0" }}
+        if: ${{ matrix.python-version == 3.9 }}
         run: |
           python .github/make_badges.py
           git config user.name github-actions
