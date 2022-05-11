@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rp2040-pio-emulator"
-version = "0.27.0"
+version = "0.28.0"
 description = "RP2040 emulator for the testing and debugging of PIO programs"
 authors = ["Nathan Young"]
 license = "Apache-2.0"
@@ -21,13 +21,13 @@ keywords = [
 python = "^3.7"
 
 [tool.poetry.dev-dependencies]
-pylint = "^2.7.2"
-pytest = "^6.2.2"
-coverage = "^5.5"
-black = "^21.5b0"
-jupyter = "^1.0.0"
-matplotlib = "^3.3.4"
-seaborn = "^0.11.1"
+pylint = "2.13.8"
+pytest = "7.1.2"
+coverage = "6.3.2"
+black = "22.3.0"
+jupyter = "1.0.0"
+matplotlib = "3.5.2"
+seaborn = "0.11.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
