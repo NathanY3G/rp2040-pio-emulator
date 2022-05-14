@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2022 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,10 +22,33 @@ def emulate(
     *,
     stop_when,
     initial_state=State(),
+    input_source=None,
     shift_osr_right=True,
     side_set_base=0,
     side_set_count=0,
 ):
+    """
+    Create and return a generator for emulating the given PIO program.
+
+    Parameters
+    ----------
+    opcodes : List[int]
+        The PIO program to emulate.
+    stop_when : function
+        The predicate used to determine if the emulation should stop or continue.
+    initial_state : State, optional
+        The initial values to use.
+    shift_osr_right : bool, optional
+        Shift the Output Shift Reigster (OSR) to the right when True and to the left when False.
+    side_set_base : int, optional
+        The first pin to use for the side-set.
+    side_set_count : int
+        The number of consecutive pins to include within the side-set.
+
+    Returns
+    -------
+    generator
+    """
     if stop_when is None:
         raise ValueError("emulate() missing value for keyword argument: 'stop_when'")
 
@@ -40,6 +63,14 @@ def emulate(
 
     while not stop_when(opcodes[current_state.program_counter], current_state):
         previous_state = current_state
+
+        if input_source:
+            current_state = replace(
+                current_state,
+                pin_values=input_source(current_state.clock)
+                & ~current_state.pin_directions,
+            )
+
         opcode = opcodes[current_state.program_counter]
 
         (side_set_value, delay_value) = _extract_delay_and_side_set_from_opcode(

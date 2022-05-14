@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2022 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from pioemu import emulate, State
+from pioemu import clock_cycles_reached, emulate, State
 from .support import emulate_single_instruction
 
 
@@ -42,3 +42,35 @@ def test_program_counter_is_incremented(opcode):
     new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state.program_counter == 1
+
+
+def test_pin_values_follow_input_source():
+    initial_state = State(pin_values=0)
+    pin_values_over_time = [0x0000_FFFF, 0xFFFF_0000, 0xFFFF_FFFF]
+
+    actual_pin_values = [
+        state.pin_values
+        for _, state in emulate(
+            [0x0000],  # jmp 0
+            stop_when=clock_cycles_reached(len(pin_values_over_time)),
+            initial_state=initial_state,
+            input_source=lambda clock: pin_values_over_time[clock],
+        )
+    ]
+
+    assert actual_pin_values == pin_values_over_time
+
+
+def test_input_source_does_not_impact_output_pins():
+    initial_state = State(pin_directions=0xFFFF_0000, pin_values=0)
+
+    _, new_state = next(
+        emulate(
+            [0x0000],  # jmp 0
+            stop_when=clock_cycles_reached(1),
+            initial_state=initial_state,
+            input_source=lambda _: 0xFFFF_FFFF,
+        )
+    )
+
+    assert new_state.pin_values == 0x0000_FFFF
