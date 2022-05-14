@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2022 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ def instruction_param(description, opcode, initial_state, expected_state):
 def emulate_single_instruction(opcode, initial_state=None):
     if initial_state is not None:
         instruction_generator = emulate(
-            [opcode, Opcodes.NOP],
+            [opcode, Opcodes.nop()],
             initial_state=initial_state,
             stop_when=clock_cycles_reached(1),
         )
