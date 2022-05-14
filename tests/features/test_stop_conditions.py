@@ -32,7 +32,9 @@ def test_execution_stops_after_fifth_clock_cycle():
 
 
 def test_execution_stops_when_nop_reached():
-    state_when_stopped = _execute_test_program(lambda opcode, _: opcode == Opcodes.nop())
+    state_when_stopped = _execute_test_program(
+        lambda opcode, _: opcode == Opcodes.nop()
+    )
     assert state_when_stopped.program_counter == 3
 
 
