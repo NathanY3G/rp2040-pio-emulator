@@ -14,6 +14,7 @@
 import pytest
 from pioemu import clock_cycles_reached, emulate, State
 from .support import emulate_single_instruction
+from .opcodes import Opcodes
 
 
 def test_stop_when_requires_value():
@@ -45,20 +46,18 @@ def test_program_counter_is_incremented(opcode):
 
 
 def test_pin_values_follow_input_source():
-    initial_state = State(pin_values=0)
-    pin_values_over_time = [0x0000_FFFF, 0xFFFF_0000, 0xFFFF_FFFF]
+    input_values_over_time = [0x0000_FFFF, 0xFFFF_0000, 0xFFFF_FFFF]
 
-    actual_pin_values = [
+    pin_values_series = [
         state.pin_values
         for _, state in emulate(
-            [0x0000],  # jmp 0
-            stop_when=clock_cycles_reached(len(pin_values_over_time)),
-            initial_state=initial_state,
-            input_source=lambda clock: pin_values_over_time[clock],
+            [Opcodes.nop()],
+            stop_when=clock_cycles_reached(len(input_values_over_time)),
+            input_source=lambda clock: input_values_over_time[clock],
         )
     ]
 
-    assert actual_pin_values == pin_values_over_time
+    assert pin_values_series == input_values_over_time
 
 
 def test_input_source_does_not_impact_output_pins():
@@ -66,7 +65,7 @@ def test_input_source_does_not_impact_output_pins():
 
     _, new_state = next(
         emulate(
-            [0x0000],  # jmp 0
+            [Opcodes.nop()],
             stop_when=clock_cycles_reached(1),
             initial_state=initial_state,
             input_source=lambda _: 0xFFFF_FFFF,
