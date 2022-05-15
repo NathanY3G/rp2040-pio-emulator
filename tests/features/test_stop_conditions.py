@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2022 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,14 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pioemu import emulate
 from functools import reduce
+from pioemu import emulate
 from ..opcodes import Opcodes
 
 
 def _execute_test_program(stop_condition):
     # Program which decrements the X register from 9 down to 0
-    opcodes = [0xE029, 0xA041, 0x0041, Opcodes.NOP]
+    opcodes = [0xE029, 0xA041, 0x0041, Opcodes.nop()]
 
     return reduce(
         lambda _, states_tuple: states_tuple[1],
@@ -32,7 +32,9 @@ def test_execution_stops_after_fifth_clock_cycle():
 
 
 def test_execution_stops_when_nop_reached():
-    state_when_stopped = _execute_test_program(lambda opcode, _: opcode == Opcodes.NOP)
+    state_when_stopped = _execute_test_program(
+        lambda opcode, _: opcode == Opcodes.nop()
+    )
     assert state_when_stopped.program_counter == 3
 
 

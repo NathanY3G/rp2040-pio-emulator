@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2022 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ def test_jump_for_scratch_register_conditions(
 
 
 def test_jump_when_x_is_non_zero_post_decrement():
-    opcodes = [0xE023, 0x0041, Opcodes.NOP]  # set x 3, jmp x-- and nop
+    opcodes = [0xE023, 0x0041, Opcodes.nop()]  # set x 3, jmp x-- and nop
 
     x_register_series = [
         state.x_register
@@ -66,7 +66,7 @@ def test_jump_when_x_is_non_zero_post_decrement():
 
 
 def test_jump_when_y_is_non_zero_post_decrement():
-    opcodes = [0xE043, 0x0081, Opcodes.NOP]  # set y 3, jmp y-- and nop
+    opcodes = [0xE043, 0x0081, Opcodes.nop()]  # set y 3, jmp y-- and nop
 
     y_register_series = [
         state.y_register

@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2022 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@ def clock_cycles_reached(target_value):
     return lambda _, state: state.clock >= target_value
 
 
-def always(state):
+def always(_):
     return True
 
 

@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2022 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ instructions_to_test_with_right_shift = [
 def test_out_instruction_when_shifting_left(opcode, initial_state, expected_state):
     _, new_state = next(
         emulate(
-            [opcode, Opcodes.NOP],
+            [opcode, Opcodes.nop()],
             initial_state=initial_state,
             stop_when=clock_cycles_reached(1),
             shift_osr_right=False,
@@ -89,7 +89,7 @@ def test_out_instruction_when_shifting_left(opcode, initial_state, expected_stat
 def test_out_instruction_when_shifting_right(opcode, initial_state, expected_state):
     _, new_state = next(
         emulate(
-            [opcode, Opcodes.NOP],
+            [opcode, Opcodes.nop()],
             initial_state=initial_state,
             stop_when=clock_cycles_reached(1),
             shift_osr_right=True,
