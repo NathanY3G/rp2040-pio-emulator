@@ -11,8 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pytest import param
 from dataclasses import replace
+from pytest import param
 from pioemu import clock_cycles_reached, emulate
 from .opcodes import Opcodes
 
