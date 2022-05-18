@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2022 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,10 +56,14 @@ class InstructionDecoder:
     instructions.
     """
 
-    def __init__(self, shifter_for_osr):
+    def __init__(self, shifter_for_osr, jmp_pin):
         """
-        Parameters:
-        shifter_for_osr (Callable[[ShiftRegister, int], (ShiftRegister, int)]): Used for shifting the contents of the OSR.
+        Parameters
+        ----------
+        shifter_for_osr : Callable[[ShiftRegister, int], (ShiftRegister, int)]
+            Used for shifting the contents of the OSR.
+        jmp_pin : int
+            The pin that determines the branch taken by JMP PIN instructions.
         """
 
         self.decoding_functions = [
@@ -80,7 +84,7 @@ class InstructionDecoder:
             y_register_equals_zero,
             y_register_not_equal_to_zero,
             x_register_not_equal_to_y_register,
-            None,
+            partial(gpio_high, jmp_pin),
             None,
         ]
 

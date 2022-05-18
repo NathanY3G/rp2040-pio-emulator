@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from pioemu import emulate, State
+from pioemu import clock_cycles_reached, emulate, State
 from ..support import emulate_single_instruction
 from ..opcodes import Opcodes
 
@@ -76,6 +76,26 @@ def test_jump_when_y_is_non_zero_post_decrement():
     ]
 
     assert y_register_series == [0, 3, 2, 1, 0]
+
+
+@pytest.mark.parametrize(
+    "jmp_pin, initial_state, expected_program_counter",
+    [
+        pytest.param(6, State(pin_values=0), 1, id="jmp pin when low"),
+        pytest.param(7, State(pin_values=(1 << 7)), 0, id="jmp pin when high"),
+    ],
+)
+def test_jump_on_external_control_pin(jmp_pin, initial_state, expected_program_counter):
+    _, new_state = next(
+        emulate(
+            [0x00C0, Opcodes.nop()],  # jmp pin 0
+            initial_state=initial_state,
+            stop_when=clock_cycles_reached(1),
+            jmp_pin=jmp_pin,
+        )
+    )
+
+    assert new_state.program_counter == expected_program_counter
 
 
 @pytest.mark.parametrize(

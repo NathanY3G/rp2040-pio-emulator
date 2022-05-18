@@ -26,6 +26,7 @@ def emulate(
     shift_osr_right=True,
     side_set_base=0,
     side_set_count=0,
+    jmp_pin=0,
 ):
     """
     Create and return a generator for emulating the given PIO program.
@@ -44,6 +45,8 @@ def emulate(
         The first pin to use for the side-set.
     side_set_count : int
         The number of consecutive pins to include within the side-set.
+    jmp_pin : int
+        The pin that determines the branch taken by JMP PIN instructions.
 
     Returns
     -------
@@ -53,9 +56,9 @@ def emulate(
         raise ValueError("emulate() missing value for keyword argument: 'stop_when'")
 
     if shift_osr_right:
-        instruction_decoder = InstructionDecoder(shift_right)
+        instruction_decoder = InstructionDecoder(shift_right, jmp_pin)
     else:
-        instruction_decoder = InstructionDecoder(shift_left)
+        instruction_decoder = InstructionDecoder(shift_left, jmp_pin)
 
     wrap_top = len(opcodes) - 1
 
