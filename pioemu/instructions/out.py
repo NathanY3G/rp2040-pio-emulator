@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2022 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,16 +13,16 @@
 from dataclasses import replace
 
 
-def out_null(shifter, bit_count, state):
+def out_null(shift_method, bit_count, state):
     """Shift bits out of the output shift register and discard them"""
-    new_osr, _ = shifter(state.output_shift_register, bit_count)
+    new_osr, _ = shift_method(state.output_shift_register, bit_count)
 
     return replace(state, output_shift_register=new_osr)
 
 
-def out_pindirs(shifter, bit_count, state):
+def out_pindirs(shift_method, bit_count, state):
     """Shift bits out of the output shift register and write those bits to the pin directions"""
-    new_osr, shift_result = shifter(state.output_shift_register, bit_count)
+    new_osr, shift_result = shift_method(state.output_shift_register, bit_count)
 
     return replace(
         state,
@@ -31,9 +31,9 @@ def out_pindirs(shifter, bit_count, state):
     )
 
 
-def out_pins(shifter, bit_count, state):
+def out_pins(shift_method, bit_count, state):
     """Shift bits out of the output shift register and write those bits to the pins"""
-    new_osr, shift_result = shifter(state.output_shift_register, bit_count)
+    new_osr, shift_result = shift_method(state.output_shift_register, bit_count)
 
     return replace(
         state,
@@ -42,9 +42,9 @@ def out_pins(shifter, bit_count, state):
     )
 
 
-def out_x(shifter, bit_count, state):
+def out_x(shift_method, bit_count, state):
     """Shift bits out of the output shift register and write those bits to X"""
-    new_osr, shift_result = shifter(state.output_shift_register, bit_count)
+    new_osr, shift_result = shift_method(state.output_shift_register, bit_count)
 
     return replace(
         state,
@@ -53,9 +53,9 @@ def out_x(shifter, bit_count, state):
     )
 
 
-def out_y(shifter, bit_count, state):
+def out_y(shift_method, bit_count, state):
     """Shift bits out of the output shift register and write those bits to Y"""
-    new_osr, shift_result = shifter(state.output_shift_register, bit_count)
+    new_osr, shift_result = shift_method(state.output_shift_register, bit_count)
 
     return replace(
         state,

@@ -13,8 +13,8 @@
 # limitations under the License.
 from dataclasses import replace
 from .instruction_decoder import InstructionDecoder
+from .shift_register import ShiftRegister
 from .state import State
-from .shifter import shift_left, shift_right
 
 
 def emulate(
@@ -34,19 +34,19 @@ def emulate(
     Parameters
     ----------
     opcodes : List[int]
-        The PIO program to emulate.
+        PIO program to emulate.
     stop_when : function
-        The predicate used to determine if the emulation should stop or continue.
+        Predicate used to determine if the emulation should stop or continue.
     initial_state : State, optional
-        The initial values to use.
+        Initial values to use.
     shift_osr_right : bool, optional
         Shift the Output Shift Reigster (OSR) to the right when True and to the left when False.
     side_set_base : int, optional
-        The first pin to use for the side-set.
+        First pin to use for the side-set.
     side_set_count : int
-        The number of consecutive pins to include within the side-set.
+        Number of consecutive pins to include within the side-set.
     jmp_pin : int
-        The pin that determines the branch taken by JMP PIN instructions.
+        Pin that determines the branch taken by JMP PIN instructions.
 
     Returns
     -------
@@ -56,9 +56,9 @@ def emulate(
         raise ValueError("emulate() missing value for keyword argument: 'stop_when'")
 
     if shift_osr_right:
-        instruction_decoder = InstructionDecoder(shift_right, jmp_pin)
+        instruction_decoder = InstructionDecoder(ShiftRegister.shift_right, jmp_pin)
     else:
-        instruction_decoder = InstructionDecoder(shift_left, jmp_pin)
+        instruction_decoder = InstructionDecoder(ShiftRegister.shift_left, jmp_pin)
 
     wrap_top = len(opcodes) - 1
 

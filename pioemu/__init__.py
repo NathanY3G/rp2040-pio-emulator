@@ -15,4 +15,5 @@ __version__ = "0.71.0"
 
 from .conditions import clock_cycles_reached
 from .emulation import emulate
-from .state import ShiftRegister, State
+from .shift_register import ShiftRegister
+from .state import State
