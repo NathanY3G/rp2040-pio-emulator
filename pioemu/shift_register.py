@@ -15,7 +15,8 @@ class ShiftRegister:
     """Immutable shift register for 32-bit values.
 
     The value held can be shifted by an arbitrary number of bits in either direction. Instances of
-    this class are immutable and therefore new representations are returned from these operations.
+    this class are immutable and therefore new representations of the shift register are returned
+    from each of its methods.
 
     Attributes
     ----------
