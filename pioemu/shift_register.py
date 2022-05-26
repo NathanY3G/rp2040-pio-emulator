@@ -90,4 +90,4 @@ class ShiftRegister:
         return NotImplemented
 
     def __repr__(self):
-        return f"ShiftRegister(contents={self._contents!r}, counter={self._contents!r})"
+        return f"ShiftRegister(contents={self._contents!r}, counter={self._counter!r})"

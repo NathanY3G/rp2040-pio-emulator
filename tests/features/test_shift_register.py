@@ -84,3 +84,7 @@ def test_shift_right(initial_state, bit_count, expected_state, expected_shift_re
 )
 def test_equality_operator(lhs, rhs, expected_result):
     assert (lhs == rhs) == expected_result
+
+
+def test_printable_representation():
+    assert repr(ShiftRegister(42, 0)) == "ShiftRegister(contents=42, counter=0)"
