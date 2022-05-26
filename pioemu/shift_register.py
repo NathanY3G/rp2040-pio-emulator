@@ -48,7 +48,7 @@ class ShiftRegister:
         bit_count : int
             Number of bits to shift into and out of the register.
         data_in : int, optional
-            Value to shift into the register's most significant bits.
+            Value to shift into the register's least significant bits.
 
         Returns
         -------
