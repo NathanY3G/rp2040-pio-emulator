@@ -40,33 +40,15 @@ class ShiftRegister:
         """Return the total number of bits shifted out of / into this shift register."""
         return self._counter
 
-    def shift_left(self, bit_count):
+    def shift_left(self, bit_count, data_in=0):
         """Shifts the most significant bits out of the shift register.
 
         Parameters
         ----------
         bit_count : int
             Number of bits to shift into and out of the register.
-
-        Returns
-        -------
-        (ShiftRegister, int)
-            Tuple containing the new representation of this shift register and the result.
-        """
-        new_contents = (self._contents << bit_count) & 0xFFFF_FFFF
-        new_counter = min(32, self._counter + bit_count)
-
-        return ShiftRegister(new_contents, new_counter), self._contents >> (
-            32 - bit_count
-        )
-
-    def shift_right(self, bit_count):
-        """Shifts the least significant bits out of the shift register.
-
-        Parameters
-        ----------
-        bit_count : int
-            Number of bits to shift into and out of the register.
+        data_in : int, optional
+            Value to shift into the register's least significant bits.
 
         Returns
         -------
@@ -75,7 +57,35 @@ class ShiftRegister:
         """
         bit_mask = (1 << bit_count) - 1
 
-        new_contents = self._contents >> bit_count
+        new_contents = ((self._contents << bit_count) & 0xFFFF_FFFF) | (
+            data_in & bit_mask
+        )
+        new_counter = min(32, self._counter + bit_count)
+
+        return ShiftRegister(new_contents, new_counter), self._contents >> (
+            32 - bit_count
+        )
+
+    def shift_right(self, bit_count, data_in=0):
+        """Shifts the least significant bits out of the shift register.
+
+        Parameters
+        ----------
+        bit_count : int
+            Number of bits to shift into and out of the register.
+        data_in : int, optional
+            Value to shift into the register's most significant bits.
+
+        Returns
+        -------
+        (ShiftRegister, int)
+            Tuple containing the new representation of this shift register and the result.
+        """
+        bit_mask = (1 << bit_count) - 1
+
+        new_contents = (self._contents >> bit_count) | (
+            (data_in & bit_mask) << (32 - bit_count)
+        )
         new_counter = min(32, self._counter + bit_count)
 
         return (

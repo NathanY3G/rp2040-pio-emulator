@@ -18,27 +18,32 @@ from pioemu.shift_register import ShiftRegister
 
 # fmt: off
 @pytest.mark.parametrize(
-    "initial_state, bit_count, expected_state, expected_shift_result",
+    "initial_state, bit_count, data_in, expected_state, expected_shift_result",
     [
         pytest.param(
-            ShiftRegister(0xBEEB_0000, 0), 8, ShiftRegister(0xEB00_0000, 8), 0x0000_00BE,
+            ShiftRegister(0xBEEB_0000, 0), 8, 0, ShiftRegister(0xEB00_0000, 8), 0x0000_00BE,
         ),
         pytest.param(
-            ShiftRegister(0xFFFF_FFFF, 0), 32, ShiftRegister(0x0000_0000, 32), 0xFFFF_FFFF,
+            ShiftRegister(0xFFFF_FFFF, 0), 32, 0, ShiftRegister(0x0000_0000, 32), 0xFFFF_FFFF,
         ),
         pytest.param(
-            ShiftRegister(0x8000_0000, 5), 3, ShiftRegister(0x0000_0000, 8), 4
+            ShiftRegister(0x8000_0000, 5), 3, 0, ShiftRegister(0x0000_0000, 8), 4
+        ),
+        pytest.param(
+            ShiftRegister(0x5555_AAAA, 4), 3, 14, ShiftRegister(0xAAAD5556, 7), 2
         ),
 
         # TODO - Test the actual behaviour of the RP2040 silicon
         pytest.param(
-            ShiftRegister(0xA0000_0000, 31), 32, ShiftRegister(0x0000_0000, 32), 0xA0000_0000,
+            ShiftRegister(0xA0000_0000, 31), 32, 0, ShiftRegister(0x0000_0000, 32), 0xA0000_0000,
         ),
     ],
 )
 # fmt: on
-def test_shift_left(initial_state, bit_count, expected_state, expected_shift_result):
-    new_state, shift_result = initial_state.shift_left(bit_count)
+def test_shift_left(
+    initial_state, bit_count, data_in, expected_state, expected_shift_result
+):
+    new_state, shift_result = initial_state.shift_left(bit_count, data_in)
 
     assert new_state.contents == expected_state.contents
     assert new_state.counter == expected_state.counter
@@ -47,27 +52,32 @@ def test_shift_left(initial_state, bit_count, expected_state, expected_shift_res
 
 # fmt: off
 @pytest.mark.parametrize(
-    "initial_state, bit_count, expected_state, expected_shift_result",
+    "initial_state, bit_count, data_in, expected_state, expected_shift_result",
     [
         pytest.param(
-            ShiftRegister(0x0000_01FF, 0), 8, ShiftRegister(0x0000_0001, 8), 0x0000_00FF,
+            ShiftRegister(0x0000_01FF, 0), 8, 0, ShiftRegister(0x0000_0001, 8), 0x0000_00FF,
         ),
         pytest.param(
-            ShiftRegister(0xFFFF_FFFF, 0), 32, ShiftRegister(0x0000_0000, 32), 0xFFFF_FFFF,
+            ShiftRegister(0xFFFF_FFFF, 0), 32, 0, ShiftRegister(0x0000_0000, 32), 0xFFFF_FFFF,
         ),
         pytest.param(
-            ShiftRegister(0x0000_0004, 5), 3, ShiftRegister(0x0000_0000, 8), 4
+            ShiftRegister(0x0000_0004, 5), 3, 0, ShiftRegister(0x0000_0000, 8), 4
+        ),
+        pytest.param(
+            ShiftRegister(0xDEAD_BEEF, 0), 16, 0x0123_CAFE, ShiftRegister(0xCAFE_DEAD, 16), 0x0000_BEEF
         ),
 
         # TODO - Test the actual behaviour of the RP2040 silicon
         pytest.param(
-            ShiftRegister(0x0000_0005, 31), 32, ShiftRegister(0x0000_0000, 32), 5
+            ShiftRegister(0x0000_0005, 31), 32, 0, ShiftRegister(0x0000_0000, 32), 5
         ),
     ],
 )
 # fmt: on
-def test_shift_right(initial_state, bit_count, expected_state, expected_shift_result):
-    new_state, shift_result = initial_state.shift_right(bit_count)
+def test_shift_right(
+    initial_state, bit_count, data_in, expected_state, expected_shift_result
+):
+    new_state, shift_result = initial_state.shift_right(bit_count, data_in)
 
     assert new_state.contents == expected_state.contents
     assert new_state.counter == expected_state.counter
