@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2022 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,11 +15,7 @@ from collections import deque
 from dataclasses import dataclass
 from typing import Deque
 
-
-@dataclass(frozen=True)
-class ShiftRegister:
-    contents: int
-    counter: int
+from .shift_register import ShiftRegister
 
 
 @dataclass(frozen=True)

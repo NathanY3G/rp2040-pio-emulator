@@ -56,14 +56,14 @@ class InstructionDecoder:
     instructions.
     """
 
-    def __init__(self, shifter_for_osr, jmp_pin):
+    def __init__(self, shift_method, jmp_pin):
         """
         Parameters
         ----------
-        shifter_for_osr : Callable[[ShiftRegister, int], (ShiftRegister, int)]
-            Used for shifting the contents of the OSR.
+        shift_method : Callable[[ShiftRegister, int], (ShiftRegister, int)]
+            Method to use to shift the contents of the Output Shift Register.
         jmp_pin : int
-            The pin that determines the branch taken by JMP PIN instructions.
+            Pin that determines the branch taken by JMP PIN instructions.
         """
 
         self.decoding_functions = [
@@ -111,11 +111,11 @@ class InstructionDecoder:
         ]
 
         self.out_destinations = [
-            partial(out_pins, shifter_for_osr),
-            partial(out_x, shifter_for_osr),
-            partial(out_y, shifter_for_osr),
-            partial(out_null, shifter_for_osr),
-            partial(out_pindirs, shifter_for_osr),
+            partial(out_pins, shift_method),
+            partial(out_x, shift_method),
+            partial(out_y, shift_method),
+            partial(out_null, shift_method),
+            partial(out_pindirs, shift_method),
             None,
             None,
             None,

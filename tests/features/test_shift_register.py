@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2022 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # limitations under the License.
 import pytest
 from pioemu import ShiftRegister
-from pioemu.shifter import shift_left, shift_right
+from pioemu.shift_register import ShiftRegister
 
 
 # fmt: off
@@ -38,9 +38,10 @@ from pioemu.shifter import shift_left, shift_right
 )
 # fmt: on
 def test_shift_left(initial_state, bit_count, expected_state, expected_shift_result):
-    new_state, shift_result = shift_left(initial_state, bit_count)
+    new_state, shift_result = initial_state.shift_left(bit_count)
 
-    assert new_state == expected_state
+    assert new_state.contents == expected_state.contents
+    assert new_state.counter == expected_state.counter
     assert shift_result == expected_shift_result
 
 
@@ -66,7 +67,20 @@ def test_shift_left(initial_state, bit_count, expected_state, expected_shift_res
 )
 # fmt: on
 def test_shift_right(initial_state, bit_count, expected_state, expected_shift_result):
-    new_state, shift_result = shift_right(initial_state, bit_count)
+    new_state, shift_result = initial_state.shift_right(bit_count)
 
-    assert new_state == expected_state
+    assert new_state.contents == expected_state.contents
+    assert new_state.counter == expected_state.counter
     assert shift_result == expected_shift_result
+
+
+@pytest.mark.parametrize(
+    "lhs, rhs, expected_result",
+    [
+        (ShiftRegister(0, 0), ShiftRegister(0, 0), True),
+        (ShiftRegister(0, 0), ShiftRegister(0xFFFF_FFFF, 0), False),
+        (ShiftRegister(0, 0), ShiftRegister(0, 32), False),
+    ],
+)
+def test_equality_operator(lhs, rhs, expected_result):
+    assert (lhs == rhs) == expected_result
