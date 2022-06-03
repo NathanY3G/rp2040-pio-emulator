@@ -5,5 +5,5 @@ pluggy==1.0.0
 py==1.11.0
 pyparsing==3.0.9
 pytest==7.1.2
-rp2040-pio-emulator==0.26.0
+rp2040-pio-emulator==0.70.0
 tomli==2.0.1

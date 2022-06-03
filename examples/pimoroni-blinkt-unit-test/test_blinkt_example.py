@@ -21,7 +21,9 @@ NUMBER_OF_LEDS = 8
 
 @pytest.fixture
 def assembled_program():
-    output = subprocess.run(["pioasm", "-o", "hex", PIO_SOURCE_FILENAME], capture_output=True)
+    output = subprocess.run(
+        ["pioasm", "-o", "hex", PIO_SOURCE_FILENAME], capture_output=True
+    )
     if output.returncode != 0:
         raise ValueError(f"Unable to assemble PIO program {PIO_SOURCE_FILENAME}")
 
