@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from pioemu import clock_cycles_reached, emulate, State
-from .support import emulate_single_instruction
+
+from pioemu import State, clock_cycles_reached, emulate
+
 from .opcodes import Opcodes
+from .support import emulate_single_instruction
 
 
 def test_stop_when_requires_value():

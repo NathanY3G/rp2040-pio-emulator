@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import replace
+
 from pytest import param
+
 from pioemu import clock_cycles_reached, emulate
+
 from .opcodes import Opcodes
 
 

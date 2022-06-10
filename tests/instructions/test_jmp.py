@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from pioemu import clock_cycles_reached, emulate, State
-from ..support import emulate_single_instruction
+
+from pioemu import State, clock_cycles_reached, emulate
+
 from ..opcodes import Opcodes
+from ..support import emulate_single_instruction
 
 
 def test_jump_always_forward():
@@ -96,20 +98,3 @@ def test_jump_on_external_control_pin(jmp_pin, initial_state, expected_program_c
     )
 
     assert new_state.program_counter == expected_program_counter
-
-
-@pytest.mark.parametrize(
-    "opcode, initial_state, expected_clock_cycles",
-    [
-        pytest.param(0x0000, State(), 1, id="jmp 0"),
-        pytest.param(0x0102, State(), 2, id="jmp 1 [1]"),
-        pytest.param(0x0A80, State(y_register=0), 11, id="jmp y-- [10]"),
-        pytest.param(0x0A80, State(y_register=3), 11, id="jmp y-- [10]"),
-    ],
-)
-def test_jump_consumes_expected_clock_cycles(
-    opcode, initial_state, expected_clock_cycles
-):
-    new_state = emulate_single_instruction(opcode, initial_state)
-
-    assert new_state.clock == expected_clock_cycles

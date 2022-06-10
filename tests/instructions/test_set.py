@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2022 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,8 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import pytest
 from pioemu import State
+
 from ..support import emulate_single_instruction
 
 
@@ -46,17 +46,3 @@ def test_set_y_register():
     new_state = emulate_single_instruction(0xE042, initial_state)  # set y, 2
 
     assert new_state.y_register == 2
-
-
-@pytest.mark.parametrize(
-    "opcode, expected_clock_cycles",
-    [
-        pytest.param(0xE102, 2, id="set pins, 2 [1]"),
-        pytest.param(0xE03F, 1, id="set x, 31"),
-        pytest.param(0xFF40, 32, id="set y, 0 [31]"),
-    ],
-)
-def test_set_consumes_expected_clock_cycles(opcode, expected_clock_cycles):
-    new_state = emulate_single_instruction(opcode)
-
-    assert new_state.clock == expected_clock_cycles

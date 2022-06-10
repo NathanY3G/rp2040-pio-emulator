@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from collections import deque
+
 import pytest
+
 from pioemu import ShiftRegister, State
+
 from ..support import emulate_single_instruction
 
 
@@ -55,25 +58,3 @@ def test_pull_clears_the_output_shift_register(opcode):
     new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state.output_shift_register.counter == 0
-
-
-@pytest.mark.parametrize(
-    "opcode, initial_state, expected_clock_cycles",
-    [
-        pytest.param(0x8080, State(), 1, id="pull noblock"),
-        pytest.param(0x9F80, State(), 32, id="pull noblock [31]"),
-        pytest.param(0x9FA0, State(transmit_fifo=deque([1])), 32, id="pull block [31]"),
-        pytest.param(
-            0x9FA0,
-            State(transmit_fifo=deque()),
-            1,
-            id="pull block [31] when fifo empty",
-        ),
-    ],
-)
-def test_pull_consumes_expected_clock_cycles(
-    opcode, initial_state, expected_clock_cycles
-):
-    new_state = emulate_single_instruction(opcode, initial_state)
-
-    assert new_state.clock == expected_clock_cycles
