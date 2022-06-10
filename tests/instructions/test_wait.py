@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2022 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,17 +40,3 @@ def test_wait_advances_when_condition_met(opcode, initial_state):
     new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state.program_counter == 1
-
-
-def test_delay_cycles_deferred_when_wait_condition_not_met():
-    new_state = emulate_single_instruction(0x3F81)  # wait 1 gpio 1 [31]
-
-    assert new_state.clock == 1
-
-
-def test_delay_cycles_applied_when_wait_condition_met():
-    new_state = emulate_single_instruction(
-        0x3F81, State(pin_values=2)
-    )  # wait 1 gpio 1 [31]
-
-    assert new_state.clock == 32

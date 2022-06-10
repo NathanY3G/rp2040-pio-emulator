@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2022 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -207,16 +207,3 @@ def test_mov_instruction(opcode, initial_state, expected_state):
     new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state == expected_state
-
-
-@pytest.mark.parametrize(
-    "opcode, expected_clock_cycles",
-    [
-        pytest.param(0xA120, 2, id="mov x, pins [1]"),
-        pytest.param(0xA140, 2, id="mov y, pins [1]"),
-    ],
-)
-def test_mov_consumes_expected_clock_cycles(opcode, expected_clock_cycles):
-    new_state = emulate_single_instruction(opcode)
-
-    assert new_state.clock == expected_clock_cycles
