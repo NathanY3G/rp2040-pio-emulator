@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from pioemu import clock_cycles_reached, emulate, State
+
+from pioemu import State, clock_cycles_reached, emulate
 
 
 def test_side_set_is_not_mistaken_for_delay():

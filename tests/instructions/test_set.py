@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from pioemu import State
+
 from ..support import emulate_single_instruction
 
 

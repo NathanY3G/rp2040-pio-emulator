@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from functools import reduce
+
 from pioemu import emulate
+
 from ..opcodes import Opcodes
 
 

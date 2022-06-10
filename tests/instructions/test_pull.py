@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from collections import deque
+
 import pytest
+
 from pioemu import ShiftRegister, State
+
 from ..support import emulate_single_instruction
 
 

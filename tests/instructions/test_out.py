@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from pioemu import clock_cycles_reached, emulate, ShiftRegister, State
-from ..support import emulate_single_instruction, instruction_param
+
+from pioemu import ShiftRegister, State, clock_cycles_reached, emulate
+
 from ..opcodes import Opcodes
+from ..support import instruction_param
 
 # fmt: off
 instructions_to_test_with_left_shift = [

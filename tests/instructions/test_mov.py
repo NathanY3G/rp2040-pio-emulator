@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pytest
-from pioemu import ShiftRegister, State
-from ..support import emulate_single_instruction, instruction_param
 
+from pioemu import ShiftRegister, State
+
+from ..support import emulate_single_instruction, instruction_param
 
 # fmt: off
 instructions_to_test = [
