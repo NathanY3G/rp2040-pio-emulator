@@ -155,8 +155,8 @@ class InstructionDecoder:
                 condition,
                 partial(write_to_program_counter, supplies_value(address)),
             )
-        else:
-            return None
+
+        return None
 
     def _decode_mov(self, opcode):
         read_from_source = self.mov_sources[opcode & 7]
@@ -190,13 +190,17 @@ class InstructionDecoder:
             opcode, self.set_destinations, supplies_value(opcode & 0x1F)
         )
 
-    def _decode_pull(self, opcode):
+    @staticmethod
+    def _decode_pull(opcode):
         if opcode & 0x0020:
-            return Instruction(transmit_fifo_not_empty, pull_blocking)
+            instruction = Instruction(transmit_fifo_not_empty, pull_blocking)
         else:
-            return Instruction(always, pull_nonblocking)
+            instruction = Instruction(always, pull_nonblocking)
 
-    def _decode_wait(self, opcode):
+        return instruction
+
+    @staticmethod
+    def _decode_wait(opcode):
         index = opcode & 0x001F
 
         if opcode & 0x0080:
@@ -206,10 +210,11 @@ class InstructionDecoder:
 
         return Instruction(condition, lambda state: state)
 
-    def _make_instruction_from_lookup_table(self, opcode, lookup_table, param):
+    @staticmethod
+    def _make_instruction_from_lookup_table(opcode, lookup_table, param):
         function = lookup_table[(opcode >> 5) & 7]
 
         if function is not None:
             return Instruction(always, partial(function, param))
-        else:
-            return None
+
+        return None
