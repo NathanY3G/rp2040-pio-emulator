@@ -27,6 +27,20 @@ def read_from_osr(state):
     return state.output_shift_register.contents
 
 
+def shift_from_osr(shift_method, bit_count, state):
+    """Shift the requested number of bits out of the output shift register."""
+
+    new_osr, shift_result = shift_method(state.output_shift_register, bit_count)
+
+    return (
+        replace(
+            state,
+            output_shift_register=new_osr,
+        ),
+        shift_result,
+    )
+
+
 def read_from_pin_directions(state):
     """Reads the contents of the pin direction register."""
 
@@ -96,6 +110,14 @@ def write_to_y(data_supplier, state):
     """Copies the given data into the Y scratch register."""
 
     return replace(state, y_register=data_supplier(state) & 0xFFFF_FFFF)
+
+
+def write_to_null(data_supplier, state):
+    """Discards the given data."""
+
+    _ = data_supplier(state)
+
+    return state
 
 
 def supplies_value(value):
