@@ -25,17 +25,13 @@ from .conditions import (
 )
 from .instruction import Instruction
 from .instructions import (
-    out_null,
-    out_pindirs,
-    out_pins,
-    out_x,
-    out_y,
     pull_blocking,
     pull_nonblocking,
 )
 from .primitive_operations import (
     read_from_isr,
     read_from_osr,
+    shift_from_osr,
     read_from_pins,
     read_from_x,
     read_from_y,
@@ -47,6 +43,7 @@ from .primitive_operations import (
     write_to_program_counter,
     write_to_x,
     write_to_y,
+    write_to_null,
 )
 
 
@@ -65,6 +62,8 @@ class InstructionDecoder:
         jmp_pin : int
             Pin that determines the branch taken by JMP PIN instructions.
         """
+
+        self.shift_method = shift_method
 
         self.decoding_functions = [
             self._decode_jmp,
@@ -111,11 +110,11 @@ class InstructionDecoder:
         ]
 
         self.out_destinations = [
-            partial(out_pins, shift_method),
-            partial(out_x, shift_method),
-            partial(out_y, shift_method),
-            partial(out_null, shift_method),
-            partial(out_pindirs, shift_method),
+            write_to_pins,
+            write_to_x,
+            write_to_y,
+            write_to_null,
+            write_to_pin_directions,
             None,
             None,
             None,
@@ -156,8 +155,8 @@ class InstructionDecoder:
                 condition,
                 partial(write_to_program_counter, supplies_value(address)),
             )
-        else:
-            return None
+
+        return None
 
     def _decode_mov(self, opcode):
         read_from_source = self.mov_sources[opcode & 7]
@@ -173,27 +172,35 @@ class InstructionDecoder:
         )
 
     def _decode_out(self, opcode):
+        write_to_destination = self.out_destinations[(opcode >> 5) & 7]
+
         bit_count = opcode & 0x1F
 
         if bit_count == 0:
             bit_count = 32
 
-        return self._make_instruction_from_lookup_table(
-            opcode, self.out_destinations, bit_count
-        )
+        def emulate_out(state):
+            state, shift_result = shift_from_osr(self.shift_method, bit_count, state)
+            return write_to_destination(supplies_value(shift_result), state)
+
+        return Instruction(always, emulate_out)
 
     def _decode_set(self, opcode):
         return self._make_instruction_from_lookup_table(
             opcode, self.set_destinations, supplies_value(opcode & 0x1F)
         )
 
-    def _decode_pull(self, opcode):
+    @staticmethod
+    def _decode_pull(opcode):
         if opcode & 0x0020:
-            return Instruction(transmit_fifo_not_empty, pull_blocking)
+            instruction = Instruction(transmit_fifo_not_empty, pull_blocking)
         else:
-            return Instruction(always, pull_nonblocking)
+            instruction = Instruction(always, pull_nonblocking)
 
-    def _decode_wait(self, opcode):
+        return instruction
+
+    @staticmethod
+    def _decode_wait(opcode):
         index = opcode & 0x001F
 
         if opcode & 0x0080:
@@ -203,10 +210,11 @@ class InstructionDecoder:
 
         return Instruction(condition, lambda state: state)
 
-    def _make_instruction_from_lookup_table(self, opcode, lookup_table, param):
+    @staticmethod
+    def _make_instruction_from_lookup_table(opcode, lookup_table, param):
         function = lookup_table[(opcode >> 5) & 7]
 
         if function is not None:
             return Instruction(always, partial(function, param))
-        else:
-            return None
+
+        return None
