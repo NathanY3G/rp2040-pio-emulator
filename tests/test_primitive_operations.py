@@ -14,6 +14,7 @@
 from pioemu import State
 from pioemu.primitive_operations import (
     read_from_pin_directions,
+    shift_into_isr,
     shift_from_osr,
     write_to_null,
 )
@@ -24,6 +25,12 @@ def test_read_from_pin_directions():
     pin_directions = read_from_pin_directions(State(pin_directions=0x0000_FFFF))
 
     assert pin_directions == 0x0000_FFFF
+
+
+def test_shift_into_isr():
+    new_state = shift_into_isr(lambda _: 0xDEED, ShiftRegister.shift_left, 13, State())
+
+    assert new_state.input_shift_register == ShiftRegister(0x1EED, 13)
 
 
 def test_shift_from_osr():

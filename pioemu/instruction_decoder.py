@@ -31,6 +31,7 @@ from .instructions import (
 )
 from .primitive_operations import (
     read_from_isr,
+    shift_into_isr,
     read_from_osr,
     shift_from_osr,
     read_from_pins,
@@ -54,22 +55,25 @@ class InstructionDecoder:
     instructions.
     """
 
-    def __init__(self, shift_method, jmp_pin):
+    def __init__(self, shift_isr_method, shift_osr_method, jmp_pin):
         """
         Parameters
         ----------
-        shift_method : Callable[[ShiftRegister, int], (ShiftRegister, int)]
+        isr_shift_method : Callable[[ShiftRegister, int], (ShiftRegister, int)]
+            Method to use to shift the contents of the Input Shift Register.
+        osr_shift_method : Callable[[ShiftRegister, int], (ShiftRegister, int)]
             Method to use to shift the contents of the Output Shift Register.
         jmp_pin : int
             Pin that determines the branch taken by JMP PIN instructions.
         """
 
-        self.shift_method = shift_method
+        self.shift_isr_method = shift_isr_method
+        self.shift_osr_method = shift_osr_method
 
         self.decoding_functions = [
             self._decode_jmp,
             self._decode_wait,
-            lambda _: None,
+            self._decode_in,
             self._decode_out,
             self._decode_pull,
             self._decode_mov,
@@ -171,6 +175,19 @@ class InstructionDecoder:
             opcode, self.mov_destinations, data_supplier
         )
 
+    def _decode_in(self, opcode):
+        read_from_source = self.mov_sources[(opcode >> 5) & 7]
+
+        bit_count = opcode & 0x1F
+
+        if bit_count == 0:
+            bit_count = 32
+
+        return Instruction(
+            always,
+            partial(shift_into_isr, read_from_source, self.shift_isr_method, bit_count),
+        )
+
     def _decode_out(self, opcode):
         write_to_destination = self.out_destinations[(opcode >> 5) & 7]
 
@@ -180,7 +197,9 @@ class InstructionDecoder:
             bit_count = 32
 
         def emulate_out(state):
-            state, shift_result = shift_from_osr(self.shift_method, bit_count, state)
+            state, shift_result = shift_from_osr(
+                self.shift_osr_method, bit_count, state
+            )
             return write_to_destination(supplies_value(shift_result), state)
 
         return Instruction(always, emulate_out)
