@@ -42,7 +42,7 @@ Instruction | Supported                         | Notes
 JMP         | :heavy_check_mark: :construction: | !OSRE variants not implemented
 WAIT        | :heavy_check_mark: :warning:      | IRQ variant is not supported
 IN          | :heavy_multiplication_x:          |
-OUT         | :heavy_check_mark: :construction: | PC, ISR and EXEC destinations not implemented
+OUT         | :heavy_check_mark: :construction: | EXEC destination not implemented
 PUSH        | :heavy_check_mark: :construction: | IfEmpty variant not implemented
 PULL        | :heavy_check_mark: :construction: | IfEmpty variant not implemented
 MOV         | :heavy_check_mark: :construction: | Some variants and operations not implemented
