@@ -131,8 +131,8 @@ class InstructionDecoder:
             write_to_y,
             write_to_null,
             write_to_pin_directions,
-            None,
-            None,
+            write_to_program_counter,
+            write_to_isr,
             None,
         ]
 
