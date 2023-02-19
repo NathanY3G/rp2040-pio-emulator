@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Nathan Young
+# Copyright 2021 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,22 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from collections import deque
-from dataclasses import dataclass
-from typing import Deque
+from dataclasses import replace
+from pioemu.state import ShiftRegister
+from pioemu.conditions import receive_fifo_not_full
 
-from .shift_register import ShiftRegister
+def push_blocking(state):
+    state.receive_fifo.push(state.input_shift_register.contents)
+    return replace(state, input_shift_register=ShiftRegister(0, 0))
 
-
-@dataclass(frozen=True)
-class State:
-    clock: int = 0
-    program_counter: int = 0
-    pin_directions: int = 0
-    pin_values: int = 0
-    transmit_fifo: Deque = deque()
-    receive_fifo: Deque = deque()
-    input_shift_register: ShiftRegister = ShiftRegister(0, 0)
-    output_shift_register: ShiftRegister = ShiftRegister(0, 32)
-    x_register: int = 0
-    y_register: int = 0
+def push_nonblocking(state):
+    if receive_fifo_not_full:
+        push_blocking(state)
+    else:
+        return replace(state, input_shift_register=ShiftRegister(0, 0))

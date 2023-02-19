@@ -17,6 +17,7 @@ from .conditions import (
     gpio_low,
     gpio_high,
     transmit_fifo_not_empty,
+    receive_fifo_not_full,
     x_register_equals_zero,
     x_register_not_equal_to_y_register,
     x_register_not_equal_to_zero,
@@ -28,6 +29,8 @@ from .instruction import Instruction
 from .instructions import (
     pull_blocking,
     pull_nonblocking,
+    push_blocking,
+    push_nonblocking,
 )
 from .primitive_operations import (
     read_from_isr,
@@ -71,7 +74,7 @@ class InstructionDecoder:
             self._decode_wait,
             lambda _: None,
             self._decode_out,
-            self._decode_pull,
+            self._decode_push_pull,
             self._decode_mov,
             lambda _: None,
             self._decode_set,
@@ -191,11 +194,19 @@ class InstructionDecoder:
         )
 
     @staticmethod
-    def _decode_pull(opcode):
-        if opcode & 0x0020:
-            instruction = Instruction(transmit_fifo_not_empty, pull_blocking)
+    def _decode_push_pull(opcode):
+        if opcode & 0x0080:
+            # Pull
+            if opcode & 0x0020:
+                instruction = Instruction(transmit_fifo_not_empty, pull_blocking)
+            else:
+                instruction = Instruction(always, pull_nonblocking)
         else:
-            instruction = Instruction(always, pull_nonblocking)
+            # Push
+            if opcode & 0x0020:
+                instruction = Instruction(receive_fifo_not_full, push_blocking)
+            else:
+                instruction = Instruction(always, push_nonblocking)
 
         return instruction
 
