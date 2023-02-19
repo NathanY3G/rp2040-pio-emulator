@@ -30,6 +30,8 @@ def gpio_high(pin_number, state):
 def transmit_fifo_not_empty(state):
     return len(state.transmit_fifo) > 0
 
+def receive_fifo_not_full(state):
+    return len(state.receive_fifo) < 32
 
 def x_register_equals_zero(state):
     return state.x_register == 0
