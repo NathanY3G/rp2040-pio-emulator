@@ -104,7 +104,7 @@ class InstructionDecoder:
             write_to_y,
             None,
             None,
-            None,
+            write_to_program_counter,
             write_to_isr,
             write_to_osr,
         ]
