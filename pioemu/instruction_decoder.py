@@ -23,6 +23,7 @@ from .conditions import (
     x_register_not_equal_to_zero,
     y_register_equals_zero,
     y_register_not_equal_to_zero,
+    output_shift_register_not_empty,
 )
 from .instruction import Instruction
 from .instructions import (
@@ -87,7 +88,7 @@ class InstructionDecoder:
             y_register_not_equal_to_zero,
             x_register_not_equal_to_y_register,
             partial(gpio_high, jmp_pin),
-            None,
+            output_shift_register_not_empty,
         ]
 
         self.mov_sources = [
@@ -107,7 +108,7 @@ class InstructionDecoder:
             write_to_y,
             None,
             None,
-            None,
+            write_to_program_counter,
             write_to_isr,
             write_to_osr,
         ]
@@ -118,8 +119,8 @@ class InstructionDecoder:
             write_to_y,
             write_to_null,
             write_to_pin_directions,
-            None,
-            None,
+            write_to_program_counter,
+            write_to_isr,
             None,
         ]
 
@@ -129,7 +130,6 @@ class InstructionDecoder:
             write_to_y,
             None,
             write_to_pin_directions,
-            None,
             None,
             None,
             None,
@@ -207,6 +207,7 @@ class InstructionDecoder:
                 instruction = Instruction(receive_fifo_not_full, push_blocking)
             else:
                 instruction = Instruction(always, push_nonblocking)
+        return instruction
 
     @staticmethod
     def _decode_wait(opcode):

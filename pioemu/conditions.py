@@ -51,3 +51,6 @@ def y_register_not_equal_to_zero(state):
 
 def x_register_not_equal_to_y_register(state):
     return state.x_register != state.y_register
+
+def output_shift_register_not_empty(state):
+    return state.output_shift_register.counter != 32
