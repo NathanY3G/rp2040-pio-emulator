@@ -13,7 +13,7 @@
 # limitations under the License.
 import pytest
 
-from pioemu import State, clock_cycles_reached, emulate
+from pioemu import ShiftRegister, State, clock_cycles_reached, emulate
 
 from ..opcodes import Opcodes
 from ..support import emulate_single_instruction
@@ -96,5 +96,26 @@ def test_jump_on_external_control_pin(jmp_pin, initial_state, expected_program_c
             jmp_pin=jmp_pin,
         )
     )
+
+    assert new_state.program_counter == expected_program_counter
+
+
+@pytest.mark.parametrize(
+    "initial_state, expected_program_counter",
+    [
+        pytest.param(
+            State(output_shift_register=ShiftRegister(0, 32)),
+            1,
+            id="jmp !osre when output shift register is empty",
+        ),
+        pytest.param(
+            State(output_shift_register=ShiftRegister(0, 0)),
+            2,
+            id="jmp !osre when output shift register is full",
+        ),
+    ],
+)
+def test_jump_on_output_shift_register_state(initial_state, expected_program_counter):
+    new_state = emulate_single_instruction(0x00E2, initial_state)  # jmp !osre, 2
 
     assert new_state.program_counter == expected_program_counter

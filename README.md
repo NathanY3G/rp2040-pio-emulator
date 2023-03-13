@@ -60,3 +60,6 @@ This software is under development and currently has limitations - the notable o
 
 1. No direct support for the concurrent running of multiple PIO programs;
    a single State Machine is emulated and not an entire PIO block.
+
+## Thanks To
+* [aaronjamt](https://github.com/aaronjamt) for contributing features and fixes.
