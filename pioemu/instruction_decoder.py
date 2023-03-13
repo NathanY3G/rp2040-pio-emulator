@@ -129,7 +129,6 @@ class InstructionDecoder:
             None,
             None,
             None,
-            None,
         ]
 
     def decode(self, opcode):
