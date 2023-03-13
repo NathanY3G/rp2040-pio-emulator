@@ -13,7 +13,7 @@
 # limitations under the License.
 from dataclasses import replace
 from pioemu.state import ShiftRegister
-from pioemu.conditions import recieve_fifo_not_full
+from pioemu.conditions import receive_fifo_not_full
 
 def push_blocking(state):
     state.receive_fifo.push(state.input_shift_register.contents)
