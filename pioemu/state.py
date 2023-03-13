@@ -12,10 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Deque
 
 from .shift_register import ShiftRegister
+
+
+def DequeFactory():
+    return deque()
+
+
+def ShiftRegisterFactoryMin():
+    return ShiftRegister(0, 0)
+
+
+def ShiftRegisterFactoryMax():
+    return ShiftRegister(0, 32)
 
 
 @dataclass(frozen=True)
@@ -24,8 +36,10 @@ class State:
     program_counter: int = 0
     pin_directions: int = 0
     pin_values: int = 0
-    transmit_fifo: Deque = deque()
-    input_shift_register: ShiftRegister = ShiftRegister(0, 0)
-    output_shift_register: ShiftRegister = ShiftRegister(0, 32)
+    transmit_fifo: Deque = field(default_factory=DequeFactory)
+    input_shift_register: ShiftRegister = field(default_factory=ShiftRegisterFactoryMin)
+    output_shift_register: ShiftRegister = field(
+        default_factory=ShiftRegisterFactoryMax
+    )
     x_register: int = 0
     y_register: int = 0
