@@ -17,14 +17,18 @@ from typing import Deque
 
 from .shift_register import ShiftRegister
 
+
 def DequeFactory():
-	return deque()
+    return deque()
+
 
 def ShiftRegisterFactoryMin():
-	return ShiftRegister(0, 0)
+    return ShiftRegister(0, 0)
+
 
 def ShiftRegisterFactoryMax():
-	return ShiftRegister(0, 32)
+    return ShiftRegister(0, 32)
+
 
 @dataclass(frozen=True)
 class State:
@@ -34,6 +38,8 @@ class State:
     pin_values: int = 0
     transmit_fifo: Deque = field(default_factory=DequeFactory)
     input_shift_register: ShiftRegister = field(default_factory=ShiftRegisterFactoryMin)
-    output_shift_register: ShiftRegister = field(default_factory=ShiftRegisterFactoryMax)
+    output_shift_register: ShiftRegister = field(
+        default_factory=ShiftRegisterFactoryMax
+    )
     x_register: int = 0
     y_register: int = 0
