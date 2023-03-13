@@ -22,6 +22,7 @@ from .conditions import (
     x_register_not_equal_to_zero,
     y_register_equals_zero,
     y_register_not_equal_to_zero,
+    output_shift_register_not_empty,
 )
 from .instruction import Instruction
 from .instructions import (
@@ -84,7 +85,7 @@ class InstructionDecoder:
             y_register_not_equal_to_zero,
             x_register_not_equal_to_y_register,
             partial(gpio_high, jmp_pin),
-            None,
+            output_shift_register_not_empty,
         ]
 
         self.mov_sources = [

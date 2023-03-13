@@ -39,7 +39,7 @@ Some additional examples include:
 
 Instruction | Supported                         | Notes
 :-----------| :---------------------------------| :----
-JMP         | :heavy_check_mark: :construction: | !OSRE variants not implemented
+JMP         | :heavy_check_mark:                | 
 WAIT        | :heavy_check_mark: :warning:      | IRQ variant is not supported
 IN          | :heavy_multiplication_x:          |
 OUT         | :heavy_check_mark: :construction: | PC, ISR and EXEC destinations not implemented
