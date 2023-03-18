@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Nathan Young
+# Copyright 2021-2023 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -92,6 +92,17 @@ class InstructionDecoder:
             output_shift_register_not_empty,
         ]
 
+        self.in_sources = [
+            read_from_pins,
+            read_from_x,
+            read_from_y,
+            supplies_value(0),
+            None,
+            None,
+            read_from_isr,
+            read_from_osr,
+        ]
+
         self.mov_sources = [
             read_from_pins,
             read_from_x,
@@ -176,7 +187,7 @@ class InstructionDecoder:
         )
 
     def _decode_in(self, opcode):
-        read_from_source = self.mov_sources[(opcode >> 5) & 7]
+        read_from_source = self.in_sources[(opcode >> 5) & 7]
 
         bit_count = opcode & 0x1F
 
