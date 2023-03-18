@@ -41,7 +41,7 @@ Instruction | Supported                         | Notes
 :-----------| :---------------------------------| :----
 JMP         | :heavy_check_mark:                | 
 WAIT        | :heavy_check_mark: :warning:      | IRQ variant is not supported
-IN          | :heavy_multiplication_x:          |
+IN          | :heavy_check_mark:                |
 OUT         | :heavy_check_mark: :construction: | PC, ISR and EXEC destinations not implemented
 PUSH        | :heavy_check_mark: :construction: | IfEmpty variant not implemented
 PULL        | :heavy_check_mark: :construction: | IfEmpty variant not implemented
