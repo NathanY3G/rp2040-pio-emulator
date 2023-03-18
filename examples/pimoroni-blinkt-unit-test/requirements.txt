@@ -3,4 +3,4 @@ iniconfig==2.0.0
 packaging==23.0
 pluggy==1.0.0
 pytest==7.2.2
-rp2040-pio-emulator==0.76.0
+rp2040-pio-emulator==0.77.0
