@@ -23,6 +23,7 @@ def emulate(
     stop_when,
     initial_state=State(),
     input_source=None,
+    shift_isr_right=True,
     shift_osr_right=True,
     side_set_base=0,
     side_set_count=0,
@@ -39,6 +40,8 @@ def emulate(
         Predicate used to determine if the emulation should stop or continue.
     initial_state : State, optional
         Initial values to use.
+    shift_isr_right : bool, optional
+        Shift the Input Shift Reigster (ISR) to the right when True and to the left when False.
     shift_osr_right : bool, optional
         Shift the Output Shift Reigster (OSR) to the right when True and to the left when False.
     side_set_base : int, optional
@@ -55,10 +58,16 @@ def emulate(
     if stop_when is None:
         raise ValueError("emulate() missing value for keyword argument: 'stop_when'")
 
-    if shift_osr_right:
-        instruction_decoder = InstructionDecoder(ShiftRegister.shift_right, jmp_pin)
-    else:
-        instruction_decoder = InstructionDecoder(ShiftRegister.shift_left, jmp_pin)
+    shift_isr_method = (
+        ShiftRegister.shift_right if shift_isr_right else ShiftRegister.shift_left
+    )
+    shift_osr_method = (
+        ShiftRegister.shift_right if shift_osr_right else ShiftRegister.shift_left
+    )
+
+    instruction_decoder = InstructionDecoder(
+        shift_isr_method, shift_osr_method, jmp_pin
+    )
 
     wrap_top = len(opcodes) - 1
 

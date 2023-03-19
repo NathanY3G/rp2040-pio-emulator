@@ -39,9 +39,9 @@ Some additional examples include:
 
 Instruction | Supported                         | Notes
 :-----------| :---------------------------------| :----
-JMP         | :heavy_check_mark: :construction: | !OSRE variants not implemented
+JMP         | :heavy_check_mark:                | 
 WAIT        | :heavy_check_mark: :warning:      | IRQ variant is not supported
-IN          | :heavy_multiplication_x:          |
+IN          | :heavy_check_mark:                |
 OUT         | :heavy_check_mark: :construction: | EXEC destination not implemented
 PUSH        | :heavy_check_mark: :construction: | IfEmpty variant not implemented
 PULL        | :heavy_check_mark: :construction: | IfEmpty variant not implemented
@@ -60,3 +60,6 @@ This software is under development and currently has limitations - the notable o
 
 1. No direct support for the concurrent running of multiple PIO programs;
    a single State Machine is emulated and not an entire PIO block.
+
+## Thanks To
+* [aaronjamt](https://github.com/aaronjamt) for contributing features and fixes.

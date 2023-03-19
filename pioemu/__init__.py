@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-__version__ = "0.75.1"
+__version__ = "0.77.0"
 
 from .conditions import clock_cycles_reached
 from .emulation import emulate

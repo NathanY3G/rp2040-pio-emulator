@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "rp2040-pio-emulator"
-version = "0.75.1"
+version = "0.77.0"
 description = "RP2040 emulator for the testing and debugging of PIO programs"
 authors = ["Nathan Young"]
 license = "Apache-2.0"
