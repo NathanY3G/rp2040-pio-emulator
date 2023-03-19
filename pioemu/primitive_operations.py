@@ -21,6 +21,16 @@ def read_from_isr(state):
     return state.input_shift_register.contents
 
 
+def shift_into_isr(data_supplier, shift_method, bit_count, state):
+    """Shifts the given data into the input shift register."""
+
+    new_isr, _ = shift_method(
+        state.input_shift_register, bit_count, data_supplier(state)
+    )
+
+    return replace(state, input_shift_register=new_isr)
+
+
 def read_from_osr(state):
     """Reads the contents of the output shift register."""
 
