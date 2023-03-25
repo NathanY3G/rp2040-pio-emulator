@@ -216,7 +216,8 @@ class InstructionDecoder:
         )
 
     def _decode_out(self, opcode):
-        write_to_destination = self.out_destinations[(opcode >> 5) & 7]
+        destination = (opcode >> 5) & 7
+        write_to_destination = self.out_destinations[destination]
 
         bit_count = opcode & 0x1F
 
@@ -228,6 +229,9 @@ class InstructionDecoder:
                 self.shift_osr_method, bit_count, state
             )
             return write_to_destination(supplies_value(shift_result), state)
+
+        if destination == 5:  # Program counter
+            return Instruction(always, emulate_out, ProgramCounterAdvance.NEVER)
 
         return Instruction(always, emulate_out, ProgramCounterAdvance.ALWAYS)
 
