@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2022, 2023 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import dataclass
+from enum import auto, Enum
 from typing import Callable
 from .state import State
+
+
+class ProgramCounterAdvance(Enum):
+    ALWAYS = auto()
+    WHEN_CONDITION_MET = auto()
+    WHEN_CONDITION_NOT_MET = auto()
+    NEVER = auto()
 
 
 @dataclass(frozen=True)
 class Instruction:
     condition: Callable[[State], bool]
     callable: Callable[[int, State], State]
+    program_counter_advance: ProgramCounterAdvance

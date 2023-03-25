@@ -18,7 +18,7 @@ keywords = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7.2"
+python = "^3.10.10"
 
 [tool.poetry.dev-dependencies]
 pylint = "2.15.5"
