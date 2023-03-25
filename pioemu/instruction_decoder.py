@@ -231,11 +231,9 @@ class InstructionDecoder:
             return write_to_destination(supplies_value(shift_result), state)
 
         if destination == 5:  # Program counter
-            program_counter_advance = ProgramCounterAdvance.NEVER
-        else:
-            program_counter_advance = ProgramCounterAdvance.ALWAYS
+            return Instruction(always, emulate_out, ProgramCounterAdvance.NEVER)
 
-        return Instruction(always, emulate_out, program_counter_advance)
+        return Instruction(always, emulate_out, ProgramCounterAdvance.ALWAYS)
 
     def _decode_set(self, opcode):
         write_to_destination = self.set_destinations[(opcode >> 5) & 7]
