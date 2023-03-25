@@ -190,9 +190,9 @@ instructions_to_test = [
     instruction_param(
         "mov x ~ pc",
         0xA0A9,
-        State(x_register=31),
-        State(x_register=31),
-        expected_program_counter=0,
+        State(x_register=29),
+        State(x_register=29),
+        expected_program_counter=2,
     ),
     instruction_param(
         "mov y isr",
