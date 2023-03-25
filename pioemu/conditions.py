@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Nathan Young
+# Copyright 2021, 2022, 2023 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ def y_register_not_equal_to_zero(state):
 
 def x_register_not_equal_to_y_register(state):
     return state.x_register != state.y_register
+
 
 def output_shift_register_not_empty(state):
     return state.output_shift_register.counter != 32

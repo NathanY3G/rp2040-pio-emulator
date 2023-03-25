@@ -1,4 +1,4 @@
-# Copyright 2021-2023 Nathan Young
+# Copyright 2021, 2022, 2023 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ from .conditions import (
     y_register_not_equal_to_zero,
     output_shift_register_not_empty,
 )
-from .instruction import Instruction
+from .instruction import Instruction, ProgramCounterAdvance
 from .instructions import (
     pull_blocking,
     pull_nonblocking,
@@ -169,12 +169,20 @@ class InstructionDecoder:
             return Instruction(
                 condition,
                 partial(write_to_program_counter, supplies_value(address)),
+                ProgramCounterAdvance.WHEN_CONDITION_NOT_MET,
             )
 
         return None
 
     def _decode_mov(self, opcode):
         read_from_source = self.mov_sources[opcode & 7]
+
+        destination = (opcode >> 5) & 7
+        write_to_destination = self.mov_destinations[destination]
+
+        if read_from_source is None or write_to_destination is None:
+            return None
+
         operation = (opcode >> 3) & 3
 
         if operation == 1:
@@ -182,8 +190,15 @@ class InstructionDecoder:
         else:
             data_supplier = read_from_source
 
-        return self._make_instruction_from_lookup_table(
-            opcode, self.mov_destinations, data_supplier
+        if destination == 5:  # Program counter
+            program_counter_advance = ProgramCounterAdvance.NEVER
+        else:
+            program_counter_advance = ProgramCounterAdvance.ALWAYS
+
+        return Instruction(
+            always,
+            partial(write_to_destination, data_supplier),
+            program_counter_advance,
         )
 
     def _decode_in(self, opcode):
@@ -197,6 +212,7 @@ class InstructionDecoder:
         return Instruction(
             always,
             partial(shift_into_isr, read_from_source, self.shift_isr_method, bit_count),
+            ProgramCounterAdvance.ALWAYS,
         )
 
     def _decode_out(self, opcode):
@@ -213,19 +229,32 @@ class InstructionDecoder:
             )
             return write_to_destination(supplies_value(shift_result), state)
 
-        return Instruction(always, emulate_out)
+        return Instruction(always, emulate_out, ProgramCounterAdvance.ALWAYS)
 
     def _decode_set(self, opcode):
-        return self._make_instruction_from_lookup_table(
-            opcode, self.set_destinations, supplies_value(opcode & 0x1F)
+        write_to_destination = self.set_destinations[(opcode >> 5) & 7]
+
+        if write_to_destination is None:
+            return None
+
+        return Instruction(
+            always,
+            partial(write_to_destination, supplies_value(opcode & 0x1F)),
+            ProgramCounterAdvance.ALWAYS,
         )
 
     @staticmethod
     def _decode_pull(opcode):
         if opcode & 0x0020:
-            instruction = Instruction(transmit_fifo_not_empty, pull_blocking)
+            instruction = Instruction(
+                transmit_fifo_not_empty,
+                pull_blocking,
+                ProgramCounterAdvance.WHEN_CONDITION_MET,
+            )
         else:
-            instruction = Instruction(always, pull_nonblocking)
+            instruction = Instruction(
+                always, pull_nonblocking, ProgramCounterAdvance.ALWAYS
+            )
 
         return instruction
 
@@ -238,13 +267,6 @@ class InstructionDecoder:
         else:
             condition = partial(gpio_low, index)
 
-        return Instruction(condition, lambda state: state)
-
-    @staticmethod
-    def _make_instruction_from_lookup_table(opcode, lookup_table, param):
-        function = lookup_table[(opcode >> 5) & 7]
-
-        if function is not None:
-            return Instruction(always, partial(function, param))
-
-        return None
+        return Instruction(
+            condition, lambda state: state, ProgramCounterAdvance.WHEN_CONDITION_MET
+        )
