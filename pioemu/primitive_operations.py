@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import replace
-from typing import Any, Callable, Tuple
+from typing import Callable, Tuple
 from .state import ShiftRegister, State
 
 
@@ -144,7 +144,7 @@ def write_to_null(data_supplier: Callable[[State], int], state: State) -> State:
     return state
 
 
-def supplies_value(value: Any) -> Callable[[State], Any]:
+def supplies_value(value: int) -> Callable[[State], int]:
     """Creates a function that returns the specified value when invoked."""
 
     return lambda _: value
