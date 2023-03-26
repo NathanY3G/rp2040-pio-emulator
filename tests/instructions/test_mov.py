@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Nathan Young
+# Copyright 2021, 2022, 2023 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -186,6 +186,13 @@ instructions_to_test = [
         0xA021,
         State(x_register=0xFFFF_FFFF),
         State(x_register=0xFFFF_FFFF),
+    ),
+    instruction_param(
+        "mov x ~ pc",
+        0xA0A9,
+        State(x_register=29),
+        State(x_register=29),
+        expected_program_counter=2,
     ),
     instruction_param(
         "mov y isr",
