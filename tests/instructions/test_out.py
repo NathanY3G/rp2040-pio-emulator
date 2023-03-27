@@ -101,7 +101,6 @@ def test_out_instruction_when_shifting_right(opcode, initial_state, expected_sta
     assert new_state == expected_state
 
 
-@pytest.mark.skip(reason="Pull request 57 has not been merged yet")
 # fmt: off
 @pytest.mark.parametrize("opcode, initial_state, expected_state", [
     instruction_param(
