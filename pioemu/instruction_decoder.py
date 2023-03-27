@@ -132,7 +132,7 @@ class InstructionDecoder:
             write_to_null,
             write_to_pin_directions,
             write_to_program_counter,
-            write_to_isr,
+            None,
             None,
         ]
 
