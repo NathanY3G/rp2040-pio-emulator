@@ -11,8 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Self, Tuple
-
+from typing import Tuple
+try:
+	from typing import Self
+except:
+	# For versions of Python < 3.11
+	from typing import TypeVar
+	Self = TypeVar('_Self', bound='A')
 
 class ShiftRegister:
     """Immutable shift register for 32-bit values.
