@@ -47,7 +47,7 @@ from ..support import emulate_single_instruction
 )
 # fmt: on
 def test_instruction_consumes_expected_clock_cycles(
-    opcode, initial_state, expected_clock_cycles
+    opcode: int, initial_state: State, expected_clock_cycles: int
 ):
     new_state = emulate_single_instruction(opcode, initial_state)
 
