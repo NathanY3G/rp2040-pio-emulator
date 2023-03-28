@@ -83,7 +83,7 @@ def write_to_isr(data_supplier, state, count=0):
     )
 
 
-def write_to_osr(data_supplier, state, count):
+def write_to_osr(data_supplier, state, count=0):
     """Copies the given data into the output shift register."""
 
     return replace(
