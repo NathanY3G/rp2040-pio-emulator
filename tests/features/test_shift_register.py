@@ -13,7 +13,7 @@
 # limitations under the License.
 import pytest
 
-from pioemu import ShiftRegister
+from pioemu import ShiftRegister, State
 
 
 # fmt: off
