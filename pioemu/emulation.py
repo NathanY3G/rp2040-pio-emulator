@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Nathan Young
+# Copyright 2021, 2022, 2023 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import replace
+from .instruction import Instruction, ProgramCounterAdvance
 from .instruction_decoder import InstructionDecoder
 from .shift_register import ShiftRegister
 from .state import State
@@ -91,9 +92,6 @@ def emulate(
 
         instruction = instruction_decoder.decode(opcode)
 
-        # TODO: Consider moving this logic into the instruction decoder
-        jump_instruction = (opcode >> 13) == 0
-
         if instruction is None:
             return
 
@@ -110,34 +108,40 @@ def emulate(
             )
 
         current_state = _advance_program_counter(
-            condition_met, jump_instruction, 0, wrap_top, current_state
+            instruction, condition_met, 0, wrap_top, current_state
         )
 
         current_state = _apply_delay_value(
-            condition_met, jump_instruction, delay_value, current_state
+            opcode, condition_met, delay_value, current_state
         )
 
         yield (previous_state, current_state)
 
 
-def _advance_program_counter(
-    condition_met, jump_instruction, wrap_bottom, wrap_top, state
-):
-    if condition_met and jump_instruction:
-        return state
-    elif not condition_met and not jump_instruction:
-        return state
-    elif state.program_counter == wrap_top:
-        return replace(state, program_counter=wrap_bottom)
+def _advance_program_counter(instruction, condition_met, wrap_bottom, wrap_top, state):
+    if state.program_counter == wrap_top:
+        new_pc = wrap_bottom
     else:
-        return replace(state, program_counter=state.program_counter + 1)
+        new_pc = state.program_counter + 1
+
+    match instruction.program_counter_advance:
+        case ProgramCounterAdvance.ALWAYS:
+            return replace(state, program_counter=new_pc)
+        case ProgramCounterAdvance.WHEN_CONDITION_MET if condition_met:
+            return replace(state, program_counter=new_pc)
+        case ProgramCounterAdvance.WHEN_CONDITION_NOT_MET if not condition_met:
+            return replace(state, program_counter=new_pc)
+        case _:
+            return state
 
 
-def _apply_delay_value(condition_met, jump_instruction, delay_value, state):
+def _apply_delay_value(opcode, condition_met, delay_value, state):
+    jump_instruction = (opcode >> 13) == 0
+
     if jump_instruction or condition_met:
         return replace(state, clock=state.clock + 1 + delay_value)
-    else:
-        return replace(state, clock=state.clock + 1)
+
+    return replace(state, clock=state.clock + 1)
 
 
 def _apply_side_effects(opcode, state):

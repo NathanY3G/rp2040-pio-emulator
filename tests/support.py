@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Nathan Young
+# Copyright 2021, 2022, 2023 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,8 +20,16 @@ from pioemu import clock_cycles_reached, emulate
 from .opcodes import Opcodes
 
 
-def instruction_param(description, opcode, initial_state, expected_state):
-    expected_state = replace(expected_state, clock=1, program_counter=1)
+def instruction_param(
+    description, opcode, initial_state, expected_state, *, expected_program_counter=None
+):
+    if expected_program_counter is not None:
+        expected_state = replace(
+            expected_state, clock=1, program_counter=expected_program_counter
+        )
+    else:
+        expected_state = replace(expected_state, clock=1, program_counter=1)
+
     return param(opcode, initial_state, expected_state, id=description)
 
 

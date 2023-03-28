@@ -79,7 +79,7 @@ qtconsole==5.4.1
 QtPy==2.3.0
 rfc3339-validator==0.1.4
 rfc3986-validator==0.1.1
-rp2040-pio-emulator==0.77.0
+rp2040-pio-emulator==0.78.0
 seaborn==0.12.2
 Send2Trash==1.8.0
 six==1.16.0
