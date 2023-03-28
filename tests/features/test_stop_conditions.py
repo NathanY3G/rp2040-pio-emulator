@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from functools import reduce
+from typing import Callable
 
-from pioemu import emulate
+from pioemu import emulate, State
 
 from ..opcodes import Opcodes
 
 
-def _execute_test_program(stop_condition):
+def _execute_test_program(stop_condition: Callable[[int, State], bool]) -> State:
     # Program which decrements the X register from 9 down to 0
     opcodes = [0xE029, 0xA041, 0x0041, Opcodes.nop()]
 
