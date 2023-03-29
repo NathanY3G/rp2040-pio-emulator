@@ -27,7 +27,7 @@ from .conditions import (
     output_shift_register_not_empty,
 )
 from .instruction import Instruction, ProgramCounterAdvance
-from .instructions import (
+from .instructions.pull import (
     pull_blocking,
     pull_nonblocking,
 )
@@ -136,9 +136,8 @@ class InstructionDecoder:
             write_to_osr,
         ]
 
-        self.out_destinations: List[
-            Callable[[Callable[[State], int], State], State] | None
-        ] = [
+        # FIXME: Different signature used by write_to_isr() conflicts with type-hints
+        self.out_destinations = [
             write_to_pins,
             write_to_x,
             write_to_y,
