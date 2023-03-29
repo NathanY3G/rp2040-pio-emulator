@@ -1,4 +1,4 @@
-# Copyright 2021 Nathan Young
+# Copyright 2021, 2023 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,8 @@
 # limitations under the License.
 from dataclasses import replace
 from typing import Callable, Tuple
-from .state import ShiftRegister, State
+from .shift_register import ShiftRegister
+from .state import State
 
 
 def read_from_isr(state: State) -> int:

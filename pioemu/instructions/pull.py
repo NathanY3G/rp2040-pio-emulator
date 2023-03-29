@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import replace
-from pioemu.state import ShiftRegister, State
-from pioemu.conditions import transmit_fifo_not_empty
-
+from ..conditions import transmit_fifo_not_empty
+from ..shift_register import ShiftRegister
+from ..state import State
 
 def pull_blocking(state: State) -> State:
     return replace(
