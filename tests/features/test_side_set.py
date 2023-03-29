@@ -42,7 +42,11 @@ def test_side_set_is_not_mistaken_for_delay():
     ],
 )
 def test_side_set_changes_pin_values(
-    opcode: int, pin_base: int, pin_count: int, initial_pin_values: int, expected_pin_values: int
+    opcode: int,
+    pin_base: int,
+    pin_count: int,
+    initial_pin_values: int,
+    expected_pin_values: int,
 ):
     _, new_state = next(
         emulate(

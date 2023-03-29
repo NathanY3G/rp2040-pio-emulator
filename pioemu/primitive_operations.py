@@ -86,15 +86,20 @@ def read_from_y(state: State) -> int:
     return state.y_register
 
 
-def write_to_isr(data_supplier: Callable[[State], int], state: State, count: int=0) -> State:
+def write_to_isr(
+    data_supplier: Callable[[State], int], state: State, count: int = 0
+) -> State:
     """Copies the given data into the input shift register."""
 
     return replace(
-        state, input_shift_register=ShiftRegister(data_supplier(state) & 0xFFFF_FFFF, count)
+        state,
+        input_shift_register=ShiftRegister(data_supplier(state) & 0xFFFF_FFFF, count),
     )
 
 
-def write_to_osr(data_supplier: Callable[[State], int], state: State, count: int=0) -> State:
+def write_to_osr(
+    data_supplier: Callable[[State], int], state: State, count: int = 0
+) -> State:
     """Copies the given data into the output shift register."""
 
     return replace(
