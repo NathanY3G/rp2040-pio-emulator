@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import replace
+from typing import Callable, Generator, List, Tuple
 from .instruction import Instruction, ProgramCounterAdvance
 from .instruction_decoder import InstructionDecoder
 from .shift_register import ShiftRegister
@@ -19,17 +20,17 @@ from .state import State
 
 
 def emulate(
-    opcodes,
+    opcodes: List[int],
     *,
-    stop_when,
-    initial_state=State(),
-    input_source=None,
-    shift_isr_right=True,
-    shift_osr_right=True,
-    side_set_base=0,
-    side_set_count=0,
-    jmp_pin=0,
-):
+    stop_when: Callable[[int, State], bool],
+    initial_state: State = State(),
+    input_source: Callable[[int], int] | None = None,
+    shift_isr_right: bool = True,
+    shift_osr_right: bool = True,
+    side_set_base: int = 0,
+    side_set_count: int = 0,
+    jmp_pin: int = 0,
+) -> Generator[Tuple[State, State], None, None]:
     """
     Create and return a generator for emulating the given PIO program.
 
@@ -118,7 +119,13 @@ def emulate(
         yield (previous_state, current_state)
 
 
-def _advance_program_counter(instruction, condition_met, wrap_bottom, wrap_top, state):
+def _advance_program_counter(
+    instruction: Instruction,
+    condition_met: bool,
+    wrap_bottom: int,
+    wrap_top: int,
+    state: State,
+) -> State:
     if state.program_counter == wrap_top:
         new_pc = wrap_bottom
     else:
@@ -135,7 +142,9 @@ def _advance_program_counter(instruction, condition_met, wrap_bottom, wrap_top, 
             return state
 
 
-def _apply_delay_value(opcode, condition_met, delay_value, state):
+def _apply_delay_value(
+    opcode: int, condition_met: bool, delay_value: int, state: State
+) -> State:
     jump_instruction = (opcode >> 13) == 0
 
     if jump_instruction or condition_met:
@@ -144,7 +153,7 @@ def _apply_delay_value(opcode, condition_met, delay_value, state):
     return replace(state, clock=state.clock + 1)
 
 
-def _apply_side_effects(opcode, state):
+def _apply_side_effects(opcode: int, state: State) -> State:
     if (opcode & 0xE0E0) == 0x0040:
         return replace(state, x_register=state.x_register - 1)
     elif (opcode & 0xE0E0) == 0x0080:
@@ -153,7 +162,9 @@ def _apply_side_effects(opcode, state):
         return state
 
 
-def _extract_delay_and_side_set_from_opcode(opcode, side_set_count):
+def _extract_delay_and_side_set_from_opcode(
+    opcode: int, side_set_count: int
+) -> Tuple[int, int]:
     combined_values = (opcode >> 8) & 0x1F
     bits_for_delay = 5 - side_set_count
     delay_mask = (1 << bits_for_delay) - 1
@@ -161,7 +172,9 @@ def _extract_delay_and_side_set_from_opcode(opcode, side_set_count):
     return (combined_values >> bits_for_delay, combined_values & delay_mask)
 
 
-def _apply_side_set_to_pin_values(state, pin_base, pin_count, pin_values):
+def _apply_side_set_to_pin_values(
+    state: State, pin_base: int, pin_count: int, pin_values: int
+) -> State:
     bit_mask = ~(((1 << pin_count) - 1) << pin_base) & 0xFFFF
     new_pin_values = (state.pin_values & bit_mask) | (pin_values << pin_base)
 

@@ -25,7 +25,7 @@ from ..support import emulate_single_instruction
         pytest.param(0x2020, State(pin_values=1), id="wait 0 pin, 0"),
     ],
 )
-def test_wait_stalls_when_condition_not_met(opcode, initial_state):
+def test_wait_stalls_when_condition_not_met(opcode: int, initial_state: State):
     new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state.program_counter == 0
@@ -38,7 +38,7 @@ def test_wait_stalls_when_condition_not_met(opcode, initial_state):
         pytest.param(0x2020, State(pin_values=0), id="wait 0 pin, 0"),
     ],
 )
-def test_wait_advances_when_condition_met(opcode, initial_state):
+def test_wait_advances_when_condition_met(opcode: int, initial_state: State):
     new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state.program_counter == 1

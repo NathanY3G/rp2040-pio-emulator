@@ -13,7 +13,7 @@
 # limitations under the License.
 import pytest
 
-from pioemu import ShiftRegister
+from pioemu import ShiftRegister, State
 
 
 # fmt: off
@@ -41,7 +41,11 @@ from pioemu import ShiftRegister
 )
 # fmt: on
 def test_shift_left(
-    initial_state, bit_count, data_in, expected_state, expected_shift_result
+    initial_state: State,
+    bit_count: int,
+    data_in: int,
+    expected_state: State,
+    expected_shift_result: int,
 ):
     new_state, shift_result = initial_state.shift_left(bit_count, data_in)
 
@@ -75,7 +79,11 @@ def test_shift_left(
 )
 # fmt: on
 def test_shift_right(
-    initial_state, bit_count, data_in, expected_state, expected_shift_result
+    initial_state: State,
+    bit_count: int,
+    data_in: int,
+    expected_state: State,
+    expected_shift_result: int,
 ):
     new_state, shift_result = initial_state.shift_right(bit_count, data_in)
 

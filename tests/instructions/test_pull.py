@@ -52,7 +52,7 @@ def test_pull_stalls_when_blocking_and_fifo_empty():
         pytest.param(0x80A0, id="pull block"),
     ],
 )
-def test_pull_clears_the_output_shift_register(opcode):
+def test_pull_clears_the_output_shift_register(opcode: int):
     initial_state = State(transmit_fifo=deque([0]))
 
     new_state = emulate_single_instruction(opcode, initial_state)

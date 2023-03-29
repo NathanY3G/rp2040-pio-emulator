@@ -72,7 +72,9 @@ instructions_to_test_with_right_shift = [
 @pytest.mark.parametrize(
     "opcode, initial_state, expected_state", instructions_to_test_with_left_shift
 )
-def test_out_instruction_when_shifting_left(opcode, initial_state, expected_state):
+def test_out_instruction_when_shifting_left(
+    opcode: int, initial_state: State, expected_state: State
+):
     _, new_state = next(
         emulate(
             [opcode, Opcodes.nop()],
@@ -88,7 +90,9 @@ def test_out_instruction_when_shifting_left(opcode, initial_state, expected_stat
 @pytest.mark.parametrize(
     "opcode, initial_state, expected_state", instructions_to_test_with_right_shift
 )
-def test_out_instruction_when_shifting_right(opcode, initial_state, expected_state):
+def test_out_instruction_when_shifting_right(
+    opcode: int, initial_state: State, expected_state: State
+):
     _, new_state = next(
         emulate(
             [opcode, Opcodes.nop()],
@@ -101,7 +105,6 @@ def test_out_instruction_when_shifting_right(opcode, initial_state, expected_sta
     assert new_state == expected_state
 
 
-@pytest.mark.skip(reason="Pull request 57 has not been merged yet")
 # fmt: off
 @pytest.mark.parametrize("opcode, initial_state, expected_state", [
     instruction_param(
@@ -110,6 +113,13 @@ def test_out_instruction_when_shifting_right(opcode, initial_state, expected_sta
         State(output_shift_register=ShiftRegister(0x0000_001F, 0)),
         State(output_shift_register=ShiftRegister(0x0000_0007, 2)),
         expected_program_counter=3,
+    ),
+
+    instruction_param(
+        "out isr, 5",
+        0x60C5,
+        State(output_shift_register=ShiftRegister(0xDEAD_BEEF, 0), input_shift_register=ShiftRegister(0x1234_4567, 32)),
+        State(output_shift_register=ShiftRegister(0x06f5_6df7, 5), input_shift_register=ShiftRegister(0x0000_000F, 5)),
     ),
 ])
 # fmt: on

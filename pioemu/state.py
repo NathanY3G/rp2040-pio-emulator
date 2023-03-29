@@ -18,15 +18,11 @@ from typing import Deque
 from .shift_register import ShiftRegister
 
 
-def DequeFactory():
-    return deque()
-
-
-def ShiftRegisterFactoryMin():
+def ShiftRegisterFactoryMin() -> ShiftRegister:
     return ShiftRegister(0, 0)
 
 
-def ShiftRegisterFactoryMax():
+def ShiftRegisterFactoryMax() -> ShiftRegister:
     return ShiftRegister(0, 32)
 
 
@@ -36,8 +32,8 @@ class State:
     program_counter: int = 0
     pin_directions: int = 0
     pin_values: int = 0
-    transmit_fifo: Deque = field(default_factory=DequeFactory)
-    receive_fifo: Deque = field(default_factory=DequeFactory)
+    transmit_fifo: Deque[int] = field(default_factory=lambda: deque())
+    receive_fifo: Deque[int] = field(default_factory=lambda: deque())
     input_shift_register: ShiftRegister = field(default_factory=ShiftRegisterFactoryMin)
     output_shift_register: ShiftRegister = field(
         default_factory=ShiftRegisterFactoryMax
