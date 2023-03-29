@@ -15,9 +15,11 @@ from dataclasses import replace
 from pioemu.state import ShiftRegister
 from pioemu.conditions import receive_fifo_not_full
 
+
 def push_blocking(state):
     state.receive_fifo.push(state.input_shift_register.contents)
     return replace(state, input_shift_register=ShiftRegister(0, 0))
+
 
 def push_nonblocking(state):
     if receive_fifo_not_full:
