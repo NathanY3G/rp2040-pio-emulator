@@ -87,7 +87,9 @@ def test_jump_when_y_is_non_zero_post_decrement():
         pytest.param(7, State(pin_values=(1 << 7)), 0, id="jmp pin when high"),
     ],
 )
-def test_jump_on_external_control_pin(jmp_pin: int, initial_state: State, expected_program_counter: int):
+def test_jump_on_external_control_pin(
+    jmp_pin: int, initial_state: State, expected_program_counter: int
+):
     _, new_state = next(
         emulate(
             [0x00C0, Opcodes.nop()],  # jmp pin 0
@@ -115,7 +117,9 @@ def test_jump_on_external_control_pin(jmp_pin: int, initial_state: State, expect
         ),
     ],
 )
-def test_jump_on_output_shift_register_state(initial_state: State, expected_program_counter: int):
+def test_jump_on_output_shift_register_state(
+    initial_state: State, expected_program_counter: int
+):
     new_state = emulate_single_instruction(0x00E2, initial_state)  # jmp !osre, 2
 
     assert new_state.program_counter == expected_program_counter

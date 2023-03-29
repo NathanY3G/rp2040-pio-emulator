@@ -16,6 +16,7 @@ from ..conditions import transmit_fifo_not_empty
 from ..shift_register import ShiftRegister
 from ..state import State
 
+
 def pull_blocking(state: State) -> State:
     return replace(
         state, output_shift_register=ShiftRegister(state.transmit_fifo.pop(), 0)

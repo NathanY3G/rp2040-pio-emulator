@@ -72,7 +72,9 @@ instructions_to_test_with_right_shift = [
 @pytest.mark.parametrize(
     "opcode, initial_state, expected_state", instructions_to_test_with_left_shift
 )
-def test_out_instruction_when_shifting_left(opcode: int, initial_state: State, expected_state: State):
+def test_out_instruction_when_shifting_left(
+    opcode: int, initial_state: State, expected_state: State
+):
     _, new_state = next(
         emulate(
             [opcode, Opcodes.nop()],
@@ -88,7 +90,9 @@ def test_out_instruction_when_shifting_left(opcode: int, initial_state: State, e
 @pytest.mark.parametrize(
     "opcode, initial_state, expected_state", instructions_to_test_with_right_shift
 )
-def test_out_instruction_when_shifting_right(opcode: int, initial_state: State, expected_state: State):
+def test_out_instruction_when_shifting_right(
+    opcode: int, initial_state: State, expected_state: State
+):
     _, new_state = next(
         emulate(
             [opcode, Opcodes.nop()],
