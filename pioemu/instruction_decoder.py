@@ -28,7 +28,7 @@ from .conditions import (
     output_shift_register_not_empty,
 )
 from .instruction import Instruction, ProgramCounterAdvance
-from .instructions.pull import (
+from .instructions import (
     pull_blocking,
     pull_nonblocking,
     push_blocking,
