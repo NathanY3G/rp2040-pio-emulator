@@ -132,7 +132,7 @@ class InstructionDecoder:
             write_to_null,
             write_to_pin_directions,
             write_to_program_counter,
-            None,
+            write_to_isr,
             None,
         ]
 
@@ -228,6 +228,13 @@ class InstructionDecoder:
             state, shift_result = shift_from_osr(
                 self.shift_osr_method, bit_count, state
             )
+
+            # Somewhat hacky workaround because 'OUT, ISR' also sets ISR shift counter to the
+            # bit_count but no other command where the ISR is written to has a similar effect.
+            # See the description of the ISR destination on section 3.4.5.2 of the RP2040 Datasheet
+            if write_to_destination == write_to_isr:
+                return write_to_destination(supplies_value(shift_result), state, count=bit_count)
+
             return write_to_destination(supplies_value(shift_result), state)
 
         if destination == 5:  # Program counter

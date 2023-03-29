@@ -75,20 +75,20 @@ def read_from_y(state):
     return state.y_register
 
 
-def write_to_isr(data_supplier, state):
+def write_to_isr(data_supplier, state, count=0):
     """Copies the given data into the input shift register."""
 
     return replace(
-        state, input_shift_register=ShiftRegister(data_supplier(state) & 0xFFFF_FFFF, 0)
+        state, input_shift_register=ShiftRegister(data_supplier(state) & 0xFFFF_FFFF, count)
     )
 
 
-def write_to_osr(data_supplier, state):
+def write_to_osr(data_supplier, state, count=0):
     """Copies the given data into the output shift register."""
 
     return replace(
         state,
-        output_shift_register=ShiftRegister(data_supplier(state) & 0xFFFF_FFFF, 0),
+        output_shift_register=ShiftRegister(data_supplier(state) & 0xFFFF_FFFF, count),
     )
 
 
