@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Nathan Young
+# Copyright 2021, 2022, 2023 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Tuple
+try:
+	from typing import Self
+except:
+	# For versions of Python < 3.11
+	from typing import TypeVar
+	Self = TypeVar('_Self', bound='A')
+
 class ShiftRegister:
     """Immutable shift register for 32-bit values.
 
@@ -26,21 +34,21 @@ class ShiftRegister:
         Total number of bits shifted out of / into this shift register (0-32).
     """
 
-    def __init__(self, contents, counter):
+    def __init__(self, contents: int, counter: int):
         self._contents = contents
         self._counter = counter
 
     @property
-    def contents(self):
+    def contents(self) -> int:
         """Return the value held within this shift register."""
         return self._contents
 
     @property
-    def counter(self):
+    def counter(self) -> int:
         """Return the total number of bits shifted out of / into this shift register."""
         return self._counter
 
-    def shift_left(self, bit_count, data_in=0):
+    def shift_left(self, bit_count: int, data_in: int = 0) -> Tuple[Self, int]:
         """Shifts the most significant bits out of the shift register.
 
         Parameters
@@ -52,7 +60,7 @@ class ShiftRegister:
 
         Returns
         -------
-        (ShiftRegister, int)
+        Tuple[ShiftRegister, int]
             Tuple containing the new representation of this shift register and the result.
         """
         bit_mask = (1 << bit_count) - 1
@@ -66,7 +74,7 @@ class ShiftRegister:
             32 - bit_count
         )
 
-    def shift_right(self, bit_count, data_in=0):
+    def shift_right(self, bit_count: int, data_in: int = 0) -> Tuple[Self, int]:
         """Shifts the least significant bits out of the shift register.
 
         Parameters
@@ -78,7 +86,7 @@ class ShiftRegister:
 
         Returns
         -------
-        (ShiftRegister, int)
+        Tuple[ShiftRegister, int]
             Tuple containing the new representation of this shift register and the result.
         """
         bit_mask = (1 << bit_count) - 1
@@ -93,11 +101,11 @@ class ShiftRegister:
             self._contents & bit_mask,
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         if self.__class__ is other.__class__:
             return (self._contents, self._counter) == (other._contents, other._counter)
 
         return NotImplemented
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"ShiftRegister(contents={self._contents!r}, counter={self._counter!r})"
