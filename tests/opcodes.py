@@ -13,5 +13,5 @@
 # limitations under the License.
 class Opcodes:
     @staticmethod
-    def nop():
+    def nop() -> int:
         return 0xA042

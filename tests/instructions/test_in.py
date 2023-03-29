@@ -59,7 +59,7 @@ instructions_to_test_with_right_shift = [
 @pytest.mark.parametrize(
     "opcode, initial_state, expected_state", instructions_to_test_with_right_shift
 )
-def test_in_instruction_when_shifting_right(opcode, initial_state, expected_state):
+def test_in_instruction_when_shifting_right(opcode: int, initial_state: State, expected_state: State):
     _, new_state = next(
         emulate(
             [opcode, Opcodes.nop()],
