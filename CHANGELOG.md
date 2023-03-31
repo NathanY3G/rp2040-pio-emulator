@@ -3,7 +3,7 @@
 ## v0.79.0 (2023-03-31)
 
 ### Added
-- Support for the OUT PC instruction. Thanks @[aaronjamt](https://github.com/aaronjamt).
+- Support for the OUT PC and ISR instructions. Thanks @[aaronjamt](https://github.com/aaronjamt).
 - Type-hints for documentation and to improve maintainability.
 
 ## v0.78.0 (2023-03-25)
