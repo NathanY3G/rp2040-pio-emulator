@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- No changes
+
 ## v0.79.0 (2023-03-31)
 
 ### Added
