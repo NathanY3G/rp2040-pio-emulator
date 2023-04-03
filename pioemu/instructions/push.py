@@ -23,6 +23,6 @@ def push_blocking(state):
 
 def push_nonblocking(state):
     if receive_fifo_not_full:
-        push_blocking(state)
+        return push_blocking(state)
     else:
         return replace(state, input_shift_register=ShiftRegister(0, 0))
