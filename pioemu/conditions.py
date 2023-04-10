@@ -36,7 +36,7 @@ def transmit_fifo_not_empty(state: State) -> bool:
 
 
 def receive_fifo_not_full(state):
-    return len(state.receive_fifo) < 32
+    return len(state.receive_fifo) < 4
 
 
 def x_register_equals_zero(state: State) -> bool:
