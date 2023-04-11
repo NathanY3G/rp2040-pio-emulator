@@ -17,7 +17,7 @@ from pioemu.conditions import receive_fifo_not_full
 
 
 def push_blocking(state):
-    state.receive_fifo.appendleft(state.input_shift_register.contents)
+    state.receive_fifo.append(state.input_shift_register.contents)
     return replace(state, input_shift_register=ShiftRegister(0, 0))
 
 
