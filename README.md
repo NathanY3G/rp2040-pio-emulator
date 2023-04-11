@@ -43,8 +43,8 @@ JMP         | :heavy_check_mark:                |
 WAIT        | :heavy_check_mark: :warning:      | IRQ variant is not supported
 IN          | :heavy_check_mark:                |
 OUT         | :heavy_check_mark: :construction: | EXEC destination not implemented
-PUSH        | :heavy_check_mark: :construction: | IfFull variant not implemented
-PULL        | :heavy_check_mark: :construction: | IfEmpty variant not implemented
+PUSH        | :heavy_check_mark:                | 
+PULL        | :heavy_check_mark:                | 
 MOV         | :heavy_check_mark: :construction: | Some variants and operations not implemented
 IRQ         | :heavy_multiplication_x:          |
 SET         | :heavy_check_mark:                |
