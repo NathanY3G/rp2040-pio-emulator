@@ -19,6 +19,7 @@ from .conditions import (
     gpio_low,
     gpio_high,
     transmit_fifo_not_empty,
+    receive_fifo_not_full,
     x_register_equals_zero,
     x_register_not_equal_to_y_register,
     x_register_not_equal_to_zero,
@@ -27,9 +28,11 @@ from .conditions import (
     output_shift_register_not_empty,
 )
 from .instruction import Instruction, ProgramCounterAdvance
-from .instructions.pull import (
+from .instructions import (
     pull_blocking,
     pull_nonblocking,
+    push_blocking,
+    push_nonblocking,
 )
 from .primitive_operations import (
     read_from_isr,
@@ -84,7 +87,7 @@ class InstructionDecoder:
             self._decode_wait,
             self._decode_in,
             self._decode_out,
-            self._decode_pull,
+            self._decode_push_pull,
             self._decode_mov,
             lambda _: None,
             self._decode_set,
@@ -274,18 +277,31 @@ class InstructionDecoder:
         )
 
     @staticmethod
-    def _decode_pull(opcode: int) -> Instruction | None:
-        if opcode & 0x0020:
-            instruction = Instruction(
-                transmit_fifo_not_empty,
-                pull_blocking,
-                ProgramCounterAdvance.WHEN_CONDITION_MET,
-            )
+    def _decode_push_pull(opcode):
+        if opcode & 0x0080:
+            # Pull
+            if opcode & 0x0020:
+                instruction = Instruction(
+                    transmit_fifo_not_empty,
+                    pull_blocking,
+                    ProgramCounterAdvance.WHEN_CONDITION_MET,
+                )
+            else:
+                instruction = Instruction(
+                    always, pull_nonblocking, ProgramCounterAdvance.ALWAYS
+                )
         else:
-            instruction = Instruction(
-                always, pull_nonblocking, ProgramCounterAdvance.ALWAYS
-            )
-
+            # Push
+            if opcode & 0x0020:
+                instruction = Instruction(
+                    receive_fifo_not_full,
+                    push_blocking,
+                    ProgramCounterAdvance.WHEN_CONDITION_MET,
+                )
+            else:
+                instruction = Instruction(
+                    always, push_nonblocking, ProgramCounterAdvance.ALWAYS
+                )
         return instruction
 
     @staticmethod

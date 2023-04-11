@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Nathan Young
+# Copyright 2023 Aaronjamt
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,5 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from .pull import pull_blocking, pull_nonblocking
-from .push import push_blocking, push_nonblocking
+from dataclasses import replace
+from pioemu.state import ShiftRegister
+from pioemu.conditions import receive_fifo_not_full
+
+
+def push_blocking(state):
+    state.receive_fifo.append(state.input_shift_register.contents)
+    return replace(state, input_shift_register=ShiftRegister(0, 0))
+
+
+def push_nonblocking(state):
+    if receive_fifo_not_full(state):
+        return push_blocking(state)
+    else:
+        return replace(state, input_shift_register=ShiftRegister(0, 0))
