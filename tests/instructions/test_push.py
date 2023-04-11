@@ -21,7 +21,6 @@ from ..support import emulate_single_instruction, instruction_param
 
 
 # fmt: off
-@pytest.mark.skip(reason="Pull request 60 has not been merged yet")
 @pytest.mark.parametrize("opcode, initial_state, expected_state", [
     instruction_param(
         "push noblock",
