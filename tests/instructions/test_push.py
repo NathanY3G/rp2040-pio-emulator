@@ -45,7 +45,7 @@ def test_push_instruction(opcode: int, initial_state: State, expected_state: Sta
 
 def test_receive_fifo_in_before_state_remains_unaffected():
     initial_state = State(
-        transmit_fifo=deque(), input_shift_register=ShiftRegister(0xDEAD_BEEF, 0)
+        receive_fifo=deque(), input_shift_register=ShiftRegister(0xDEAD_BEEF, 0)
     )
 
     before_state, _ = emulate_single_instruction(0x8000, initial_state)  # push noblock
