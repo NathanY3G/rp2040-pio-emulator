@@ -124,6 +124,6 @@ def test_out_instruction_when_shifting_right(
 ])
 # fmt: on
 def test_out_instruction(opcode, initial_state, expected_state):
-    new_state = emulate_single_instruction(opcode, initial_state)
+    _, new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state == expected_state

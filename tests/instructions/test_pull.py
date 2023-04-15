@@ -19,6 +19,8 @@ from pioemu import ShiftRegister, State
 
 from ..support import emulate_single_instruction, instruction_param
 
+
+# fmt: off
 @pytest.mark.parametrize("opcode, initial_state, expected_state", [
     instruction_param(
         "pull noblock when fifo not empty",
@@ -48,6 +50,6 @@ from ..support import emulate_single_instruction, instruction_param
 ])
 # fmt: on
 def test_pull_instruction(opcode: int, initial_state: State, expected_state: State):
-    new_state = emulate_single_instruction(opcode, initial_state)
+    _, new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state == expected_state

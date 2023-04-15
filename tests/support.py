@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from dataclasses import replace
+from typing import Tuple
 
 from pytest import param
 
@@ -33,7 +34,7 @@ def instruction_param(
     return param(opcode, initial_state, expected_state, id=description)
 
 
-def emulate_single_instruction(opcode: int, initial_state=None) -> State:
+def emulate_single_instruction(opcode: int, initial_state=None) -> Tuple[State, State]:
     if initial_state is not None:
         instruction_generator = emulate(
             [opcode, Opcodes.nop()],
@@ -43,6 +44,4 @@ def emulate_single_instruction(opcode: int, initial_state=None) -> State:
     else:
         instruction_generator = emulate([opcode], stop_when=clock_cycles_reached(1))
 
-    _, new_state = next(instruction_generator)
-
-    return new_state
+    return next(instruction_generator)

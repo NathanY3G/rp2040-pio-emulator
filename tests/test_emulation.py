@@ -42,7 +42,7 @@ def test_emulation_stops_when_unsupported_opcode_is_reached():
 def test_program_counter_is_incremented(opcode: int):
     initial_state = State(program_counter=0)
 
-    new_state = emulate_single_instruction(opcode, initial_state)
+    _, new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state.program_counter == 1
 
