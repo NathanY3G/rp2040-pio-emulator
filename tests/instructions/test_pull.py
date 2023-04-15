@@ -53,3 +53,11 @@ def test_pull_instruction(opcode: int, initial_state: State, expected_state: Sta
     _, new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state == expected_state
+
+
+def test_transmit_fifo_in_before_state_remains_unaffected():
+    initial_state = State(transmit_fifo=deque([0xDEAD_BEEF]))
+
+    before_state, _ = emulate_single_instruction(0x80A0, initial_state)  # pull block
+
+    assert before_state.transmit_fifo == deque([0xDEAD_BEEF])

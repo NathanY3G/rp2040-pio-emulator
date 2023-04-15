@@ -18,15 +18,25 @@ from ..state import State
 
 
 def pull_blocking(state: State) -> State:
+    new_transmit_fifo = state.transmit_fifo.copy()
+
     return replace(
-        state, output_shift_register=ShiftRegister(state.transmit_fifo.pop(), 0)
+        state,
+        transmit_fifo=new_transmit_fifo,
+        output_shift_register=ShiftRegister(new_transmit_fifo.pop(), 0),
     )
 
 
 def pull_nonblocking(state: State) -> State:
+    new_transmit_fifo = state.transmit_fifo.copy()
+
     if transmit_fifo_not_empty(state):
-        new_contents = state.transmit_fifo.pop()
+        new_contents = new_transmit_fifo.pop()
     else:
         new_contents = state.x_register
 
-    return replace(state, output_shift_register=ShiftRegister(new_contents, 0))
+    return replace(
+        state,
+        transmit_fifo=new_transmit_fifo,
+        output_shift_register=ShiftRegister(new_contents, 0),
+    )
