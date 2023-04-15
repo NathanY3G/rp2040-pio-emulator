@@ -26,7 +26,9 @@ class State:
     pin_values: int = 0
     transmit_fifo: Deque[int] = field(default_factory=deque)
     receive_fifo: Deque[int] = field(default_factory=deque)
-    input_shift_register: ShiftRegister = field(default_factory=ShiftRegister(0, 0))
+    input_shift_register: ShiftRegister = field(
+        default_factory=lambda: ShiftRegister(0, 0)
+    )
     output_shift_register: ShiftRegister = field(
         default_factory=lambda: ShiftRegister(0, 32)
     )
