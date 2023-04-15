@@ -26,7 +26,7 @@ from ..support import emulate_single_instruction
     ],
 )
 def test_wait_stalls_when_condition_not_met(opcode: int, initial_state: State):
-    new_state = emulate_single_instruction(opcode, initial_state)
+    _, new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state.program_counter == 0
 
@@ -39,6 +39,6 @@ def test_wait_stalls_when_condition_not_met(opcode: int, initial_state: State):
     ],
 )
 def test_wait_advances_when_condition_met(opcode: int, initial_state: State):
-    new_state = emulate_single_instruction(opcode, initial_state)
+    _, new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state.program_counter == 1

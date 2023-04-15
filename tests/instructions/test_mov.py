@@ -212,6 +212,6 @@ instructions_to_test = [
 
 @pytest.mark.parametrize("opcode, initial_state, expected_state", instructions_to_test)
 def test_mov_instruction(opcode: int, initial_state: State, expected_state: State):
-    new_state = emulate_single_instruction(opcode, initial_state)
+    _, new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state == expected_state

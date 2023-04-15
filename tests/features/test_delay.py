@@ -49,6 +49,6 @@ from ..support import emulate_single_instruction
 def test_instruction_consumes_expected_clock_cycles(
     opcode: int, initial_state: State, expected_clock_cycles: int
 ):
-    new_state = emulate_single_instruction(opcode, initial_state)
+    _, new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state.clock == expected_clock_cycles

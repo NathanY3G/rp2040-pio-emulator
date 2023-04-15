@@ -11,14 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from collections import deque
 from dataclasses import replace
 from pioemu.state import ShiftRegister
 from pioemu.conditions import receive_fifo_not_full
 
 
 def push_blocking(state):
-    state.receive_fifo.append(state.input_shift_register.contents)
-    return replace(state, input_shift_register=ShiftRegister(0, 0))
+    return replace(
+        state,
+        receive_fifo=deque([*state.receive_fifo, state.input_shift_register.contents]),
+        input_shift_register=ShiftRegister(0, 0),
+    )
 
 
 def push_nonblocking(state):

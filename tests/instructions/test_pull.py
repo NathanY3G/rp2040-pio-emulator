@@ -19,12 +19,14 @@ from pioemu import ShiftRegister, State
 
 from ..support import emulate_single_instruction, instruction_param
 
+
+# fmt: off
 @pytest.mark.parametrize("opcode, initial_state, expected_state", [
     instruction_param(
         "pull noblock when fifo not empty",
         0x8080,
-        State(transmit_fifo=deque([0x1111_1111])),
-        State(transmit_fifo=deque(), output_shift_register=ShiftRegister(0x1111_1111, 0)),
+        State(transmit_fifo=deque([1, 2, 3, 4])),
+        State(transmit_fifo=deque([2, 3, 4]), output_shift_register=ShiftRegister(1, 0)),
     ),
     instruction_param(
         "pull noblock when fifo empty",
@@ -35,8 +37,8 @@ from ..support import emulate_single_instruction, instruction_param
     instruction_param(
         "pull block when fifo not empty",
         0x80A0,
-        State(transmit_fifo=deque([0x3333_3333])),
-        State(transmit_fifo=deque(), output_shift_register=ShiftRegister(0x3333_3333, 0)),
+        State(transmit_fifo=deque([2, 3, 4])),
+        State(transmit_fifo=deque([3, 4]), output_shift_register=ShiftRegister(2, 0)),
     ),
     instruction_param(
         "pull block when fifo empty",
@@ -48,6 +50,14 @@ from ..support import emulate_single_instruction, instruction_param
 ])
 # fmt: on
 def test_pull_instruction(opcode: int, initial_state: State, expected_state: State):
-    new_state = emulate_single_instruction(opcode, initial_state)
+    _, new_state = emulate_single_instruction(opcode, initial_state)
 
     assert new_state == expected_state
+
+
+def test_transmit_fifo_in_before_state_remains_unaffected():
+    initial_state = State(transmit_fifo=deque([0xDEAD_BEEF]))
+
+    before_state, _ = emulate_single_instruction(0x80A0, initial_state)  # pull block
+
+    assert before_state.transmit_fifo == deque([0xDEAD_BEEF])
