@@ -18,12 +18,14 @@ from .conditions import (
     always,
     gpio_low,
     gpio_high,
+    input_shift_register_full,
+    negate,
+    output_shift_register_empty,
     x_register_equals_zero,
     x_register_not_equal_to_y_register,
     x_register_not_equal_to_zero,
     y_register_equals_zero,
     y_register_not_equal_to_zero,
-    output_shift_register_not_empty,
 )
 from .instruction import Instruction, ProgramCounterAdvance
 from .instructions.pull import (
@@ -102,7 +104,7 @@ class InstructionDecoder:
             y_register_not_equal_to_zero,
             x_register_not_equal_to_y_register,
             partial(gpio_high, jmp_pin),
-            output_shift_register_not_empty,
+            negate(output_shift_register_empty),
         ]
 
         self.in_sources: List[Callable[[State], int] | None] = [
@@ -283,15 +285,19 @@ class InstructionDecoder:
 
         if opcode & 0x0080:
             # Pull
+            condition = output_shift_register_empty if (opcode & 0x0040) else always
+
             instruction = Instruction(
-                always,
+                condition,
                 pull_blocking if block else pull_nonblocking,
                 ProgramCounterAdvance.ALWAYS,
             )
         else:
             # Push
+            condition = input_shift_register_full if (opcode & 0x0040) else always
+
             instruction = Instruction(
-                always,
+                condition,
                 push_blocking if block else push_nonblocking,
                 ProgramCounterAdvance.ALWAYS,
             )

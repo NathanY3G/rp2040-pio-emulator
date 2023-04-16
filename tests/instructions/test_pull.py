@@ -23,29 +23,66 @@ from ..support import emulate_single_instruction, instruction_param
 # fmt: off
 @pytest.mark.parametrize("opcode, initial_state, expected_state", [
     instruction_param(
-        "pull noblock when fifo not empty",
+        "pull noblock when FIFO not empty",
         0x8080,
         State(transmit_fifo=deque([1, 2, 3, 4])),
         State(transmit_fifo=deque([2, 3, 4]), output_shift_register=ShiftRegister(1, 0)),
     ),
     instruction_param(
-        "pull noblock when fifo empty",
+        "pull noblock when FIFO empty",
         0x8080,
         State(transmit_fifo=deque(), x_register=0x2222_2222),
         State(transmit_fifo=deque(), output_shift_register=ShiftRegister(0x2222_2222, 0), x_register=0x2222_2222),
     ),
     instruction_param(
-        "pull block when fifo not empty",
+        "pull block when FIFO not empty",
         0x80A0,
         State(transmit_fifo=deque([2, 3, 4])),
         State(transmit_fifo=deque([3, 4]), output_shift_register=ShiftRegister(2, 0)),
     ),
     instruction_param(
-        "pull block when fifo empty",
+        "pull block when FIFO empty",
         0x80A0,
         State(transmit_fifo=deque()),
         State(transmit_fifo=deque()),
         expected_program_counter=0,
+    ),
+    instruction_param(
+        "pull ifempty noblock when OSR not empty and FIFO not empty",
+        0x80C0,
+        State(transmit_fifo=deque([3, 4]), output_shift_register=ShiftRegister(0, 1)),
+        State(transmit_fifo=deque([3, 4]), output_shift_register=ShiftRegister(0, 1)),
+    ),
+    instruction_param(
+        "pull ifempty noblock when OSR empty and FIFO not empty",
+        0x80C0,
+        State(transmit_fifo=deque([4]), output_shift_register=ShiftRegister(0, 32)),
+        State(transmit_fifo=deque(), output_shift_register=ShiftRegister(4, 0)),
+    ),
+    instruction_param(
+        "pull ifempty block when OSR not empty and FIFO empty",
+        0x80E0,
+        State(transmit_fifo=deque(), output_shift_register=ShiftRegister(0, 31)),
+        State(transmit_fifo=deque(), output_shift_register=ShiftRegister(0, 31)),
+    ),
+    instruction_param(
+        "pull ifempty block when OSR not empty and FIFO not empty",
+        0x80E0,
+        State(transmit_fifo=deque([1]), output_shift_register=ShiftRegister(0, 31)),
+        State(transmit_fifo=deque([1]), output_shift_register=ShiftRegister(0, 31)),
+    ),
+    instruction_param(
+        "pull ifempty block when OSR empty and FIFO empty",
+        0x80E0,
+        State(transmit_fifo=deque(), output_shift_register=ShiftRegister(0, 32)),
+        State(transmit_fifo=deque(), output_shift_register=ShiftRegister(0, 32)),
+        expected_program_counter=0,
+    ),
+    instruction_param(
+        "pull ifempty block when OSR empty and FIFO not empty",
+        0x80E0,
+        State(transmit_fifo=deque([1]), output_shift_register=ShiftRegister(0, 32)),
+        State(transmit_fifo=deque(), output_shift_register=ShiftRegister(1, 0)),
     ),
 ])
 # fmt: on

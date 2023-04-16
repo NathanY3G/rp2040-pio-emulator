@@ -23,6 +23,13 @@ def always(_: State) -> Literal[True]:
     return True
 
 
+def negate(predicate: Callable[[State], bool]) -> Callable[[State], bool]:
+    def wrapper(state: State) -> bool:
+        return not predicate(state)
+
+    return wrapper
+
+
 def gpio_low(pin_number: int, state: State) -> bool:
     return not gpio_high(pin_number, state)
 
@@ -67,5 +74,9 @@ def x_register_not_equal_to_y_register(state: State) -> bool:
     return state.x_register != state.y_register
 
 
-def output_shift_register_not_empty(state: State) -> bool:
-    return state.output_shift_register.counter != 32
+def input_shift_register_full(state: State) -> bool:
+    return state.input_shift_register.counter == 32
+
+
+def output_shift_register_empty(state: State) -> bool:
+    return state.output_shift_register.counter == 32
