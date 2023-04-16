@@ -31,12 +31,20 @@ def gpio_high(pin_number: int, state: State) -> bool:
     return state.pin_values & (1 << pin_number) != 0
 
 
-def transmit_fifo_not_empty(state: State) -> bool:
-    return len(state.transmit_fifo) > 0
+def transmit_fifo_empty(state: State) -> bool:
+    return len(state.transmit_fifo) == 0
 
 
-def receive_fifo_not_full(state):
-    return len(state.receive_fifo) < 4
+def transmit_fifo_full(state: State) -> bool:
+    return len(state.transmit_fifo) == 4
+
+
+def receive_fifo_empty(state: State) -> bool:
+    return len(state.receive_fifo) == 0
+
+
+def receive_fifo_full(state: State) -> bool:
+    return len(state.receive_fifo) == 4
 
 
 def x_register_equals_zero(state: State) -> bool:

@@ -14,11 +14,11 @@
 from collections import deque
 from dataclasses import replace
 from pioemu.state import ShiftRegister
-from pioemu.conditions import receive_fifo_not_full
+from pioemu.conditions import receive_fifo_full
 
 
 def push_blocking(state):
-    if not receive_fifo_not_full(state):  # TODO: Refactor double negative
+    if receive_fifo_full(state):
         return None  # Represents a stall
 
     return replace(
@@ -29,7 +29,7 @@ def push_blocking(state):
 
 
 def push_nonblocking(state):
-    if receive_fifo_not_full(state):
-        return push_blocking(state)
-    else:
+    if receive_fifo_full(state):
         return replace(state, input_shift_register=ShiftRegister(0, 0))
+
+    return push_blocking(state)
