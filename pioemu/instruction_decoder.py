@@ -18,8 +18,6 @@ from .conditions import (
     always,
     gpio_low,
     gpio_high,
-    transmit_fifo_not_empty,
-    receive_fifo_not_full,
     x_register_equals_zero,
     x_register_not_equal_to_y_register,
     x_register_not_equal_to_zero,
@@ -28,9 +26,11 @@ from .conditions import (
     output_shift_register_not_empty,
 )
 from .instruction import Instruction, ProgramCounterAdvance
-from .instructions import (
+from .instructions.pull import (
     pull_blocking,
     pull_nonblocking,
+)
+from .instructions.push import (
     push_blocking,
     push_nonblocking,
 )
@@ -42,6 +42,7 @@ from .primitive_operations import (
     read_from_pins,
     read_from_x,
     read_from_y,
+    stall_unless_predicate_met,
     supplies_value,
     write_to_isr,
     write_to_osr,
@@ -277,31 +278,24 @@ class InstructionDecoder:
         )
 
     @staticmethod
-    def _decode_push_pull(opcode):
+    def _decode_push_pull(opcode: int) -> Instruction:
+        block = bool(opcode & 0x0020)
+
         if opcode & 0x0080:
             # Pull
-            if opcode & 0x0020:
-                instruction = Instruction(
-                    transmit_fifo_not_empty,
-                    pull_blocking,
-                    ProgramCounterAdvance.WHEN_CONDITION_MET,
-                )
-            else:
-                instruction = Instruction(
-                    always, pull_nonblocking, ProgramCounterAdvance.ALWAYS
-                )
+            instruction = Instruction(
+                always,
+                pull_blocking if block else pull_nonblocking,
+                ProgramCounterAdvance.ALWAYS,
+            )
         else:
             # Push
-            if opcode & 0x0020:
-                instruction = Instruction(
-                    receive_fifo_not_full,
-                    push_blocking,
-                    ProgramCounterAdvance.WHEN_CONDITION_MET,
-                )
-            else:
-                instruction = Instruction(
-                    always, push_nonblocking, ProgramCounterAdvance.ALWAYS
-                )
+            instruction = Instruction(
+                always,
+                push_blocking if block else push_nonblocking,
+                ProgramCounterAdvance.ALWAYS,
+            )
+
         return instruction
 
     @staticmethod
@@ -314,5 +308,7 @@ class InstructionDecoder:
             condition = partial(gpio_low, index)
 
         return Instruction(
-            condition, lambda state: state, ProgramCounterAdvance.WHEN_CONDITION_MET
+            always,
+            partial(stall_unless_predicate_met, condition),
+            ProgramCounterAdvance.ALWAYS,
         )

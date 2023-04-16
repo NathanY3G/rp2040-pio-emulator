@@ -154,3 +154,13 @@ def supplies_value(value: int) -> Callable[[State], int]:
     """Creates a function that returns the specified value when invoked."""
 
     return lambda _: value
+
+
+def stall_unless_predicate_met(
+    predicate: Callable[[State], bool],
+    state: State,
+) -> State | None:
+    if predicate(state):
+        return state
+
+    return None  # Represents a stall

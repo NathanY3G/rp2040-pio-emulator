@@ -74,6 +74,7 @@ def emulate(
     wrap_top = len(opcodes) - 1
 
     current_state = initial_state
+    stalled = False
 
     while not stop_when(opcodes[current_state.program_counter], current_state):
         previous_state = current_state
@@ -98,7 +99,13 @@ def emulate(
 
         condition_met = instruction.condition(current_state)
         if condition_met:
-            current_state = instruction.callable(current_state)
+            new_state = instruction.callable(current_state)
+
+            if new_state is not None:
+                current_state = new_state
+                stalled = False
+            else:
+                stalled = True
 
         current_state = _apply_side_effects(opcode, current_state)
 
@@ -108,13 +115,16 @@ def emulate(
                 current_state, side_set_base, side_set_count, side_set_value
             )
 
-        current_state = _advance_program_counter(
-            instruction, condition_met, 0, wrap_top, current_state
-        )
+        if not stalled:
+            current_state = _advance_program_counter(
+                instruction, condition_met, 0, wrap_top, current_state
+            )
 
-        current_state = _apply_delay_value(
-            opcode, condition_met, delay_value, current_state
-        )
+            current_state = _apply_delay_value(
+                opcode, condition_met, delay_value, current_state
+            )
+
+        current_state = replace(current_state, clock=current_state.clock + 1)
 
         yield (previous_state, current_state)
 
@@ -148,9 +158,9 @@ def _apply_delay_value(
     jump_instruction = (opcode >> 13) == 0
 
     if jump_instruction or condition_met:
-        return replace(state, clock=state.clock + 1 + delay_value)
+        return replace(state, clock=state.clock + delay_value)
 
-    return replace(state, clock=state.clock + 1)
+    return state
 
 
 def _apply_side_effects(opcode: int, state: State) -> State:
