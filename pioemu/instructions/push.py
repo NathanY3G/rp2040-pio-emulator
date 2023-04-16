@@ -18,6 +18,9 @@ from pioemu.conditions import receive_fifo_not_full
 
 
 def push_blocking(state):
+    if not receive_fifo_not_full(state):  # TODO: Refactor double negative
+        return None  # Represents a stall
+
     return replace(
         state,
         receive_fifo=deque([*state.receive_fifo, state.input_shift_register.contents]),

@@ -18,6 +18,9 @@ from ..state import State
 
 
 def pull_blocking(state: State) -> State:
+    if not transmit_fifo_not_empty(state):  # TODO: Refactor double negative
+        return None  # Represents a stall
+
     updated_transmit_fifo = state.transmit_fifo.copy()
 
     return replace(

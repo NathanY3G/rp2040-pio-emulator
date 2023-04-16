@@ -279,13 +279,15 @@ class InstructionDecoder:
 
     @staticmethod
     def _decode_push_pull(opcode):
+        block = bool(opcode & 0x0020)
+
         if opcode & 0x0080:
             # Pull
-            if opcode & 0x0020:
+            if block:
                 instruction = Instruction(
-                    transmit_fifo_not_empty,
+                    always,
                     pull_blocking,
-                    ProgramCounterAdvance.WHEN_CONDITION_MET,
+                    ProgramCounterAdvance.ALWAYS,
                 )
             else:
                 instruction = Instruction(
@@ -293,11 +295,11 @@ class InstructionDecoder:
                 )
         else:
             # Push
-            if opcode & 0x0020:
+            if block:
                 instruction = Instruction(
-                    receive_fifo_not_full,
+                    always,
                     push_blocking,
-                    ProgramCounterAdvance.WHEN_CONDITION_MET,
+                    ProgramCounterAdvance.ALWAYS,
                 )
             else:
                 instruction = Instruction(
