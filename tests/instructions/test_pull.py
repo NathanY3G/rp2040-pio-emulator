@@ -47,6 +47,43 @@ from ..support import emulate_single_instruction, instruction_param
         State(transmit_fifo=deque()),
         expected_program_counter=0,
     ),
+    instruction_param(
+        "pull ifempty noblock when OSR not empty and fifo not empty",
+        0x80C0,
+        State(transmit_fifo=deque([3, 4]), output_shift_register=ShiftRegister(0, 1)),
+        State(transmit_fifo=deque([3, 4]), output_shift_register=ShiftRegister(0, 1)),
+    ),
+    instruction_param(
+        "pull ifempty noblock when OSR empty and fifo not empty",
+        0x80C0,
+        State(transmit_fifo=deque([4]), output_shift_register=ShiftRegister(0, 32)),
+        State(transmit_fifo=deque(), output_shift_register=ShiftRegister(4, 0)),
+    ),
+    instruction_param(
+        "pull ifempty block when OSR not empty and fifo empty",
+        0x80E0,
+        State(transmit_fifo=deque(), output_shift_register=ShiftRegister(0, 31)),
+        State(transmit_fifo=deque(), output_shift_register=ShiftRegister(0, 31)),
+    ),
+    instruction_param(
+        "pull ifempty block when OSR not empty and fifo not empty",
+        0x80E0,
+        State(transmit_fifo=deque([1]), output_shift_register=ShiftRegister(0, 31)),
+        State(transmit_fifo=deque([1]), output_shift_register=ShiftRegister(0, 31)),
+    ),
+    instruction_param(
+        "pull ifempty block when OSR empty and fifo empty",
+        0x80E0,
+        State(transmit_fifo=deque(), output_shift_register=ShiftRegister(0, 32)),
+        State(transmit_fifo=deque(), output_shift_register=ShiftRegister(0, 32)),
+        expected_program_counter=0,
+    ),
+    instruction_param(
+        "pull ifempty block when OSR empty and fifo not empty",
+        0x80E0,
+        State(transmit_fifo=deque([1]), output_shift_register=ShiftRegister(0, 32)),
+        State(transmit_fifo=deque(), output_shift_register=ShiftRegister(1, 0)),
+    ),
 ])
 # fmt: on
 def test_pull_instruction(opcode: int, initial_state: State, expected_state: State):

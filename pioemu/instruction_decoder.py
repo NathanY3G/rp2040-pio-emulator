@@ -284,8 +284,10 @@ class InstructionDecoder:
 
         if opcode & 0x0080:
             # Pull
+            condition = output_shift_register_empty if (opcode & 0x0040) else always
+
             instruction = Instruction(
-                always,
+                condition,
                 pull_blocking if block else pull_nonblocking,
                 ProgramCounterAdvance.ALWAYS,
             )
