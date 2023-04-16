@@ -18,8 +18,6 @@ from .conditions import (
     always,
     gpio_low,
     gpio_high,
-    transmit_fifo_not_empty,
-    receive_fifo_not_full,
     x_register_equals_zero,
     x_register_not_equal_to_y_register,
     x_register_not_equal_to_zero,
