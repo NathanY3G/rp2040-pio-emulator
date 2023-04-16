@@ -42,6 +42,7 @@ from .primitive_operations import (
     read_from_pins,
     read_from_x,
     read_from_y,
+    stall_unless_predicate_met,
     supplies_value,
     write_to_isr,
     write_to_osr,
@@ -314,5 +315,7 @@ class InstructionDecoder:
             condition = partial(gpio_low, index)
 
         return Instruction(
-            condition, lambda state: state, ProgramCounterAdvance.WHEN_CONDITION_MET
+            always,
+            partial(stall_unless_predicate_met, condition),
+            ProgramCounterAdvance.ALWAYS,
         )

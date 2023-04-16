@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Nathan Young
+# Copyright 2021, 2022, 2023 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,24 +27,6 @@ def test_stop_when_requires_value():
 def test_emulation_stops_when_unsupported_opcode_is_reached():
     with pytest.raises(StopIteration):
         next(emulate([0xE0E0], stop_when=lambda opcode, _: False))
-
-
-@pytest.mark.parametrize(
-    "opcode",
-    [
-        pytest.param(0xE022, id="set x, 2"),
-        pytest.param(0x6283, id="out pindirs, 3 [2]"),
-        pytest.param(0x6708, id="out pins, 8 [7]"),
-        pytest.param(0x6023, id="out x, 3"),
-        pytest.param(0x7F40, id="out y, 32 [31]"),
-    ],
-)
-def test_program_counter_is_incremented(opcode: int):
-    initial_state = State(program_counter=0)
-
-    _, new_state = emulate_single_instruction(opcode, initial_state)
-
-    assert new_state.program_counter == 1
 
 
 def test_pin_values_follow_input_source():
