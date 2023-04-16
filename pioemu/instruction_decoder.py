@@ -18,6 +18,7 @@ from .conditions import (
     always,
     gpio_low,
     gpio_high,
+    input_shift_register_full,
     negate,
     output_shift_register_empty,
     x_register_equals_zero,
@@ -293,8 +294,10 @@ class InstructionDecoder:
             )
         else:
             # Push
+            condition = input_shift_register_full if (opcode & 0x0040) else always
+
             instruction = Instruction(
-                always,
+                condition,
                 push_blocking if block else push_nonblocking,
                 ProgramCounterAdvance.ALWAYS,
             )
