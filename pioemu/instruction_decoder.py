@@ -281,28 +281,19 @@ class InstructionDecoder:
 
         if opcode & 0x0080:
             # Pull
-            if block:
-                instruction = Instruction(
-                    always,
-                    pull_blocking,
-                    ProgramCounterAdvance.ALWAYS,
-                )
-            else:
-                instruction = Instruction(
-                    always, pull_nonblocking, ProgramCounterAdvance.ALWAYS
-                )
+            instruction = Instruction(
+                always,
+                pull_blocking if block else pull_nonblocking,
+                ProgramCounterAdvance.ALWAYS,
+            )
         else:
             # Push
-            if block:
-                instruction = Instruction(
-                    always,
-                    push_blocking,
-                    ProgramCounterAdvance.ALWAYS,
-                )
-            else:
-                instruction = Instruction(
-                    always, push_nonblocking, ProgramCounterAdvance.ALWAYS
-                )
+            instruction = Instruction(
+                always,
+                push_blocking if block else push_nonblocking,
+                ProgramCounterAdvance.ALWAYS,
+            )
+
         return instruction
 
     @staticmethod
