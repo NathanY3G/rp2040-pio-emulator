@@ -27,5 +27,5 @@ class ProgramCounterAdvance(Enum):
 @dataclass(frozen=True)
 class Instruction:
     condition: Callable[[State], bool]
-    callable: Callable[[State], State]
+    callable: Callable[[State], State | None]
     program_counter_advance: ProgramCounterAdvance

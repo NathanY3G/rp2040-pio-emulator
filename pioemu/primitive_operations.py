@@ -159,7 +159,7 @@ def supplies_value(value: int) -> Callable[[State], int]:
 def stall_unless_predicate_met(
     predicate: Callable[[State], bool],
     state: State,
-) -> State:
+) -> State | None:
     if predicate(state):
         return state
 

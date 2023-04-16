@@ -17,7 +17,7 @@ from ..shift_register import ShiftRegister
 from ..state import State
 
 
-def pull_blocking(state: State) -> State:
+def pull_blocking(state: State) -> State | None:
     if transmit_fifo_empty(state):
         return None  # Represents a stall
 

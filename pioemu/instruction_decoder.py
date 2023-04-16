@@ -26,9 +26,11 @@ from .conditions import (
     output_shift_register_not_empty,
 )
 from .instruction import Instruction, ProgramCounterAdvance
-from .instructions import (
+from .instructions.pull import (
     pull_blocking,
     pull_nonblocking,
+)
+from .instructions.push import (
     push_blocking,
     push_nonblocking,
 )
@@ -276,7 +278,7 @@ class InstructionDecoder:
         )
 
     @staticmethod
-    def _decode_push_pull(opcode):
+    def _decode_push_pull(opcode: int) -> Instruction:
         block = bool(opcode & 0x0020)
 
         if opcode & 0x0080:
