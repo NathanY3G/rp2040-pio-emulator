@@ -3,8 +3,8 @@
 ## Introduction
 Welcome to a tour of the `pioemu` library! Let's begin by exploring the example from the
 [Quick Start Guide](./Quick%20Start%20Guide.md) in more depth. This example has been divided into
-logical sections with an explanation added to each section. The exception to this is the import
-statements which have been omitted.
+logical sections with an explanation added to each. The exception to this is the import statements
+which have been omitted.
 
 
 ## PIO Program
