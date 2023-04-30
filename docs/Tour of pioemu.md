@@ -61,5 +61,5 @@ decremented past zero.
 
 ### Summary
 In this tour we have examined the example program from the [Quick Start Guide](./Quick%20Start%20Guide.md)
-in more depth. However, if this tour was too brief or unclear for your then please consider creating
+in more depth. However, if this tour was too brief or unclear for you then please consider creating
 a [new issue](https://github.com/NathanY3G/rp2040-pio-emulator/issues) - thanks!
