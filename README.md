@@ -26,6 +26,12 @@ for before, after in generator:
   print(f"X register: {before.x_register} -> {after.x_register}")
 ```
 
+## Documentation
+A [Tour of pioemu](./docs/Tour%20of%20pioemu.md) provides a more detailed explanation than the
+[Quick Start Guide](./docs/Quick%20Start%20Guide.md) offers. However, if neither of these provides
+you with the information that you seek then please consider creating a
+[new issue](https://github.com/NathanY3G/rp2040-pio-emulator/issues) - thanks!
+
 ## Additional Examples
 Some additional examples include:
 
