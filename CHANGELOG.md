@@ -1,7 +1,9 @@
 # Changelog
 
 ## Unreleased
-- No changes
+
+### Added
+= Additional documentation - a Tour of pioemu.
 
 ## v0.80.0 (2023-04-16)
 
