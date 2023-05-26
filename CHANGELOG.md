@@ -5,6 +5,9 @@
 ### Added
 - Additional documentation - a Tour of pioemu.
 
+### Changed
+- Update dependencies used by the Jupyter Notebook example. Thanks Renovate Bot.
+
 ## v0.80.0 (2023-04-16)
 
 ### Added
