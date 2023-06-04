@@ -80,10 +80,11 @@ def emulate(
         previous_state = current_state
 
         if input_source:
+            masked_values = current_state.pin_values & current_state.pin_directions
+            masked_input = input_source(current_state.clock) & ~current_state.pin_directions
             current_state = replace(
                 current_state,
-                pin_values=input_source(current_state.clock)
-                & ~current_state.pin_directions,
+                pin_values=masked_values | masked_input,
             )
 
         opcode = opcodes[current_state.program_counter]
