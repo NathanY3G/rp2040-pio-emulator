@@ -1,12 +1,13 @@
 # Changelog
 
-## Unreleased
+## v0.81.0 (2023-06-10)
 
 ### Added
 - Additional documentation - a Tour of pioemu.
 
 ### Changed
-- Update dependencies used by the Jupyter Notebook example. Thanks Dependabot!
+- Fixed incorrect pin values when `input_source` was used. Thanks  [winnylourson](https://github.com/winnylourson).
+- Updated dependencies used by the Jupyter Notebook example. Thanks Dependabot!
 
 ## v0.80.0 (2023-04-16)
 
