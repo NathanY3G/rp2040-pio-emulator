@@ -1,7 +1,9 @@
 # Changelog
 
 ## Unreleased
-- No changes
+
+### Changed
+- Updated dependencies.
 
 ## v0.81.0 (2023-06-10)
 
