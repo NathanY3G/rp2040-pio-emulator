@@ -66,7 +66,7 @@ pandocfilters==1.5.0
 parso==0.8.3
 pexpect==4.8.0
 pickleshare==0.7.5
-Pillow==10.0.0
+Pillow==10.0.1
 platformdirs==3.9.1
 pluggy==1.2.0
 prometheus-client==0.17.1
