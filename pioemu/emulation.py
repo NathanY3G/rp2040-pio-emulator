@@ -23,7 +23,7 @@ def emulate(
     opcodes: List[int],
     *,
     stop_when: Callable[[int, State], bool],
-    initial_state: State = State(),
+    initial_state: State | None = None,
     input_source: Callable[[int], int] | None = None,
     shift_isr_right: bool = True,
     shift_osr_right: bool = True,
@@ -73,7 +73,7 @@ def emulate(
 
     wrap_top = len(opcodes) - 1
 
-    current_state = initial_state
+    current_state = initial_state if initial_state else State()
     stalled = False
 
     while not stop_when(opcodes[current_state.program_counter], current_state):

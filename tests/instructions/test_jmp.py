@@ -49,7 +49,9 @@ def test_jump_always_forward():
 def test_jump_for_scratch_register_conditions(
     opcode: int, initial_state: State, expected_program_counter: int
 ):
-    _, new_state = emulate_single_instruction(opcode, initial_state)
+    _, new_state = emulate_single_instruction(
+        opcode, initial_state=initial_state, advance_program_counter=True
+    )
 
     assert new_state.program_counter == expected_program_counter
 
@@ -120,6 +122,10 @@ def test_jump_on_external_control_pin(
 def test_jump_on_output_shift_register_state(
     initial_state: State, expected_program_counter: int
 ):
-    _, new_state = emulate_single_instruction(0x00E2, initial_state)  # jmp !osre, 2
+    opcode = 0x00E2  # jmp !osre, 2
+
+    _, new_state = emulate_single_instruction(
+        opcode, initial_state=initial_state, advance_program_counter=True
+    )
 
     assert new_state.program_counter == expected_program_counter

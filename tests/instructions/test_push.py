@@ -87,16 +87,21 @@ from ..support import emulate_single_instruction, instruction_param
 ])
 # fmt: on
 def test_push_instruction(opcode: int, initial_state: State, expected_state: State):
-    _, new_state = emulate_single_instruction(opcode, initial_state)
+    _, new_state = emulate_single_instruction(
+        opcode, initial_state=initial_state, advance_program_counter=True
+    )
 
     assert new_state == expected_state
 
 
 def test_receive_fifo_in_before_state_remains_unaffected():
-    initial_state = State(
-        receive_fifo=deque(), input_shift_register=ShiftRegister(0xDEAD_BEEF, 0)
-    )
+    opcode = 0x8000  # push noblock
 
-    before_state, _ = emulate_single_instruction(0x8000, initial_state)  # push noblock
+    before_state, _ = emulate_single_instruction(
+        opcode,
+        initial_state=State(
+            receive_fifo=deque(), input_shift_register=ShiftRegister(0xDEAD_BEEF, 0)
+        ),
+    )
 
     assert before_state.receive_fifo == deque()
