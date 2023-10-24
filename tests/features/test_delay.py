@@ -1,4 +1,4 @@
-# Copyright 2022 Nathan Young
+# Copyright 2022, 2023 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,6 +49,6 @@ from ..support import emulate_single_instruction
 def test_instruction_consumes_expected_clock_cycles(
     opcode: int, initial_state: State, expected_clock_cycles: int
 ):
-    _, new_state = emulate_single_instruction(opcode, initial_state)
+    _, new_state = emulate_single_instruction(opcode, initial_state=initial_state)
 
     assert new_state.clock == expected_clock_cycles

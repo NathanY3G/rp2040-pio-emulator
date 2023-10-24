@@ -34,14 +34,18 @@ def instruction_param(
     return param(opcode, initial_state, expected_state, id=description)
 
 
-def emulate_single_instruction(opcode: int, initial_state=None) -> Tuple[State, State]:
-    if initial_state is not None:
-        instruction_generator = emulate(
-            [opcode, Opcodes.nop()],
-            initial_state=initial_state,
-            stop_when=clock_cycles_reached(1),
-        )
+def emulate_single_instruction(
+    opcode: int, *, initial_state=None, advance_program_counter=False
+) -> Tuple[State, State]:
+    if advance_program_counter:
+        opcodes = [opcode, Opcodes.nop()]
     else:
-        instruction_generator = emulate([opcode], stop_when=clock_cycles_reached(1))
+        opcodes = [opcode]
+
+    instruction_generator = emulate(
+        opcodes,
+        initial_state=initial_state if initial_state else None,
+        stop_when=clock_cycles_reached(1),
+    )
 
     return next(instruction_generator)

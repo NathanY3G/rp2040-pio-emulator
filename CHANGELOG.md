@@ -6,6 +6,7 @@
 - Python 3.12 to the CI build matrix.
 
 ### Changed
+- Refactored tests to be more explicit regarding program counter advance.
 - Updated dependencies used for development.
 - Updated dependencies used by the Jupyter Notebook example. Thanks Dependabot!
 

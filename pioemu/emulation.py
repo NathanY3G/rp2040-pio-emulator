@@ -23,7 +23,7 @@ def emulate(
     opcodes: List[int],
     *,
     stop_when: Callable[[int, State], bool],
-    initial_state: State = State(),
+    initial_state: State | None = None,
     input_source: Callable[[int], int] | None = None,
     shift_isr_right: bool = True,
     shift_osr_right: bool = True,
@@ -73,7 +73,7 @@ def emulate(
 
     wrap_top = len(opcodes) - 1
 
-    current_state = initial_state
+    current_state = initial_state if initial_state else State()
     stalled = False
 
     while not stop_when(opcodes[current_state.program_counter], current_state):
@@ -81,7 +81,9 @@ def emulate(
 
         if input_source:
             masked_values = current_state.pin_values & current_state.pin_directions
-            masked_input = input_source(current_state.clock) & ~current_state.pin_directions
+            masked_input = (
+                input_source(current_state.clock) & ~current_state.pin_directions
+            )
             current_state = replace(
                 current_state,
                 pin_values=masked_values | masked_input,

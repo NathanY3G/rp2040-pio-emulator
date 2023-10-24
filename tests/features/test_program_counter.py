@@ -30,7 +30,9 @@ from tests.support import emulate_single_instruction
 def test_program_counter_is_incremented(opcode: int):
     initial_state = State(program_counter=0)
 
-    _, new_state = emulate_single_instruction(opcode, initial_state)
+    _, new_state = emulate_single_instruction(
+        opcode, initial_state=initial_state, advance_program_counter=True
+    )
 
     assert new_state.program_counter == 1
 
@@ -42,7 +44,9 @@ def test_program_counter_is_incremented(opcode: int):
 def test_program_counter_remains_unchanged_when_stalled(
     opcode: int, initial_state: State
 ):
-    previous_state, new_state = emulate_single_instruction(opcode, initial_state)
+    previous_state, new_state = emulate_single_instruction(
+        opcode, initial_state=initial_state, advance_program_counter=True
+    )
 
     assert new_state.clock == previous_state.clock + 1
     assert new_state.program_counter == previous_state.program_counter
