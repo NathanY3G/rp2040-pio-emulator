@@ -45,7 +45,7 @@ def test_program_counter_remains_unchanged_when_stalled(
     opcode: int, initial_state: State
 ):
     previous_state, new_state = emulate_single_instruction(
-        opcode, initial_state=initial_state
+        opcode, initial_state=initial_state, advance_program_counter=True
     )
 
     assert new_state.clock == previous_state.clock + 1
