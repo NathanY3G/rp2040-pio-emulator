@@ -21,11 +21,11 @@ keywords = [
 python = "^3.10.13"
 
 [tool.poetry.dev-dependencies]
-pylint = "3.0.1"
-pytest = "7.4.2"
+pylint = "3.0.2"
+pytest = "7.4.3"
 coverage = "7.3.2"
-black = "23.10.0"
-mypy = "1.6.1"
+black = "23.11.0"
+mypy = "1.7.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
