@@ -13,6 +13,7 @@
 # limitations under the License.
 from dataclasses import replace
 from typing import Callable, Generator, List, Tuple
+
 from .instruction import Instruction, ProgramCounterAdvance
 from .instruction_decoder import InstructionDecoder
 from .shift_register import ShiftRegister
@@ -30,6 +31,7 @@ def emulate(
     side_set_base: int = 0,
     side_set_count: int = 0,
     jmp_pin: int = 0,
+    wrap_target: int = 0,
 ) -> Generator[Tuple[State, State], None, None]:
     """
     Create and return a generator for emulating the given PIO program.
@@ -120,7 +122,7 @@ def emulate(
 
         if not stalled:
             current_state = _advance_program_counter(
-                instruction, condition_met, 0, wrap_top, current_state
+                instruction, condition_met, wrap_target, wrap_top, current_state
             )
 
             current_state = _apply_delay_value(
