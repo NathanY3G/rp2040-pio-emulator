@@ -32,6 +32,7 @@ def emulate(
     side_set_count: int = 0,
     jmp_pin: int = 0,
     wrap_target: int = 0,
+    wrap_top: int = 0,
 ) -> Generator[Tuple[State, State], None, None]:
     """
     Create and return a generator for emulating the given PIO program.
@@ -54,6 +55,11 @@ def emulate(
         Number of consecutive pins to include within the side-set.
     jmp_pin : int
         Pin that determines the branch taken by JMP PIN instructions.
+    wrap_target : int
+        Program counter value to wrap to when the program counter reaches the wrap_top value.
+    wrap_top : int
+        Program counter value to wrap from when the program counter reaches the wrap_top value.
+        Defaults to len(opcodes) - 1.
 
     Returns
     -------
@@ -73,7 +79,7 @@ def emulate(
         shift_isr_method, shift_osr_method, jmp_pin
     )
 
-    wrap_top = len(opcodes) - 1
+    wrap_top = wrap_top or len(opcodes) - 1
 
     current_state = initial_state if initial_state else State()
     stalled = False
