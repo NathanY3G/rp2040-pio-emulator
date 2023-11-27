@@ -9,6 +9,7 @@
 - Refactored tests to be more explicit regarding program counter advance.
 - Updated dependencies used for development.
 - Updated dependencies used by the Jupyter Notebook example. Thanks Dependabot!
+- Additional documentation - FAQ.
 
 ## v0.81.0 (2023-06-10)
 

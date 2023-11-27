@@ -28,8 +28,9 @@ for before, after in generator:
 
 ## Documentation
 A [Tour of pioemu](./docs/Tour%20of%20pioemu.md) provides a more detailed explanation than the
-[Quick Start Guide](./docs/Quick%20Start%20Guide.md) offers. However, if neither of these provides
-you with the information that you seek then please consider creating a
+[Quick Start Guide](./docs/Quick%20Start%20Guide.md) offers. In addition, there is a
+[FAQ](./docs/FAQ.md) available that might contain an answer to your question. However, if none
+of these provides you with the necessary information then please consider creating a
 [new issue](https://github.com/NathanY3G/rp2040-pio-emulator/issues) - thanks!
 
 ## Additional Examples
