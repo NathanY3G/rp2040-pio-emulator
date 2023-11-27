@@ -70,4 +70,5 @@ This software is under development and currently has limitations - the notable o
 
 ## Thanks To
 * [aaronjamt](https://github.com/aaronjamt) for contributing features and fixes.
+* [Josverl](https://github.com/Josverl) for contributing features.
 * [winnylourson](https://github.com/winnylourson) for contributing a bug fix.
