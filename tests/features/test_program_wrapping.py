@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Nathan Young
+# Copyright 2021, 2022, 2023 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,3 +25,19 @@ def test_programs_wrap_by_default():
     ]
 
     assert x_register_series == [0xFFFF_FFFF, 0x0000_0000, 0xFFFF_FFFF]
+
+
+def test_wrapping():
+    opcodes = [0xE020 + i for i in range(4)]
+
+    x_register_series = [
+        state.x_register
+        for _, state in emulate(
+            opcodes,
+            wrap_target=1,
+            wrap_top=2,
+            stop_when=lambda _, state: state.clock == 4,
+        )
+    ]
+
+    assert x_register_series == [0, 1, 2, 1]
