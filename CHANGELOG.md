@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.82.0 (2023-11-27)
 
 ### Added
 - Options to control program wrapping. Thanks [Josverl](https://github.com/Josverl).
