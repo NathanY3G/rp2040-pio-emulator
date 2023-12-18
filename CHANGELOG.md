@@ -1,7 +1,9 @@
 # Changelog
 
 ## Unreleased
-- No changes
+
+### Changed
+- Updated dependencies used by the Jupyter Notebook example. Thanks Dependabot!
 
 ## 0.82.0 (2023-11-27)
 
