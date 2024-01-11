@@ -161,7 +161,6 @@ def _is_input_source_signature_supported(input_source: Callable):
 
 
 def _wrap_deprecated_input_source(input_source: Callable[[int], int]):
-    print("Wrapping!")
     return lambda state: input_source(state.clock)
 
 
