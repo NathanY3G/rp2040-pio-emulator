@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- Support `input_source`'s with different signatures.
+
 ### Changed
 - Updated dependencies used for development.
 - Updated dependencies used by examples.
