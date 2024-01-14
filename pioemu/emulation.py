@@ -154,12 +154,12 @@ def _normalize_input_source(logger: logging.Logger, input_source: Callable):
     if parameter_type == State:
         return input_source
     elif parameter_type == int:
-        return _wrap_deprecated_input_source(input_source)
+        return lambda state: input_source(state.clock)
     elif parameter_type is None:
         logger.warning(
             "input_source is missing type hints/annotations and may not work as expected"
         )
-        return _wrap_deprecated_input_source(input_source)
+        return lambda state: input_source(state.clock)
     else:
         raise ValueError("Unsupported signature for input_source")
 
@@ -173,10 +173,6 @@ def _get_input_source_parameter_type(input_source: Callable):
     parameter_type = parameters[0].annotation
 
     return parameter_type if parameter_type != inspect._empty else None
-
-
-def _wrap_deprecated_input_source(input_source: Callable[[int], int]):
-    return lambda state: input_source(state.clock)
 
 
 def _advance_program_counter(
