@@ -69,17 +69,14 @@ def emulate(
     -------
     generator
     """
+    logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.WARNING)
     logger = logging.getLogger(__name__)
 
     if stop_when is None:
         raise ValueError("emulate() missing value for keyword argument: 'stop_when'")
 
-    if input_source and not _is_input_source_signature_supported(input_source):
-        logger.warning(
-            "input_source is missing the expected type annotations/hints and may not work as expected"
-        )
-
-        input_source = _wrap_deprecated_input_source(input_source)
+    if input_source:
+        input_source = _normalize_input_source(logger, input_source)
 
     shift_isr_method = (
         ShiftRegister.shift_right if shift_isr_right else ShiftRegister.shift_left
@@ -151,13 +148,31 @@ def emulate(
         yield (previous_state, current_state)
 
 
-def _is_input_source_signature_supported(input_source: Callable):
-    parameter_types = [
-        parameter.annotation
-        for parameter in inspect.signature(input_source).parameters.values()
-    ]
+def _normalize_input_source(logger: logging.Logger, input_source: Callable):
+    parameter_type = _get_input_source_parameter_type(input_source)
 
-    return parameter_types == [State]
+    if parameter_type == State:
+        return input_source
+    elif parameter_type == int:
+        return _wrap_deprecated_input_source(input_source)
+    elif parameter_type is None:
+        logger.warning(
+            "input_source is missing type hints/annotations and may not work as expected"
+        )
+        return _wrap_deprecated_input_source(input_source)
+    else:
+        raise ValueError("Unsupported signature for input_source")
+
+
+def _get_input_source_parameter_type(input_source: Callable):
+    parameters = list(inspect.signature(input_source).parameters.values())
+
+    if len(parameters) != 1:
+        raise ValueError("Unsupported signature for input_source")
+
+    parameter_type = parameters[0].annotation
+
+    return parameter_type if parameter_type != inspect._empty else None
 
 
 def _wrap_deprecated_input_source(input_source: Callable[[int], int]):
