@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Nathan Young
+# Copyright 2021, 2022, 2023, 2024 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import inspect
+import logging
 from dataclasses import replace
 from typing import Callable, Generator, List, Tuple
 
@@ -25,7 +27,7 @@ def emulate(
     *,
     stop_when: Callable[[int, State], bool],
     initial_state: State | None = None,
-    input_source: Callable[[int], int] | None = None,
+    input_source: Callable[[State], int] | Callable[[int], int] | None = None,
     shift_isr_right: bool = True,
     shift_osr_right: bool = True,
     side_set_base: int = 0,
@@ -45,6 +47,8 @@ def emulate(
         Predicate used to determine if the emulation should stop or continue.
     initial_state : State, optional
         Initial values to use.
+    input_source : Callable, optional
+        Invoked before each instruction to obtain the values currently present on the GPIO pins.
     shift_isr_right : bool, optional
         Shift the Input Shift Reigster (ISR) to the right when True and to the left when False.
     shift_osr_right : bool, optional
@@ -65,8 +69,14 @@ def emulate(
     -------
     generator
     """
+    logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.WARNING)
+    logger = logging.getLogger(__name__)
+
     if stop_when is None:
         raise ValueError("emulate() missing value for keyword argument: 'stop_when'")
+
+    if input_source:
+        input_source = _normalize_input_source(logger, input_source)
 
     shift_isr_method = (
         ShiftRegister.shift_right if shift_isr_right else ShiftRegister.shift_left
@@ -89,9 +99,7 @@ def emulate(
 
         if input_source:
             masked_values = current_state.pin_values & current_state.pin_directions
-            masked_input = (
-                input_source(current_state.clock) & ~current_state.pin_directions
-            )
+            masked_input = input_source(current_state) & ~current_state.pin_directions
             current_state = replace(
                 current_state,
                 pin_values=masked_values | masked_input,
@@ -138,6 +146,33 @@ def emulate(
         current_state = replace(current_state, clock=current_state.clock + 1)
 
         yield (previous_state, current_state)
+
+
+def _normalize_input_source(logger: logging.Logger, input_source: Callable):
+    parameter_type = _get_input_source_parameter_type(input_source)
+
+    if parameter_type == State:
+        return input_source
+    elif parameter_type == int:
+        return lambda state: input_source(state.clock)
+    elif parameter_type is None:
+        logger.warning(
+            "input_source is missing type hints/annotations and may not work as expected"
+        )
+        return lambda state: input_source(state.clock)
+    else:
+        raise ValueError("Unsupported signature for input_source")
+
+
+def _get_input_source_parameter_type(input_source: Callable):
+    parameters = list(inspect.signature(input_source).parameters.values())
+
+    if len(parameters) != 1:
+        raise ValueError("Unsupported signature for input_source")
+
+    parameter_type = parameters[0].annotation
+
+    return parameter_type if parameter_type != inspect._empty else None
 
 
 def _advance_program_counter(
