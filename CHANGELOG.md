@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.83.0 (2024-01-21)
 
 ### Added
 - Support `input_source`'s with different signatures.
