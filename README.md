@@ -36,11 +36,12 @@ of these provides you with the necessary information then please consider creati
 ## Additional Examples
 Some additional examples include:
 
-1. Visualisation of square wave program using Jupyter Notebooks within the `examples/` directory.
+1. Visualisation of square wave program using Jupyter Notebooks within the
+   [rp2040-pio-emulator-examples](https://github.com/NathanY3G/rp2040-pio-emulator-examples) repository.
 
-1. TDD example for the Pimoroni Blinkt! within the `examples/` directory.
-
-1. [pico-pio-examples](https://github.com/NathanY3G/pico-pio-examples)
+1. [TDD](https://en.wikipedia.org/wiki/Test-driven_development) example for the
+   [Pimoroni Blinkt!](https://shop.pimoroni.com/products/blinkt) within the
+   [rp2040-pio-emulator-examples](https://github.com/NathanY3G/rp2040-pio-emulator-examples) repository.
 
 ## Supported Instructions
 
