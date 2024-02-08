@@ -1,7 +1,9 @@
 # Changelog
 
 ## Unreleased
-- No changes
+
+### Changed
+- Moved additional examples to their own [repository](https://github.com/NathanY3G/rp2040-pio-emulator-examples).
 
 ## 0.83.0 (2024-01-21)
 
