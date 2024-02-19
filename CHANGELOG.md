@@ -4,6 +4,7 @@
 
 ### Changed
 - Moved additional examples to their own [repository](https://github.com/NathanY3G/rp2040-pio-emulator-examples).
+- Updated dependencies used for development.
 
 ## 0.83.0 (2024-01-21)
 
