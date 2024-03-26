@@ -43,7 +43,8 @@ repository, including:
 1. Tool to create Fast Signal Trace (FST) files suitable for analysis by
    [GTKWave](https://gtkwave.sourceforge.net/)
 
-1. Visualisation of a square wave program using Jupyter Notebooks
+1. Visualisation of square wave program using a
+   [Jupyter Notebook](https://jupyter-notebook.readthedocs.io/en/latest/)
 
 ## Supported Instructions
 
