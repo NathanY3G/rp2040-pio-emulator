@@ -34,14 +34,17 @@ of these provides you with the necessary information then please consider creati
 [new issue](https://github.com/NathanY3G/rp2040-pio-emulator/issues) - thanks!
 
 ## Additional Examples
-Some additional examples include:
-
-1. Visualisation of square wave program using Jupyter Notebooks within the
-   [rp2040-pio-emulator-examples](https://github.com/NathanY3G/rp2040-pio-emulator-examples) repository.
+Some additional examples are available within the [rp2040-pio-emulator-examples](https://github.com/NathanY3G/rp2040-pio-emulator-examples)
+repository, including:
 
 1. [TDD](https://en.wikipedia.org/wiki/Test-driven_development) example for the
-   [Pimoroni Blinkt!](https://shop.pimoroni.com/products/blinkt) within the
-   [rp2040-pio-emulator-examples](https://github.com/NathanY3G/rp2040-pio-emulator-examples) repository.
+   [Pimoroni Blinkt!](https://shop.pimoroni.com/products/blinkt)
+
+1. Tool to create Fast Signal Trace (FST) files suitable for analysis by
+   [GTKWave](https://gtkwave.sourceforge.net/)
+
+1. Visualisation of square wave program using a
+   [Jupyter Notebook](https://jupyter-notebook.readthedocs.io/en/latest/)
 
 ## Supported Instructions
 
