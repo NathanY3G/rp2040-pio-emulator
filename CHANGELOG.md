@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Added
+- Initial support for auto-pulling data from the FIFO to the Output Shift Register.
+
 ### Changed
 - Moved additional examples to their own [repository](https://github.com/NathanY3G/rp2040-pio-emulator-examples).
 - Updated dependencies used for development.
