@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023, 2024 Nathan Young
+# Copyright 2021, 2022, 2023, 2024, 2025 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ def emulate(
     stop_when: Callable[[int, State], bool],
     initial_state: State | None = None,
     input_source: Callable[[State], int] | Callable[[int], int] | None = None,
+    auto_pull: bool = False,
     shift_isr_right: bool = True,
     shift_osr_right: bool = True,
     side_set_base: int = 0,
@@ -49,6 +50,8 @@ def emulate(
         Initial values to use.
     input_source : Callable, optional
         Invoked before each instruction to obtain the values currently present on the GPIO pins.
+    auto_pull : bool, optional
+        Automatically refill the Output Shift Reigster (OSR) from its associated FIFO when True.
     shift_isr_right : bool, optional
         Shift the Input Shift Reigster (ISR) to the right when True and to the left when False.
     shift_osr_right : bool, optional
@@ -118,7 +121,17 @@ def emulate(
 
         condition_met = instruction.condition(current_state)
         if condition_met:
-            new_state = instruction.callable(current_state)
+            # Stall the PIO if it attempts to fill an empty OSR and execute 'OUT' within the same
+            # clock cycle. Please refer to the Autopull Details section (3.4.5.2) within the RP2040
+            # Datasheet for more details.
+            if (
+                _is_out_instruction(opcode)
+                and auto_pull
+                and current_state.output_shift_register.counter >= 32
+            ):
+                new_state = None
+            else:
+                new_state = instruction.callable(current_state)
 
             if new_state is not None:
                 current_state = new_state
@@ -126,7 +139,7 @@ def emulate(
             else:
                 stalled = True
 
-        current_state = _apply_side_effects(opcode, current_state)
+        current_state = _apply_side_effects(opcode, current_state, auto_pull)
 
         # TODO: Check that the following still applies when an instruction is stalled
         if side_set_count > 0:
@@ -146,6 +159,10 @@ def emulate(
         current_state = replace(current_state, clock=current_state.clock + 1)
 
         yield (previous_state, current_state)
+
+
+def _is_out_instruction(opcode: int) -> bool:
+    return ((opcode >> 13) & 7) == 3
 
 
 def _normalize_input_source(logger: logging.Logger, input_source: Callable):
@@ -209,13 +226,27 @@ def _apply_delay_value(
     return state
 
 
-def _apply_side_effects(opcode: int, state: State) -> State:
-    if (opcode & 0xE0E0) == 0x0040:
+def _apply_side_effects(opcode: int, state: State, auto_pull: bool) -> State:
+    if (
+        _is_out_instruction(opcode)
+        and auto_pull
+        and state.output_shift_register.counter >= 32
+        and state.transmit_fifo
+    ):
+        new_transmit_fifo = state.transmit_fifo.copy()
+        new_output_shift_register = ShiftRegister(new_transmit_fifo.popleft(), 0)
+
+        return replace(
+            state,
+            transmit_fifo=new_transmit_fifo,
+            output_shift_register=new_output_shift_register,
+        )
+    elif (opcode & 0xE0E0) == 0x0040:
         return replace(state, x_register=state.x_register - 1)
     elif (opcode & 0xE0E0) == 0x0080:
         return replace(state, y_register=state.y_register - 1)
-    else:
-        return state
+
+    return state
 
 
 def _extract_delay_and_side_set_from_opcode(
