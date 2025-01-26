@@ -32,7 +32,7 @@ from ..support import instruction_param
             0x6000,
             State(pin_values=0xFFFF_FFFF, transmit_fifo=deque(), output_shift_register=ShiftRegister(0, 32)),
             State(pin_values=0xFFFF_FFFF, transmit_fifo=deque(), output_shift_register=ShiftRegister(0, 32)),
-            expected_program_counter=0,  # Should stall when threshold_reached
+            expected_program_counter=0,  # Should stall when threshold reached
         ),
 
         # Test PIO stalls when auto-pull threshold reached with non-empty FIFO
@@ -41,7 +41,7 @@ from ..support import instruction_param
             0x6000,
             State(pin_values=0xFFFF_FFFF, transmit_fifo=deque([0xAAAA_AAAA]), output_shift_register=ShiftRegister(0, 32)),
             State(pin_values=0xFFFF_FFFF, transmit_fifo=deque(), output_shift_register=ShiftRegister(0xAAAA_AAAA, 0)),
-            expected_program_counter=0,  # Should stall when threshold_reached
+            expected_program_counter=0,  # Should stall when threshold reached
         ),
 
         # Test OSR refills after last bits shifted out when FIFO is not empty

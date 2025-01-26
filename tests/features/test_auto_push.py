@@ -32,7 +32,7 @@ from ..support import instruction_param
             0x4060,
             State(receive_fifo=deque([1, 2, 3, 4]), input_shift_register=ShiftRegister(5, 32)),
             State(receive_fifo=deque([1, 2, 3, 4]), input_shift_register=ShiftRegister(5, 32)),
-            expected_program_counter=0,  # Should stall when threshold_reached
+            expected_program_counter=0,  # Should stall when threshold reached
         ),
 
         instruction_param(
