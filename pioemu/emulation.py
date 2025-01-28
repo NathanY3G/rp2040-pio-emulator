@@ -124,9 +124,9 @@ def emulate(
 
         condition_met = instruction.condition(current_state)
         if condition_met:
-            # Stall the PIO if it attempts to automatically push the contents of the ISR into a
-            # full FIFO. Please refer to the Autopush Details section (3.5.4.1) within the RP2040
-            # Datasheet for more details.
+            # Stall the state machine if it attempts to automatically push the contents of the ISR
+            # into a full FIFO. Please refer to the Autopush Details section (3.5.4.1) within the
+            # RP2040 Datasheet for more details.
             if (
                 _is_in_instruction(opcode)
                 and auto_push
@@ -135,9 +135,9 @@ def emulate(
             ):
                 new_state = None
 
-            # Stall the PIO if it attempts to fill an empty OSR and execute 'OUT' within the same
-            # clock cycle. Please refer to the Autopull Details section (3.4.5.2) within the RP2040
-            # Datasheet for more details.
+            # Stall the state machine if it attempts to fill an empty OSR and execute 'OUT' within
+            # the same clock cycle. Please refer to the Autopull Details section (3.4.5.2) within
+            # the RP2040 Datasheet for more details.
             elif (
                 _is_out_instruction(opcode)
                 and auto_pull
