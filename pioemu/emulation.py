@@ -29,6 +29,7 @@ def emulate(
     initial_state: State | None = None,
     input_source: Callable[[State], int] | Callable[[int], int] | None = None,
     auto_pull: bool = False,
+    auto_push: bool = False,
     shift_isr_right: bool = True,
     shift_osr_right: bool = True,
     side_set_base: int = 0,
@@ -52,6 +53,8 @@ def emulate(
         Invoked before each instruction to obtain the values currently present on the GPIO pins.
     auto_pull : bool, optional
         Automatically refill the Output Shift Reigster (OSR) from its associated FIFO when True.
+    auto_push : bool, optional
+        Automatically transfer the Input Shift Register (ISR) into its associated FIFO when True.
     shift_isr_right : bool, optional
         Shift the Input Shift Reigster (ISR) to the right when True and to the left when False.
     shift_osr_right : bool, optional
@@ -121,10 +124,21 @@ def emulate(
 
         condition_met = instruction.condition(current_state)
         if condition_met:
-            # Stall the PIO if it attempts to fill an empty OSR and execute 'OUT' within the same
-            # clock cycle. Please refer to the Autopull Details section (3.4.5.2) within the RP2040
-            # Datasheet for more details.
+            # Stall the state machine if it attempts to automatically push the contents of the ISR
+            # into a full FIFO. Please refer to the Autopush Details section (3.5.4.1) within the
+            # RP2040 Datasheet for more details.
             if (
+                _is_in_instruction(opcode)
+                and auto_push
+                and current_state.input_shift_register.counter >= 32
+                and len(current_state.receive_fifo) >= 4
+            ):
+                new_state = None
+
+            # Stall the state machine if it attempts to fill an empty OSR and execute 'OUT' within
+            # the same clock cycle. Please refer to the Autopull Details section (3.4.5.2) within
+            # the RP2040 Datasheet for more details.
+            elif (
                 _is_out_instruction(opcode)
                 and auto_pull
                 and current_state.output_shift_register.counter >= 32
@@ -139,7 +153,7 @@ def emulate(
             else:
                 stalled = True
 
-        current_state = _apply_side_effects(opcode, current_state, auto_pull)
+        current_state = _apply_side_effects(opcode, current_state, auto_push, auto_pull)
 
         # TODO: Check that the following still applies when an instruction is stalled
         if side_set_count > 0:
@@ -159,6 +173,10 @@ def emulate(
         current_state = replace(current_state, clock=current_state.clock + 1)
 
         yield (previous_state, current_state)
+
+
+def _is_in_instruction(opcode: int) -> bool:
+    return ((opcode >> 13) & 7) == 2
 
 
 def _is_out_instruction(opcode: int) -> bool:
@@ -226,8 +244,25 @@ def _apply_delay_value(
     return state
 
 
-def _apply_side_effects(opcode: int, state: State, auto_pull: bool) -> State:
+def _apply_side_effects(
+    opcode: int, state: State, auto_push: bool, auto_pull: bool
+) -> State:
     if (
+        _is_in_instruction(opcode)
+        and auto_push
+        and state.input_shift_register.counter >= 32
+        and len(state.receive_fifo) < 4
+    ):
+        new_receive_fifo = state.receive_fifo.copy()
+        new_receive_fifo.append(state.input_shift_register.contents)
+        new_input_shift_register = ShiftRegister(0, 0)
+
+        return replace(
+            state,
+            receive_fifo=new_receive_fifo,
+            input_shift_register=new_input_shift_register,
+        )
+    elif (
         _is_out_instruction(opcode)
         and auto_pull
         and state.output_shift_register.counter >= 32

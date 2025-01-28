@@ -26,41 +26,38 @@ from ..support import instruction_param
 @pytest.mark.parametrize(
     "opcode, initial_state, expected_state",
     [
-        # Test PIO stalls when auto-pull threshold reached with empty FIFO
+        # Test PIO stalls when auto-push threshold reached with full FIFO
         instruction_param(
-            "out pins, 32",
-            0x6000,
-            State(pin_values=0xFFFF_FFFF, transmit_fifo=deque(), output_shift_register=ShiftRegister(0, 32)),
-            State(pin_values=0xFFFF_FFFF, transmit_fifo=deque(), output_shift_register=ShiftRegister(0, 32)),
+            "in null, 32",
+            0x4060,
+            State(receive_fifo=deque([1, 2, 3, 4]), input_shift_register=ShiftRegister(5, 32)),
+            State(receive_fifo=deque([1, 2, 3, 4]), input_shift_register=ShiftRegister(5, 32)),
             expected_program_counter=0,  # Should stall when threshold reached
         ),
 
-        # Test PIO stalls when auto-pull threshold reached with non-empty FIFO
         instruction_param(
-            "out pins, 32",
-            0x6000,
-            State(pin_values=0xFFFF_FFFF, transmit_fifo=deque([0xAAAA_AAAA]), output_shift_register=ShiftRegister(0, 32)),
-            State(pin_values=0xFFFF_FFFF, transmit_fifo=deque(), output_shift_register=ShiftRegister(0xAAAA_AAAA, 0)),
-            expected_program_counter=0,  # Should stall when threshold reached
+            "in null, 32",
+            0x4060,
+            State(receive_fifo=deque(), input_shift_register=ShiftRegister(0xFFFF_FFFF, 0)),
+            State(receive_fifo=deque([0]), input_shift_register=ShiftRegister(0, 0)),
         ),
 
-        # Test OSR refills after last bits shifted out when FIFO is not empty
         instruction_param(
-            "out pins, 8",
-            0x6008,
-            State(pin_values=0xFFFF_FFFF, transmit_fifo=deque([0xAAAA_AAAA]), output_shift_register=ShiftRegister(0xFF, 24)),
-            State(pin_values=0x0000_00FF, transmit_fifo=deque(), output_shift_register=ShiftRegister(0xAAAA_AAAA, 0)),
+            "in pins, 8",
+            0x4008,
+            State(pin_values=0x0000_00FF, receive_fifo=deque(), input_shift_register=ShiftRegister(0xFFFF_FF00, 24)),
+            State(pin_values=0x0000_00FF, receive_fifo=deque([0xFFFF_FFFF]), input_shift_register=ShiftRegister(0, 0)),
         ),
     ]
 )
 # fmt: on
-def test_auto_pull(opcode: int, initial_state: State, expected_state: State):
+def test_auto_push(opcode: int, initial_state: State, expected_state: State):
     _, new_state = next(
         emulate(
             [opcode, Opcodes.nop()],
             initial_state=initial_state,
             stop_when=clock_cycles_reached(1),
-            auto_pull=True,
+            auto_push=True,
         )
     )
 
