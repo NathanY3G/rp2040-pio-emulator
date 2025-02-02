@@ -30,6 +30,8 @@ def emulate(
     input_source: Callable[[State], int] | Callable[[int], int] | None = None,
     auto_pull: bool = False,
     auto_push: bool = False,
+    pull_threshold: int = 32,
+    push_threshold: int = 32,
     shift_isr_right: bool = True,
     shift_osr_right: bool = True,
     side_set_base: int = 0,
@@ -55,6 +57,10 @@ def emulate(
         Automatically refill the Output Shift Reigster (OSR) from its associated FIFO when True.
     auto_push : bool, optional
         Automatically transfer the Input Shift Register (ISR) into its associated FIFO when True.
+    pull_threshold : int, optional
+        Number of bits shifted into Input Shift Register (ISR) before auto-push will take place.
+    push_threshold : int, optional
+        Number of bits shifted out of Output Shift Register (OSR) before auto-pull will take place.
     shift_isr_right : bool, optional
         Shift the Input Shift Reigster (ISR) to the right when True and to the left when False.
     shift_osr_right : bool, optional
@@ -77,6 +83,16 @@ def emulate(
     """
     logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.WARNING)
     logger = logging.getLogger(__name__)
+
+    if pull_threshold < 1 or pull_threshold > 32:
+        raise ValueError(
+            "emulate() invalid value for keyword argument: 'pull_threshold'"
+        )
+
+    if push_threshold < 1 or push_threshold > 32:
+        raise ValueError(
+            "emulate() invalid value for keyword argument: 'push_threshold'"
+        )
 
     if stop_when is None:
         raise ValueError("emulate() missing value for keyword argument: 'stop_when'")
@@ -130,7 +146,7 @@ def emulate(
             if (
                 _is_in_instruction(opcode)
                 and auto_push
-                and current_state.input_shift_register.counter >= 32
+                and current_state.input_shift_register.counter >= push_threshold
                 and len(current_state.receive_fifo) >= 4
             ):
                 new_state = None
@@ -141,7 +157,7 @@ def emulate(
             elif (
                 _is_out_instruction(opcode)
                 and auto_pull
-                and current_state.output_shift_register.counter >= 32
+                and current_state.output_shift_register.counter >= pull_threshold
             ):
                 new_state = None
             else:
@@ -153,7 +169,9 @@ def emulate(
             else:
                 stalled = True
 
-        current_state = _apply_side_effects(opcode, current_state, auto_push, auto_pull)
+        current_state = _apply_side_effects(
+            opcode, current_state, auto_push, push_threshold, auto_pull, pull_threshold
+        )
 
         # TODO: Check that the following still applies when an instruction is stalled
         if side_set_count > 0:
@@ -245,12 +263,17 @@ def _apply_delay_value(
 
 
 def _apply_side_effects(
-    opcode: int, state: State, auto_push: bool, auto_pull: bool
+    opcode: int,
+    state: State,
+    auto_push: bool,
+    push_threshold: int,
+    auto_pull: bool,
+    pull_threshold: int,
 ) -> State:
     if (
         _is_in_instruction(opcode)
         and auto_push
-        and state.input_shift_register.counter >= 32
+        and state.input_shift_register.counter >= push_threshold
         and len(state.receive_fifo) < 4
     ):
         new_receive_fifo = state.receive_fifo.copy()
@@ -265,7 +288,7 @@ def _apply_side_effects(
     elif (
         _is_out_instruction(opcode)
         and auto_pull
-        and state.output_shift_register.counter >= 32
+        and state.output_shift_register.counter >= pull_threshold
         and state.transmit_fifo
     ):
         new_transmit_fifo = state.transmit_fifo.copy()
