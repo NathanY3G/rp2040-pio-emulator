@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.84.0 (2025-02-02)
 
 ### Added
 - Initial support for automatically pulling/pushing data from/to the FIFOs.
