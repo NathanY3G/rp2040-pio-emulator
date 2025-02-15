@@ -14,9 +14,17 @@
 import inspect
 import logging
 from dataclasses import replace
-from typing import Callable, Generator, List, Tuple
+from typing import Callable, Generator, List, Optional, Tuple
 
-from .instruction import Emulation, ProgramCounterAdvance
+from .decoding.instruction_decoder import InstructionDecoder as NewInstructionDecoder
+from .instruction import (
+    Emulation,
+    InInstruction,
+    Instruction,
+    JmpInstruction,
+    OutInstruction,
+    ProgramCounterAdvance,
+)
 from .instruction_decoder import InstructionDecoder
 from .shift_register import ShiftRegister
 from .state import State
@@ -107,7 +115,9 @@ def emulate(
         ShiftRegister.shift_right if shift_osr_right else ShiftRegister.shift_left
     )
 
-    instruction_decoder = InstructionDecoder(
+    new_instruction_decoder = NewInstructionDecoder(side_set_count)
+
+    old_instruction_decoder = InstructionDecoder(
         shift_isr_method, shift_osr_method, jmp_pin
     )
 
@@ -133,7 +143,13 @@ def emulate(
             opcode, side_set_count
         )
 
-        emulation = instruction_decoder.decode(opcode)
+        instruction = new_instruction_decoder.decode(opcode)
+
+        emulation = (
+            old_instruction_decoder.create_emulation(instruction)
+            if instruction
+            else old_instruction_decoder.decode(opcode)
+        )
 
         if emulation is None:
             return
@@ -144,7 +160,7 @@ def emulate(
             # into a full FIFO. Please refer to the Autopush Details section (3.5.4.1) within the
             # RP2040 Datasheet for more details.
             if (
-                _is_in_instruction(opcode)
+                isinstance(instruction, InInstruction)
                 and auto_push
                 and current_state.input_shift_register.counter >= push_threshold
                 and len(current_state.receive_fifo) >= 4
@@ -155,7 +171,7 @@ def emulate(
             # the same clock cycle. Please refer to the Autopull Details section (3.4.5.2) within
             # the RP2040 Datasheet for more details.
             elif (
-                _is_out_instruction(opcode)
+                isinstance(instruction, OutInstruction)
                 and auto_pull
                 and current_state.output_shift_register.counter >= pull_threshold
             ):
@@ -170,7 +186,13 @@ def emulate(
                 stalled = True
 
         current_state = _apply_side_effects(
-            opcode, current_state, auto_push, push_threshold, auto_pull, pull_threshold
+            instruction,
+            opcode,
+            current_state,
+            auto_push,
+            push_threshold,
+            auto_pull,
+            pull_threshold,
         )
 
         # TODO: Check that the following still applies when an instruction is stalled
@@ -185,20 +207,12 @@ def emulate(
             )
 
             current_state = _apply_delay_value(
-                opcode, condition_met, delay_value, current_state
+                instruction, condition_met, delay_value, current_state
             )
 
         current_state = replace(current_state, clock=current_state.clock + 1)
 
         yield (previous_state, current_state)
-
-
-def _is_in_instruction(opcode: int) -> bool:
-    return ((opcode >> 13) & 7) == 2
-
-
-def _is_out_instruction(opcode: int) -> bool:
-    return ((opcode >> 13) & 7) == 3
 
 
 def _normalize_input_source(logger: logging.Logger, input_source: Callable):
@@ -252,17 +266,19 @@ def _advance_program_counter(
 
 
 def _apply_delay_value(
-    opcode: int, condition_met: bool, delay_value: int, state: State
+    instruction: Optional[Instruction],
+    condition_met: bool,
+    delay_value: int,
+    state: State,
 ) -> State:
-    jump_instruction = (opcode >> 13) == 0
-
-    if jump_instruction or condition_met:
+    if isinstance(instruction, JmpInstruction) or condition_met:
         return replace(state, clock=state.clock + delay_value)
 
     return state
 
 
 def _apply_side_effects(
+    instruction: Optional[Instruction],
     opcode: int,
     state: State,
     auto_push: bool,
@@ -271,7 +287,7 @@ def _apply_side_effects(
     pull_threshold: int,
 ) -> State:
     if (
-        _is_in_instruction(opcode)
+        isinstance(instruction, InInstruction)
         and auto_push
         and state.input_shift_register.counter >= push_threshold
         and len(state.receive_fifo) < 4
@@ -286,7 +302,7 @@ def _apply_side_effects(
             input_shift_register=new_input_shift_register,
         )
     elif (
-        _is_out_instruction(opcode)
+        isinstance(instruction, OutInstruction)
         and auto_pull
         and state.output_shift_register.counter >= pull_threshold
         and state.transmit_fifo

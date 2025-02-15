@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from functools import partial
-from typing import Callable, List, Tuple
+from typing import Callable, List, Optional, Tuple
 
 from .conditions import (
     always,
@@ -29,7 +29,14 @@ from .conditions import (
 )
 from .instruction import (
     Emulation,
+    InInstruction,
+    Instruction,
+    JmpInstruction,
+    OutInstruction,
     ProgramCounterAdvance,
+    PullInstruction,
+    PushInstruction,
+    WaitInstruction,
 )
 from .instructions.pull import (
     pull_blocking,
@@ -88,12 +95,12 @@ class InstructionDecoder:
         self.shift_isr_method = shift_isr_method
         self.shift_osr_method = shift_osr_method
 
-        self.decoding_functions: List[Callable[[int], Emulation | None]] = [
-            self._decode_jmp,
-            self._decode_wait,
-            self._decode_in,
-            self._decode_out,
-            self._decode_push_pull,
+        self.decoding_functions: List[Callable[[int], Optional[Emulation]]] = [
+            lambda _: None,
+            lambda _: None,
+            lambda _: None,
+            lambda _: None,
+            lambda _: None,
             self._decode_mov,
             lambda _: None,
             self._decode_set,
@@ -170,7 +177,36 @@ class InstructionDecoder:
             None,
         ]
 
-    def decode(self, opcode: int) -> Emulation | None:
+    def create_emulation(
+        self, instruction: Optional[Instruction]
+    ) -> Optional[Emulation]:
+        """
+        Returns an emulation for the given instruction.
+
+        Parameters:
+        instruction (Instruction): The instruction to be emulated.
+
+        Returns:
+        Emulation: Emulation for the given instruction or None when invalid/not supported
+        """
+
+        match instruction:
+            case InInstruction():
+                return self._decode_in(instruction)
+            case JmpInstruction():
+                return self._decode_jmp(instruction)
+            case OutInstruction():
+                return self._decode_out(instruction)
+            case PullInstruction():
+                return self._decode_pull(instruction)
+            case PushInstruction():
+                return self._decode_push(instruction)
+            case WaitInstruction():
+                return self._decode_wait(instruction)
+            case _:
+                return None
+
+    def decode(self, opcode: int) -> Optional[Emulation]:
         """
         Decodes the given opcode and returns a callable which emulates it.
 
@@ -184,20 +220,22 @@ class InstructionDecoder:
         decoding_function = self.decoding_functions[(opcode >> 13) & 7]
         return decoding_function(opcode)
 
-    def _decode_jmp(self, opcode: int) -> Emulation | None:
-        address = opcode & 0x1F
-        condition = self.jmp_conditions[(opcode >> 5) & 7]
+    def _decode_jmp(self, instruction: JmpInstruction) -> Optional[Emulation]:
+        condition = self.jmp_conditions[instruction.condition]
 
-        if condition is not None:
-            return Emulation(
-                condition,
-                partial(write_to_program_counter, supplies_value(address)),
-                ProgramCounterAdvance.WHEN_CONDITION_NOT_MET,
-            )
+        if condition is None:
+            return None
 
-        return None
+        return Emulation(
+            condition,
+            partial(
+                write_to_program_counter, supplies_value(instruction.target_address)
+            ),
+            ProgramCounterAdvance.WHEN_CONDITION_NOT_MET,
+            instruction,
+        )
 
-    def _decode_mov(self, opcode: int) -> Emulation:
+    def _decode_mov(self, opcode: int) -> Optional[Emulation]:
         read_from_source = self.mov_sources[opcode & 7]
 
         destination = (opcode >> 5) & 7
@@ -224,35 +262,30 @@ class InstructionDecoder:
             program_counter_advance,
         )
 
-    def _decode_in(self, opcode: int) -> Emulation:
-        read_from_source = self.in_sources[(opcode >> 5) & 7]
-
-        bit_count = opcode & 0x1F
-
-        if bit_count == 0:
-            bit_count = 32
+    def _decode_in(self, instruction: InInstruction) -> Emulation:
+        read_from_source = self.in_sources[instruction.source]
 
         return Emulation(
             always,
-            partial(shift_into_isr, read_from_source, self.shift_isr_method, bit_count),
+            partial(
+                shift_into_isr,
+                read_from_source,
+                self.shift_isr_method,
+                instruction.bit_count,
+            ),
             ProgramCounterAdvance.ALWAYS,
+            instruction,
         )
 
-    def _decode_out(self, opcode: int) -> Emulation:
-        destination = (opcode >> 5) & 7
-        write_to_destination = self.out_destinations[destination]
-
-        bit_count = opcode & 0x1F
-
-        if bit_count == 0:
-            bit_count = 32
+    def _decode_out(self, instruction: OutInstruction) -> Optional[Emulation]:
+        write_to_destination = self.out_destinations[instruction.destination]
 
         if write_to_destination is None:
             return None
 
         def emulate_out(state: State) -> State:
             state, shift_result = shift_from_osr(
-                self.shift_osr_method, bit_count, state
+                self.shift_osr_method, instruction.bit_count, state
             )
 
             # Somewhat hacky workaround because 'OUT, ISR' also sets ISR shift counter to the
@@ -260,17 +293,24 @@ class InstructionDecoder:
             # See the description of the ISR destination on section 3.4.5.2 of the RP2040 Datasheet
             if write_to_destination == write_to_isr:
                 return write_to_destination(
-                    supplies_value(shift_result), state, count=bit_count
+                    supplies_value(shift_result), state, count=instruction.bit_count
                 )
 
             return write_to_destination(supplies_value(shift_result), state)
 
-        if destination == 5:  # Program counter
-            return Emulation(always, emulate_out, ProgramCounterAdvance.NEVER)
+        if instruction.destination == 5:  # Program counter
+            program_counter_advance = ProgramCounterAdvance.NEVER
+        else:
+            program_counter_advance = ProgramCounterAdvance.ALWAYS
 
-        return Emulation(always, emulate_out, ProgramCounterAdvance.ALWAYS)
+        return Emulation(
+            always,
+            emulate_out,
+            program_counter_advance,
+            instruction,
+        )
 
-    def _decode_set(self, opcode: int) -> Emulation:
+    def _decode_set(self, opcode: int) -> Optional[Emulation]:
         write_to_destination = self.set_destinations[(opcode >> 5) & 7]
 
         if write_to_destination is None:
@@ -283,38 +323,33 @@ class InstructionDecoder:
         )
 
     @staticmethod
-    def _decode_push_pull(opcode: int) -> Emulation:
-        block = bool(opcode & 0x0020)
+    def _decode_pull(instruction: PullInstruction) -> Emulation:
+        condition = output_shift_register_empty if instruction.if_empty else always
 
-        if opcode & 0x0080:
-            # Pull
-            condition = output_shift_register_empty if (opcode & 0x0040) else always
-
-            instruction = Emulation(
-                condition,
-                pull_blocking if block else pull_nonblocking,
-                ProgramCounterAdvance.ALWAYS,
-            )
-        else:
-            # Push
-            condition = input_shift_register_full if (opcode & 0x0040) else always
-
-            instruction = Emulation(
-                condition,
-                push_blocking if block else push_nonblocking,
-                ProgramCounterAdvance.ALWAYS,
-            )
-
-        return instruction
+        return Emulation(
+            condition,
+            pull_blocking if instruction.block else pull_nonblocking,
+            ProgramCounterAdvance.ALWAYS,
+            instruction,
+        )
 
     @staticmethod
-    def _decode_wait(opcode: int) -> Emulation:
-        index = opcode & 0x001F
+    def _decode_push(instruction: PushInstruction) -> Emulation:
+        condition = input_shift_register_full if instruction.if_full else always
 
-        if opcode & 0x0080:
-            condition = partial(gpio_high, index)
+        return Emulation(
+            condition,
+            push_blocking if instruction.block else push_nonblocking,
+            ProgramCounterAdvance.ALWAYS,
+            instruction,
+        )
+
+    @staticmethod
+    def _decode_wait(instruction: WaitInstruction) -> Emulation:
+        if instruction.polarity:
+            condition = partial(gpio_high, instruction.index)
         else:
-            condition = partial(gpio_low, index)
+            condition = partial(gpio_low, instruction.index)
 
         return Emulation(
             always,
