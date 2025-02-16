@@ -16,7 +16,7 @@ import logging
 from dataclasses import replace
 from typing import Callable, Generator, List, Tuple
 
-from .instruction import Instruction, ProgramCounterAdvance
+from .instruction import Emulation, ProgramCounterAdvance
 from .instruction_decoder import InstructionDecoder
 from .shift_register import ShiftRegister
 from .state import State
@@ -133,12 +133,12 @@ def emulate(
             opcode, side_set_count
         )
 
-        instruction = instruction_decoder.decode(opcode)
+        emulation = instruction_decoder.decode(opcode)
 
-        if instruction is None:
+        if emulation is None:
             return
 
-        condition_met = instruction.condition(current_state)
+        condition_met = emulation.condition(current_state)
         if condition_met:
             # Stall the state machine if it attempts to automatically push the contents of the ISR
             # into a full FIFO. Please refer to the Autopush Details section (3.5.4.1) within the
@@ -161,7 +161,7 @@ def emulate(
             ):
                 new_state = None
             else:
-                new_state = instruction.callable(current_state)
+                new_state = emulation.emulate(current_state)
 
             if new_state is not None:
                 current_state = new_state
@@ -181,7 +181,7 @@ def emulate(
 
         if not stalled:
             current_state = _advance_program_counter(
-                instruction, condition_met, wrap_target, wrap_top, current_state
+                emulation, condition_met, wrap_target, wrap_top, current_state
             )
 
             current_state = _apply_delay_value(
@@ -229,7 +229,7 @@ def _get_input_source_parameter_type(input_source: Callable):
 
 
 def _advance_program_counter(
-    instruction: Instruction,
+    emulation: Emulation,
     condition_met: bool,
     wrap_bottom: int,
     wrap_top: int,
@@ -240,7 +240,7 @@ def _advance_program_counter(
     else:
         new_pc = state.program_counter + 1
 
-    match instruction.program_counter_advance:
+    match emulation.program_counter_advance:
         case ProgramCounterAdvance.ALWAYS:
             return replace(state, program_counter=new_pc)
         case ProgramCounterAdvance.WHEN_CONDITION_MET if condition_met:

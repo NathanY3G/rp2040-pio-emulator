@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Nathan Young
+# Copyright 2021, 2022, 2023, 2025 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ class ProgramCounterAdvance(Enum):
 
 
 @dataclass(frozen=True)
-class Instruction:
+class Emulation:
     condition: Callable[[State], bool]
-    callable: Callable[[State], State | None]
+    emulate: Callable[[State], State | None]
     program_counter_advance: ProgramCounterAdvance
