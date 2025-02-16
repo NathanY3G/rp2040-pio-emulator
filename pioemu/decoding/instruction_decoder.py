@@ -13,20 +13,45 @@
 # limitations under the License.
 from pioemu.instruction import JmpInstruction
 
-# TODO - Add documentation
-
 
 class InstructionDecoder:
+    """
+    Decodes state-machine opcodes into higher-level representations.
+    """
+
     def __init__(self, side_set_count: int = 0):
+        """
+        Parameters
+        ----------
+        side_set_count (int): Number of bits of side-set information encoded into opcodes.
+        """
         self.side_set_count = side_set_count
         self.bits_for_delay = 5 - self.side_set_count
         self.delay_mask = (1 << self.bits_for_delay) - 1
 
     def decode(self, opcode: int) -> JmpInstruction | None:
+        """
+        Decodes an opcode into an object representing the instruction and its parameters.
+
+        Parameters:
+        opcode (int): The opcode to decode.
+
+        Returns:
+        Instruction: Representation of the given opcode or None when invalid/not supported
+        """
+
+        if (opcode >> 13) & 7 == 0:
+            return self._decode_jmp(opcode)
+
+        return None
+
+    def _decode_jmp(self, opcode: int) -> JmpInstruction:
         target_address = opcode & 0x1F
         condition = (opcode >> 5) & 7
 
-        delay = (opcode >> 8) & self.delay_mask
-        side_set = opcode >> 8 + self.bits_for_delay
+        delay_cycles = (opcode >> 8) & self.delay_mask
+        side_set_value = opcode >> 8 + self.bits_for_delay
 
-        return JmpInstruction(target_address, condition, delay, side_set)
+        return JmpInstruction(
+            opcode, target_address, condition, delay_cycles, side_set_value
+        )

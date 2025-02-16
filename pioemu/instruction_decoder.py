@@ -29,6 +29,7 @@ from .conditions import (
 )
 from .instruction import (
     Emulation,
+    JmpInstruction,
     ProgramCounterAdvance,
 )
 from .instructions.pull import (
@@ -170,6 +171,22 @@ class InstructionDecoder:
             None,
         ]
 
+    def create_emulation(self, instruction: JmpInstruction) -> Emulation | None:
+        """
+        Returns an emulation for the given instruction.
+
+        Parameters:
+        instruction (Instruction): The instruction to be emulated.
+
+        Returns:
+        Emulation: Emulation for the given instruction or None when invalid/not supported
+        """
+
+        if isinstance(instruction, JmpInstruction):
+            return self._decode_jmp(instruction)
+
+        return None
+
     def decode(self, opcode: int) -> Emulation | None:
         """
         Decodes the given opcode and returns a callable which emulates it.
@@ -184,18 +201,20 @@ class InstructionDecoder:
         decoding_function = self.decoding_functions[(opcode >> 13) & 7]
         return decoding_function(opcode)
 
-    def _decode_jmp(self, opcode: int) -> Emulation | None:
-        address = opcode & 0x1F
-        condition = self.jmp_conditions[(opcode >> 5) & 7]
+    def _decode_jmp(self, instruction: JmpInstruction) -> Emulation | None:
+        condition = self.jmp_conditions[instruction.condition]
 
-        if condition is not None:
-            return Emulation(
-                condition,
-                partial(write_to_program_counter, supplies_value(address)),
-                ProgramCounterAdvance.WHEN_CONDITION_NOT_MET,
-            )
+        if condition is None:
+            return None
 
-        return None
+        return Emulation(
+            condition,
+            partial(
+                write_to_program_counter, supplies_value(instruction.target_address)
+            ),
+            ProgramCounterAdvance.WHEN_CONDITION_NOT_MET,
+            instruction,
+        )
 
     def _decode_mov(self, opcode: int) -> Emulation:
         read_from_source = self.mov_sources[opcode & 7]
