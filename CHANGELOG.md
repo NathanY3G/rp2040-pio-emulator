@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-- No changes
+### Changed
+- Renamed internal `Instruction` class
 
 ## 0.84.0 (2025-02-02)
 
