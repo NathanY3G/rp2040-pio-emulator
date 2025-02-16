@@ -16,7 +16,8 @@ import logging
 from dataclasses import replace
 from typing import Callable, Generator, List, Tuple
 
-from .instruction import Emulation, ProgramCounterAdvance
+from .decoding.instruction_decoder import InstructionDecoder as NewInstructionDecoder
+from .instruction import Emulation, JmpInstruction, ProgramCounterAdvance
 from .instruction_decoder import InstructionDecoder
 from .shift_register import ShiftRegister
 from .state import State
@@ -107,7 +108,9 @@ def emulate(
         ShiftRegister.shift_right if shift_osr_right else ShiftRegister.shift_left
     )
 
-    instruction_decoder = InstructionDecoder(
+    new_instruction_decoder = NewInstructionDecoder(side_set_count)
+
+    old_instruction_decoder = InstructionDecoder(
         shift_isr_method, shift_osr_method, jmp_pin
     )
 
@@ -133,7 +136,13 @@ def emulate(
             opcode, side_set_count
         )
 
-        emulation = instruction_decoder.decode(opcode)
+        instruction = new_instruction_decoder.decode(opcode)
+
+        emulation = (
+            old_instruction_decoder.create_emulation(instruction)
+            if instruction
+            else old_instruction_decoder.decode(opcode)
+        )
 
         if emulation is None:
             return
@@ -185,7 +194,7 @@ def emulate(
             )
 
             current_state = _apply_delay_value(
-                opcode, condition_met, delay_value, current_state
+                instruction, condition_met, delay_value, current_state
             )
 
         current_state = replace(current_state, clock=current_state.clock + 1)
@@ -252,11 +261,12 @@ def _advance_program_counter(
 
 
 def _apply_delay_value(
-    opcode: int, condition_met: bool, delay_value: int, state: State
+    instruction: JmpInstruction | None,
+    condition_met: bool,
+    delay_value: int,
+    state: State,
 ) -> State:
-    jump_instruction = (opcode >> 13) == 0
-
-    if jump_instruction or condition_met:
+    if isinstance(instruction, JmpInstruction) or condition_met:
         return replace(state, clock=state.clock + delay_value)
 
     return state

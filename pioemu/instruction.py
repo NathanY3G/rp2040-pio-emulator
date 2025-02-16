@@ -25,7 +25,17 @@ class ProgramCounterAdvance(Enum):
 
 
 @dataclass(frozen=True)
+class JmpInstruction:
+    opcode: int
+    target_address: int
+    condition: int  # TODO: Use an enumeration instead of an integer?
+    delay_cycles: int
+    side_set_value: int
+
+
+@dataclass(frozen=True)
 class Emulation:
     condition: Callable[[State], bool]
     emulate: Callable[[State], State | None]
     program_counter_advance: ProgramCounterAdvance
+    instruction: JmpInstruction | None = None

@@ -14,10 +14,17 @@
 import pytest
 from pioemu.decoding.instruction_decoder import InstructionDecoder
 from pioemu.instruction import JmpInstruction
+from tests.opcodes import Opcodes
+
+
+def test_none_returned_for_unsupported_opcodes():
+    instruction = InstructionDecoder().decode(Opcodes.nop())
+
+    assert instruction is None
 
 
 @pytest.mark.parametrize(
-    "opcode, side_set_count, expected_target_address, expected_condition, expected_delay, expected_side_set",
+    "opcode, side_set_count, expected_target_address, expected_condition, expected_delay_cycles, expected_side_set_value",
     [
         pytest.param(0x1A20, 3, 0, 1, 2, 6, id="jmp !x 0 side 0b110 [2]"),
         pytest.param(0x1440, 2, 0, 2, 4, 2, id="jmp x-- 0 side 0b10 [4]"),
@@ -41,15 +48,16 @@ def test_decoding_of_jmp_instruction(
     side_set_count: int,
     expected_target_address: int,
     expected_condition: int,
-    expected_delay: int,
-    expected_side_set: int,
+    expected_delay_cycles: int,
+    expected_side_set_value: int,
 ):
     instruction_decoder = InstructionDecoder(side_set_count)
     instruction = instruction_decoder.decode(opcode)
 
     assert isinstance(instruction, JmpInstruction)
 
+    assert instruction.opcode == opcode
     assert instruction.target_address == expected_target_address
     assert instruction.condition == expected_condition
-    assert instruction.delay == expected_delay
-    assert instruction.side_set == expected_side_set
+    assert instruction.delay_cycles == expected_delay_cycles
+    assert instruction.side_set_value == expected_side_set_value
