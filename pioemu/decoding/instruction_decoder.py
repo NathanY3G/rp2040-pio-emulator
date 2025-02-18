@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pioemu.instruction import JmpInstruction
+from pioemu.instruction import InInstruction, JmpInstruction
 
 
 class InstructionDecoder:
@@ -27,9 +27,9 @@ class InstructionDecoder:
         """
         self.side_set_count = side_set_count
         self.bits_for_delay = 5 - self.side_set_count
-        self.delay_mask = (1 << self.bits_for_delay) - 1
+        self.delay_cycles_mask = (1 << self.bits_for_delay) - 1
 
-    def decode(self, opcode: int) -> JmpInstruction | None:
+    def decode(self, opcode: int) -> InInstruction | JmpInstruction | None:
         """
         Decodes an opcode into an object representing the instruction and its parameters.
 
@@ -40,18 +40,36 @@ class InstructionDecoder:
         Instruction: Representation of the given opcode or None when invalid/not supported
         """
 
-        if (opcode >> 13) & 7 == 0:
-            return self._decode_jmp(opcode)
+        match (opcode >> 13) & 7:
+            case 0:
+                return self._decode_jmp(opcode)
+            case 2:
+                return self._decode_in(opcode)
+            case _:
+                return None
 
-        return None
+    def _decode_in(self, opcode: int) -> InInstruction | None:
+        bit_count = opcode & 0x1F
+        if bit_count == 0:
+            bit_count = 32
+
+        source = (opcode >> 5) & 7
+        delay_cycles, side_set_value = self._extract_delay_cycles_and_side_set(opcode)
+
+        return InInstruction(opcode, source, bit_count, delay_cycles, side_set_value)
 
     def _decode_jmp(self, opcode: int) -> JmpInstruction:
         target_address = opcode & 0x1F
         condition = (opcode >> 5) & 7
-
-        delay_cycles = (opcode >> 8) & self.delay_mask
-        side_set_value = opcode >> 8 + self.bits_for_delay
+        delay_cycles, side_set_value = self._extract_delay_cycles_and_side_set(opcode)
 
         return JmpInstruction(
             opcode, target_address, condition, delay_cycles, side_set_value
         )
+
+    def _extract_delay_cycles_and_side_set(self, opcode: int):
+        delay_cycles_and_side_set = (opcode >> 8) & 0x1F
+        delay_cycles = delay_cycles_and_side_set & self.delay_cycles_mask
+        side_set_value = delay_cycles_and_side_set >> self.bits_for_delay
+
+        return (delay_cycles, side_set_value)

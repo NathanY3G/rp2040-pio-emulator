@@ -17,7 +17,7 @@ from dataclasses import replace
 from typing import Callable, Generator, List, Tuple
 
 from .decoding.instruction_decoder import InstructionDecoder as NewInstructionDecoder
-from .instruction import Emulation, JmpInstruction, ProgramCounterAdvance
+from .instruction import Emulation, InInstruction, JmpInstruction, ProgramCounterAdvance
 from .instruction_decoder import InstructionDecoder
 from .shift_register import ShiftRegister
 from .state import State
@@ -153,7 +153,7 @@ def emulate(
             # into a full FIFO. Please refer to the Autopush Details section (3.5.4.1) within the
             # RP2040 Datasheet for more details.
             if (
-                _is_in_instruction(opcode)
+                isinstance(instruction, InInstruction)
                 and auto_push
                 and current_state.input_shift_register.counter >= push_threshold
                 and len(current_state.receive_fifo) >= 4
@@ -179,7 +179,13 @@ def emulate(
                 stalled = True
 
         current_state = _apply_side_effects(
-            opcode, current_state, auto_push, push_threshold, auto_pull, pull_threshold
+            instruction,
+            opcode,
+            current_state,
+            auto_push,
+            push_threshold,
+            auto_pull,
+            pull_threshold,
         )
 
         # TODO: Check that the following still applies when an instruction is stalled
@@ -200,10 +206,6 @@ def emulate(
         current_state = replace(current_state, clock=current_state.clock + 1)
 
         yield (previous_state, current_state)
-
-
-def _is_in_instruction(opcode: int) -> bool:
-    return ((opcode >> 13) & 7) == 2
 
 
 def _is_out_instruction(opcode: int) -> bool:
@@ -273,6 +275,7 @@ def _apply_delay_value(
 
 
 def _apply_side_effects(
+    instruction: InInstruction,
     opcode: int,
     state: State,
     auto_push: bool,
@@ -281,7 +284,7 @@ def _apply_side_effects(
     pull_threshold: int,
 ) -> State:
     if (
-        _is_in_instruction(opcode)
+        isinstance(instruction, InInstruction)
         and auto_push
         and state.input_shift_register.counter >= push_threshold
         and len(state.receive_fifo) < 4
