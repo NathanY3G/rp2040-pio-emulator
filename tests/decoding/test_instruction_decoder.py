@@ -13,7 +13,7 @@
 # limitations under the License.
 import pytest
 from pioemu.decoding.instruction_decoder import InstructionDecoder
-from pioemu.instruction import JmpInstruction
+from pioemu.instruction import InInstruction, JmpInstruction
 from tests.opcodes import Opcodes
 
 
@@ -21,6 +21,44 @@ def test_none_returned_for_unsupported_opcodes():
     instruction = InstructionDecoder().decode(Opcodes.nop())
 
     assert instruction is None
+
+
+@pytest.mark.parametrize(
+    "opcode, side_set_count, expected_source, expected_bit_count, expected_delay_cycles, expected_side_set_value",
+    [
+        pytest.param(0x5C01, 0, 0, 1, 28, 0, id="in pins, 1 [28]"),
+        pytest.param(0x5B21, 0, 1, 1, 27, 0, id="in x, 1 [27]"),
+        pytest.param(0x4F41, 3, 2, 1, 3, 3, id="in y, 1 side 0b011 [3]"),
+        pytest.param(0x5C61, 4, 3, 1, 0, 14, id="in null, 1 side 0b1110"),
+        pytest.param(0x50C1, 1, 6, 1, 0, 1, id="in isr, 1 side 0b1"),
+        pytest.param(0x42E1, 5, 7, 1, 0, 2, id="in osr, 1 side 0b00010"),
+        pytest.param(0x5AE0, 4, 7, 32, 0, 13, id="in osr, 32 side 0b1101"),
+        pytest.param(0x4DC0, 2, 6, 32, 5, 1, id="in isr, 32 side 0b01 [5]"),
+        pytest.param(0x5060, 2, 3, 32, 0, 2, id="in null, 32 side 0b10"),
+        pytest.param(0x5340, 3, 2, 32, 3, 4, id="in y, 32 side 0b100 [3]"),
+        pytest.param(0x4820, 2, 1, 32, 0, 1, id="in x, 32 side 0b01"),
+        pytest.param(0x4D00, 5, 0, 32, 0, 13, id="in pins, 32 side 0b01101"),
+    ],
+)
+def test_decoding_of_in_instruction(
+    opcode: int,
+    side_set_count: int,
+    expected_source: int,
+    expected_bit_count: int,
+    expected_delay_cycles: int,
+    expected_side_set_value: int,
+):
+    instruction_decoder = InstructionDecoder(side_set_count)
+
+    decoded_instruction = instruction_decoder.decode(opcode)
+
+    assert decoded_instruction == InInstruction(
+        opcode,
+        expected_source,
+        expected_bit_count,
+        expected_delay_cycles,
+        expected_side_set_value,
+    )
 
 
 @pytest.mark.parametrize(
@@ -52,12 +90,13 @@ def test_decoding_of_jmp_instruction(
     expected_side_set_value: int,
 ):
     instruction_decoder = InstructionDecoder(side_set_count)
-    instruction = instruction_decoder.decode(opcode)
 
-    assert isinstance(instruction, JmpInstruction)
+    decoded_instruction = instruction_decoder.decode(opcode)
 
-    assert instruction.opcode == opcode
-    assert instruction.target_address == expected_target_address
-    assert instruction.condition == expected_condition
-    assert instruction.delay_cycles == expected_delay_cycles
-    assert instruction.side_set_value == expected_side_set_value
+    assert decoded_instruction == JmpInstruction(
+        opcode,
+        expected_target_address,
+        expected_condition,
+        expected_delay_cycles,
+        expected_side_set_value,
+    )

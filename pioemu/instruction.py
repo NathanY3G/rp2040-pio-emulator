@@ -25,6 +25,15 @@ class ProgramCounterAdvance(Enum):
 
 
 @dataclass(frozen=True)
+class InInstruction:
+    opcode: int
+    source: int  # TODO: Use an enumeration instead of an integer?
+    bit_count: int
+    delay_cycles: int
+    side_set_value: int
+
+
+@dataclass(frozen=True)
 class JmpInstruction:
     opcode: int
     target_address: int

@@ -29,6 +29,7 @@ from .conditions import (
 )
 from .instruction import (
     Emulation,
+    InInstruction,
     JmpInstruction,
     ProgramCounterAdvance,
 )
@@ -171,7 +172,9 @@ class InstructionDecoder:
             None,
         ]
 
-    def create_emulation(self, instruction: JmpInstruction) -> Emulation | None:
+    def create_emulation(
+        self, instruction: JmpInstruction | InInstruction
+    ) -> Emulation | None:
         """
         Returns an emulation for the given instruction.
 
@@ -182,10 +185,13 @@ class InstructionDecoder:
         Emulation: Emulation for the given instruction or None when invalid/not supported
         """
 
-        if isinstance(instruction, JmpInstruction):
-            return self._decode_jmp(instruction)
-
-        return None
+        match instruction:
+            case JmpInstruction():
+                return self._decode_jmp(instruction)
+            case InInstruction():
+                return self._decode_in(instruction)
+            case _:
+                return None
 
     def decode(self, opcode: int) -> Emulation | None:
         """
@@ -216,7 +222,7 @@ class InstructionDecoder:
             instruction,
         )
 
-    def _decode_mov(self, opcode: int) -> Emulation:
+    def _decode_mov(self, opcode: int) -> Emulation | None:
         read_from_source = self.mov_sources[opcode & 7]
 
         destination = (opcode >> 5) & 7
@@ -243,21 +249,21 @@ class InstructionDecoder:
             program_counter_advance,
         )
 
-    def _decode_in(self, opcode: int) -> Emulation:
-        read_from_source = self.in_sources[(opcode >> 5) & 7]
-
-        bit_count = opcode & 0x1F
-
-        if bit_count == 0:
-            bit_count = 32
+    def _decode_in(self, instruction: InInstruction) -> Emulation:
+        read_from_source = self.in_sources[instruction.source]
 
         return Emulation(
             always,
-            partial(shift_into_isr, read_from_source, self.shift_isr_method, bit_count),
+            partial(
+                shift_into_isr,
+                read_from_source,
+                self.shift_isr_method,
+                instruction.bit_count,
+            ),
             ProgramCounterAdvance.ALWAYS,
         )
 
-    def _decode_out(self, opcode: int) -> Emulation:
+    def _decode_out(self, opcode: int) -> Emulation | None:
         destination = (opcode >> 5) & 7
         write_to_destination = self.out_destinations[destination]
 
@@ -289,7 +295,7 @@ class InstructionDecoder:
 
         return Emulation(always, emulate_out, ProgramCounterAdvance.ALWAYS)
 
-    def _decode_set(self, opcode: int) -> Emulation:
+    def _decode_set(self, opcode: int) -> Emulation | None:
         write_to_destination = self.set_destinations[(opcode >> 5) & 7]
 
         if write_to_destination is None:
