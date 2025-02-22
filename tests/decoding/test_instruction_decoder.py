@@ -13,7 +13,7 @@
 # limitations under the License.
 import pytest
 from pioemu.decoding.instruction_decoder import InstructionDecoder
-from pioemu.instruction import InInstruction, JmpInstruction
+from pioemu.instruction import InInstruction, JmpInstruction, OutInstruction
 from tests.opcodes import Opcodes
 
 
@@ -98,6 +98,48 @@ def test_decoding_of_jmp_instruction(
         opcode,
         expected_target_address,
         expected_condition,
+        expected_delay_cycles,
+        expected_side_set_value,
+    )
+
+
+@pytest.mark.parametrize(
+    "opcode, side_set_count, expected_destination, expected_bit_count, expected_delay_cycles, expected_side_set_value",
+    [
+        pytest.param(0x6901, 4, 0, 1, 1, 4, id="out pins, 1 side 0b0100 [1]"),
+        pytest.param(0x6D21, 5, 1, 1, 0, 13, id="out x, 1 side 0b01101"),
+        pytest.param(0x6041, 4, 2, 1, 0, 0, id="out y, 1 side 0b0000"),
+        pytest.param(0x7661, 0, 3, 1, 22, 0, id="out null, 1 [22]"),
+        pytest.param(0x6C81, 3, 4, 1, 0, 3, id="out pindirs, 1 side 0b011"),
+        pytest.param(0x7AA1, 4, 5, 1, 0, 13, id="out pc, 1 side 0b1101"),
+        pytest.param(0x6FC1, 1, 6, 1, 15, 0, id="out isr, 1 side 0b0 [15]"),
+        pytest.param(0x60E1, 4, 7, 1, 0, 0, id="out exec, 1 side 0b0000"),
+        pytest.param(0x76E0, 0, 7, 32, 22, 0, id="out exec, 32 [22]"),
+        pytest.param(0x7DC0, 5, 6, 32, 0, 29, id="out isr, 32 side 0b11101"),
+        pytest.param(0x73A0, 4, 5, 32, 1, 9, id="out pc, 32 side 0b1001 [1]"),
+        pytest.param(0x7480, 2, 4, 32, 4, 2, id="out pindirs, 32 side 0b10 [4]"),
+        pytest.param(0x6B60, 4, 3, 32, 1, 5, id="out null, 32 side 0b0101 [1]"),
+        pytest.param(0x7440, 4, 2, 32, 0, 10, id="out y, 32 side 0b1010"),
+        pytest.param(0x6920, 5, 1, 32, 0, 9, id="out x, 32 side 0b01001"),
+        pytest.param(0x6900, 1, 0, 32, 9, 0, id="out pins, 32 side 0b0 [9]"),
+    ],
+)
+def test_decoding_of_out_instruction(
+    opcode: int,
+    side_set_count: int,
+    expected_destination: int,
+    expected_bit_count: int,
+    expected_delay_cycles: int,
+    expected_side_set_value: int,
+):
+    instruction_decoder = InstructionDecoder(side_set_count)
+
+    decoded_instruction = instruction_decoder.decode(opcode)
+
+    assert decoded_instruction == OutInstruction(
+        opcode,
+        expected_destination,
+        expected_bit_count,
         expected_delay_cycles,
         expected_side_set_value,
     )
