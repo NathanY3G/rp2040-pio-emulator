@@ -263,7 +263,7 @@ def _advance_program_counter(
 
 
 def _apply_delay_value(
-    instruction: JmpInstruction | None,
+    instruction: JmpInstruction | InInstruction | None,
     condition_met: bool,
     delay_value: int,
     state: State,
@@ -275,7 +275,7 @@ def _apply_delay_value(
 
 
 def _apply_side_effects(
-    instruction: InInstruction,
+    instruction: JmpInstruction | InInstruction | None,
     opcode: int,
     state: State,
     auto_push: bool,

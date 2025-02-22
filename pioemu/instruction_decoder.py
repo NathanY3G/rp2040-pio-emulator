@@ -261,6 +261,7 @@ class InstructionDecoder:
                 instruction.bit_count,
             ),
             ProgramCounterAdvance.ALWAYS,
+            instruction,
         )
 
     def _decode_out(self, opcode: int) -> Emulation | None:

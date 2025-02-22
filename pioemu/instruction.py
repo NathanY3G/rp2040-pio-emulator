@@ -47,4 +47,4 @@ class Emulation:
     condition: Callable[[State], bool]
     emulate: Callable[[State], State | None]
     program_counter_advance: ProgramCounterAdvance
-    instruction: JmpInstruction | None = None
+    instruction: JmpInstruction | InInstruction | None = None
