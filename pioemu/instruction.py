@@ -43,8 +43,17 @@ class JmpInstruction:
 
 
 @dataclass(frozen=True)
+class OutInstruction:
+    opcode: int
+    destination: int  # TODO: Use an enumeration instead of an integer?
+    bit_count: int
+    delay_cycles: int
+    side_set_value: int
+
+
+@dataclass(frozen=True)
 class Emulation:
     condition: Callable[[State], bool]
     emulate: Callable[[State], State | None]
     program_counter_advance: ProgramCounterAdvance
-    instruction: JmpInstruction | InInstruction | None = None
+    instruction: InInstruction | JmpInstruction | OutInstruction | None = None

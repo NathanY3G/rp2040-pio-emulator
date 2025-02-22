@@ -31,6 +31,7 @@ from .instruction import (
     Emulation,
     InInstruction,
     JmpInstruction,
+    OutInstruction,
     ProgramCounterAdvance,
 )
 from .instructions.pull import (
@@ -173,7 +174,7 @@ class InstructionDecoder:
         ]
 
     def create_emulation(
-        self, instruction: JmpInstruction | InInstruction
+        self, instruction: InInstruction | JmpInstruction | OutInstruction
     ) -> Emulation | None:
         """
         Returns an emulation for the given instruction.
@@ -186,10 +187,12 @@ class InstructionDecoder:
         """
 
         match instruction:
-            case JmpInstruction():
-                return self._decode_jmp(instruction)
             case InInstruction():
                 return self._decode_in(instruction)
+            case JmpInstruction():
+                return self._decode_jmp(instruction)
+            case OutInstruction():
+                return self._decode_out(instruction)
             case _:
                 return None
 
@@ -264,21 +267,15 @@ class InstructionDecoder:
             instruction,
         )
 
-    def _decode_out(self, opcode: int) -> Emulation | None:
-        destination = (opcode >> 5) & 7
-        write_to_destination = self.out_destinations[destination]
-
-        bit_count = opcode & 0x1F
-
-        if bit_count == 0:
-            bit_count = 32
+    def _decode_out(self, instruction: OutInstruction) -> Emulation | None:
+        write_to_destination = self.out_destinations[instruction.destination]
 
         if write_to_destination is None:
             return None
 
         def emulate_out(state: State) -> State:
             state, shift_result = shift_from_osr(
-                self.shift_osr_method, bit_count, state
+                self.shift_osr_method, instruction.bit_count, state
             )
 
             # Somewhat hacky workaround because 'OUT, ISR' also sets ISR shift counter to the
@@ -286,15 +283,22 @@ class InstructionDecoder:
             # See the description of the ISR destination on section 3.4.5.2 of the RP2040 Datasheet
             if write_to_destination == write_to_isr:
                 return write_to_destination(
-                    supplies_value(shift_result), state, count=bit_count
+                    supplies_value(shift_result), state, count=instruction.bit_count
                 )
 
             return write_to_destination(supplies_value(shift_result), state)
 
-        if destination == 5:  # Program counter
-            return Emulation(always, emulate_out, ProgramCounterAdvance.NEVER)
+        if instruction.destination == 5:  # Program counter
+            program_counter_advance = ProgramCounterAdvance.NEVER
+        else:
+            program_counter_advance = ProgramCounterAdvance.ALWAYS
 
-        return Emulation(always, emulate_out, ProgramCounterAdvance.ALWAYS)
+        return Emulation(
+            always,
+            emulate_out,
+            program_counter_advance,
+            instruction,
+        )
 
     def _decode_set(self, opcode: int) -> Emulation | None:
         write_to_destination = self.set_destinations[(opcode >> 5) & 7]

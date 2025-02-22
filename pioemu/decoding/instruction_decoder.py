@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pioemu.instruction import InInstruction, JmpInstruction
+from pioemu.instruction import InInstruction, JmpInstruction, OutInstruction
 
 
 class InstructionDecoder:
@@ -29,7 +29,9 @@ class InstructionDecoder:
         self.bits_for_delay = 5 - self.side_set_count
         self.delay_cycles_mask = (1 << self.bits_for_delay) - 1
 
-    def decode(self, opcode: int) -> InInstruction | JmpInstruction | None:
+    def decode(
+        self, opcode: int
+    ) -> InInstruction | JmpInstruction | OutInstruction | None:
         """
         Decodes an opcode into an object representing the instruction and its parameters.
 
@@ -45,6 +47,8 @@ class InstructionDecoder:
                 return self._decode_jmp(opcode)
             case 2:
                 return self._decode_in(opcode)
+            case 3:
+                return self._decode_out(opcode)
             case _:
                 return None
 
@@ -70,6 +74,19 @@ class InstructionDecoder:
 
         return JmpInstruction(
             opcode, target_address, condition, delay_cycles, side_set_value
+        )
+
+    def _decode_out(self, opcode: int) -> OutInstruction:
+        bit_count = opcode & 0x1F
+        if bit_count == 0:
+            bit_count = 32
+
+        destination = (opcode >> 5) & 7
+
+        delay_cycles, side_set_value = self._extract_delay_cycles_and_side_set(opcode)
+
+        return OutInstruction(
+            opcode, destination, bit_count, delay_cycles, side_set_value
         )
 
     def _extract_delay_cycles_and_side_set(self, opcode: int):

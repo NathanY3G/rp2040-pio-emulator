@@ -17,7 +17,13 @@ from dataclasses import replace
 from typing import Callable, Generator, List, Tuple
 
 from .decoding.instruction_decoder import InstructionDecoder as NewInstructionDecoder
-from .instruction import Emulation, InInstruction, JmpInstruction, ProgramCounterAdvance
+from .instruction import (
+    Emulation,
+    InInstruction,
+    JmpInstruction,
+    OutInstruction,
+    ProgramCounterAdvance,
+)
 from .instruction_decoder import InstructionDecoder
 from .shift_register import ShiftRegister
 from .state import State
@@ -164,7 +170,7 @@ def emulate(
             # the same clock cycle. Please refer to the Autopull Details section (3.4.5.2) within
             # the RP2040 Datasheet for more details.
             elif (
-                _is_out_instruction(opcode)
+                isinstance(instruction, OutInstruction)
                 and auto_pull
                 and current_state.output_shift_register.counter >= pull_threshold
             ):
@@ -206,10 +212,6 @@ def emulate(
         current_state = replace(current_state, clock=current_state.clock + 1)
 
         yield (previous_state, current_state)
-
-
-def _is_out_instruction(opcode: int) -> bool:
-    return ((opcode >> 13) & 7) == 3
 
 
 def _normalize_input_source(logger: logging.Logger, input_source: Callable):
@@ -263,7 +265,7 @@ def _advance_program_counter(
 
 
 def _apply_delay_value(
-    instruction: JmpInstruction | InInstruction | None,
+    instruction: InInstruction | JmpInstruction | OutInstruction | None,
     condition_met: bool,
     delay_value: int,
     state: State,
@@ -275,7 +277,7 @@ def _apply_delay_value(
 
 
 def _apply_side_effects(
-    instruction: JmpInstruction | InInstruction | None,
+    instruction: InInstruction | JmpInstruction | OutInstruction | None,
     opcode: int,
     state: State,
     auto_push: bool,
@@ -299,7 +301,7 @@ def _apply_side_effects(
             input_shift_register=new_input_shift_register,
         )
     elif (
-        _is_out_instruction(opcode)
+        isinstance(instruction, OutInstruction)
         and auto_pull
         and state.output_shift_register.counter >= pull_threshold
         and state.transmit_fifo
