@@ -54,6 +54,11 @@ class InstructionDecoder:
             bit_count = 32
 
         source = (opcode >> 5) & 7
+
+        # Check if source has been reserved for future use
+        if source == 4 or source == 5:
+            return None
+
         delay_cycles, side_set_value = self._extract_delay_cycles_and_side_set(opcode)
 
         return InInstruction(opcode, source, bit_count, delay_cycles, side_set_value)

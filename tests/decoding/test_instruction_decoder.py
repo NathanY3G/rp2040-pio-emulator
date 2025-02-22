@@ -17,10 +17,11 @@ from pioemu.instruction import InInstruction, JmpInstruction
 from tests.opcodes import Opcodes
 
 
-def test_none_returned_for_unsupported_opcodes():
-    instruction = InstructionDecoder().decode(Opcodes.nop())
+@pytest.mark.parametrize("opcode", [Opcodes.nop(), 0x4081, 0x40A1])
+def test_none_returned_for_unsupported_opcodes(opcode: int):
+    decoded_instruction = InstructionDecoder().decode(opcode)
 
-    assert instruction is None
+    assert decoded_instruction is None
 
 
 @pytest.mark.parametrize(
