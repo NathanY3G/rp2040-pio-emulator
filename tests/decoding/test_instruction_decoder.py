@@ -54,11 +54,11 @@ def test_decoding_of_in_instruction(
     decoded_instruction = instruction_decoder.decode(opcode)
 
     assert decoded_instruction == InInstruction(
-        opcode,
-        expected_source,
-        expected_bit_count,
-        expected_delay_cycles,
-        expected_side_set_value,
+        opcode=opcode,
+        source=expected_source,
+        bit_count=expected_bit_count,
+        delay_cycles=expected_delay_cycles,
+        side_set_value=expected_side_set_value,
     )
 
 
@@ -95,11 +95,11 @@ def test_decoding_of_jmp_instruction(
     decoded_instruction = instruction_decoder.decode(opcode)
 
     assert decoded_instruction == JmpInstruction(
-        opcode,
-        expected_target_address,
-        expected_condition,
-        expected_delay_cycles,
-        expected_side_set_value,
+        opcode=opcode,
+        target_address=expected_target_address,
+        condition=expected_condition,
+        delay_cycles=expected_delay_cycles,
+        side_set_value=expected_side_set_value,
     )
 
 
@@ -137,9 +137,9 @@ def test_decoding_of_out_instruction(
     decoded_instruction = instruction_decoder.decode(opcode)
 
     assert decoded_instruction == OutInstruction(
-        opcode,
-        expected_destination,
-        expected_bit_count,
-        expected_delay_cycles,
-        expected_side_set_value,
+        opcode=opcode,
+        destination=expected_destination,
+        bit_count=expected_bit_count,
+        delay_cycles=expected_delay_cycles,
+        side_set_value=expected_side_set_value,
     )

@@ -11,7 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from pioemu.instruction import InInstruction, JmpInstruction, OutInstruction
+from typing import Optional
+from pioemu.instruction import (
+    InInstruction,
+    Instruction,
+    JmpInstruction,
+    OutInstruction,
+)
 
 
 class InstructionDecoder:
@@ -29,9 +35,7 @@ class InstructionDecoder:
         self.bits_for_delay = 5 - self.side_set_count
         self.delay_cycles_mask = (1 << self.bits_for_delay) - 1
 
-    def decode(
-        self, opcode: int
-    ) -> InInstruction | JmpInstruction | OutInstruction | None:
+    def decode(self, opcode: int) -> Optional[Instruction]:
         """
         Decodes an opcode into an object representing the instruction and its parameters.
 
@@ -65,15 +69,23 @@ class InstructionDecoder:
 
         delay_cycles, side_set_value = self._extract_delay_cycles_and_side_set(opcode)
 
-        return InInstruction(opcode, source, bit_count, delay_cycles, side_set_value)
+        return InInstruction(
+            opcode=opcode,
+            source=source,
+            bit_count=bit_count,
+            delay_cycles=delay_cycles,
+            side_set_value=side_set_value,
+        )
 
     def _decode_jmp(self, opcode: int) -> JmpInstruction:
-        target_address = opcode & 0x1F
-        condition = (opcode >> 5) & 7
         delay_cycles, side_set_value = self._extract_delay_cycles_and_side_set(opcode)
 
         return JmpInstruction(
-            opcode, target_address, condition, delay_cycles, side_set_value
+            opcode=opcode,
+            target_address=opcode & 0x1F,
+            condition=(opcode >> 5) & 7,
+            delay_cycles=delay_cycles,
+            side_set_value=side_set_value,
         )
 
     def _decode_out(self, opcode: int) -> OutInstruction:
@@ -81,12 +93,14 @@ class InstructionDecoder:
         if bit_count == 0:
             bit_count = 32
 
-        destination = (opcode >> 5) & 7
-
         delay_cycles, side_set_value = self._extract_delay_cycles_and_side_set(opcode)
 
         return OutInstruction(
-            opcode, destination, bit_count, delay_cycles, side_set_value
+            opcode=opcode,
+            destination=(opcode >> 5) & 7,
+            bit_count=bit_count,
+            delay_cycles=delay_cycles,
+            side_set_value=side_set_value,
         )
 
     def _extract_delay_cycles_and_side_set(self, opcode: int):

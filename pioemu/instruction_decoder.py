@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from functools import partial
-from typing import Callable, List, Tuple
+from typing import Callable, List, Optional, Tuple
 
 from .conditions import (
     always,
@@ -30,6 +30,7 @@ from .conditions import (
 from .instruction import (
     Emulation,
     InInstruction,
+    Instruction,
     JmpInstruction,
     OutInstruction,
     ProgramCounterAdvance,
@@ -91,7 +92,7 @@ class InstructionDecoder:
         self.shift_isr_method = shift_isr_method
         self.shift_osr_method = shift_osr_method
 
-        self.decoding_functions: List[Callable[[int], Emulation | None]] = [
+        self.decoding_functions: List[Callable[[int], Optional[Emulation]]] = [
             self._decode_jmp,
             self._decode_wait,
             self._decode_in,
@@ -174,8 +175,8 @@ class InstructionDecoder:
         ]
 
     def create_emulation(
-        self, instruction: InInstruction | JmpInstruction | OutInstruction
-    ) -> Emulation | None:
+        self, instruction: Optional[Instruction]
+    ) -> Optional[Emulation]:
         """
         Returns an emulation for the given instruction.
 
@@ -196,7 +197,7 @@ class InstructionDecoder:
             case _:
                 return None
 
-    def decode(self, opcode: int) -> Emulation | None:
+    def decode(self, opcode: int) -> Optional[Emulation]:
         """
         Decodes the given opcode and returns a callable which emulates it.
 
@@ -210,7 +211,7 @@ class InstructionDecoder:
         decoding_function = self.decoding_functions[(opcode >> 13) & 7]
         return decoding_function(opcode)
 
-    def _decode_jmp(self, instruction: JmpInstruction) -> Emulation | None:
+    def _decode_jmp(self, instruction: JmpInstruction) -> Optional[Emulation]:
         condition = self.jmp_conditions[instruction.condition]
 
         if condition is None:
@@ -225,7 +226,7 @@ class InstructionDecoder:
             instruction,
         )
 
-    def _decode_mov(self, opcode: int) -> Emulation | None:
+    def _decode_mov(self, opcode: int) -> Optional[Emulation]:
         read_from_source = self.mov_sources[opcode & 7]
 
         destination = (opcode >> 5) & 7
@@ -267,7 +268,7 @@ class InstructionDecoder:
             instruction,
         )
 
-    def _decode_out(self, instruction: OutInstruction) -> Emulation | None:
+    def _decode_out(self, instruction: OutInstruction) -> Optional[Emulation]:
         write_to_destination = self.out_destinations[instruction.destination]
 
         if write_to_destination is None:
@@ -300,7 +301,7 @@ class InstructionDecoder:
             instruction,
         )
 
-    def _decode_set(self, opcode: int) -> Emulation | None:
+    def _decode_set(self, opcode: int) -> Optional[Emulation]:
         write_to_destination = self.set_destinations[(opcode >> 5) & 7]
 
         if write_to_destination is None:
