@@ -13,10 +13,16 @@
 # limitations under the License.
 import pytest
 from pioemu.decoding.instruction_decoder import InstructionDecoder
-from pioemu.instruction import InInstruction, JmpInstruction, OutInstruction
+from pioemu.instruction import (
+    InInstruction,
+    JmpInstruction,
+    OutInstruction,
+    PushInstruction,
+)
 from tests.opcodes import Opcodes
 
 
+# TODO: Add invalid opcodes for PUSH
 @pytest.mark.parametrize("opcode", [Opcodes.nop(), 0x4081, 0x40A1])
 def test_none_returned_for_unsupported_opcodes(opcode: int):
     decoded_instruction = InstructionDecoder().decode(opcode)
@@ -140,6 +146,38 @@ def test_decoding_of_out_instruction(
         opcode=opcode,
         destination=expected_destination,
         bit_count=expected_bit_count,
+        delay_cycles=expected_delay_cycles,
+        side_set_value=expected_side_set_value,
+    )
+
+
+# fmt: off
+@pytest.mark.parametrize(
+    "opcode, side_set_count, expected_if_full_flag, expected_block_flag, expected_delay_cycles, expected_side_set_value",
+    [
+        pytest.param(0x8600, 1, False, False, 6, 0, id="push noblock side 0b0 [6]"),
+        pytest.param(0x9340, 5, True, False, 0, 19, id="push iffull noblock side 0b10011"),
+        pytest.param(0x9960, 4, True, True, 1, 12, id="push iffull block side 0b1100 [1]"),
+        pytest.param(0x8B20, 0, False, True, 11, 0, id="push block [11]"),
+    ],
+)
+# fmt: on
+def test_decoding_of_push_instruction(
+    opcode: int,
+    side_set_count: int,
+    expected_if_full_flag: int,
+    expected_block_flag: int,
+    expected_delay_cycles: int,
+    expected_side_set_value: int,
+):
+    instruction_decoder = InstructionDecoder(side_set_count)
+
+    decoded_instruction = instruction_decoder.decode(opcode)
+
+    assert decoded_instruction == PushInstruction(
+        opcode=opcode,
+        if_full=expected_if_full_flag,
+        block=expected_block_flag,
         delay_cycles=expected_delay_cycles,
         side_set_value=expected_side_set_value,
     )

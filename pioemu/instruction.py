@@ -49,6 +49,12 @@ class OutInstruction(Instruction):
     bit_count: int
 
 
+@dataclass(frozen=True, kw_only=True)
+class PushInstruction(Instruction):
+    if_full: bool
+    block: bool
+
+
 @dataclass(frozen=True)
 class Emulation:
     condition: Callable[[State], bool]
