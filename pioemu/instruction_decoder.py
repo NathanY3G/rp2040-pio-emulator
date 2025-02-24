@@ -34,6 +34,7 @@ from .instruction import (
     JmpInstruction,
     OutInstruction,
     ProgramCounterAdvance,
+    PushInstruction,
 )
 from .instructions.pull import (
     pull_blocking,
@@ -194,6 +195,8 @@ class InstructionDecoder:
                 return self._decode_jmp(instruction)
             case OutInstruction():
                 return self._decode_out(instruction)
+            case PushInstruction():
+                return self._decode_push_pull(instruction)
             case _:
                 return None
 
@@ -314,11 +317,17 @@ class InstructionDecoder:
         )
 
     @staticmethod
-    def _decode_push_pull(opcode: int) -> Emulation:
-        block = bool(opcode & 0x0020)
+    def _decode_push_pull(instruction: PushInstruction | int) -> Emulation:
+        opcode = (
+            instruction.opcode
+            if isinstance(instruction, PushInstruction)
+            else instruction
+        )
 
         if opcode & 0x0080:
             # Pull
+            block = bool(opcode & 0x0020)
+
             condition = output_shift_register_empty if (opcode & 0x0040) else always
 
             instruction = Emulation(
@@ -328,12 +337,13 @@ class InstructionDecoder:
             )
         else:
             # Push
-            condition = input_shift_register_full if (opcode & 0x0040) else always
+            condition = input_shift_register_full if instruction.if_full else always
 
             instruction = Emulation(
                 condition,
-                push_blocking if block else push_nonblocking,
+                push_blocking if instruction.block else push_nonblocking,
                 ProgramCounterAdvance.ALWAYS,
+                instruction,
             )
 
         return instruction
