@@ -14,12 +14,13 @@
 import inspect
 import logging
 from dataclasses import replace
-from typing import Callable, Generator, List, Tuple
+from typing import Callable, Generator, List, Optional, Tuple
 
 from .decoding.instruction_decoder import InstructionDecoder as NewInstructionDecoder
 from .instruction import (
     Emulation,
     InInstruction,
+    Instruction,
     JmpInstruction,
     OutInstruction,
     ProgramCounterAdvance,
@@ -265,7 +266,7 @@ def _advance_program_counter(
 
 
 def _apply_delay_value(
-    instruction: InInstruction | JmpInstruction | OutInstruction | None,
+    instruction: Optional[Instruction],
     condition_met: bool,
     delay_value: int,
     state: State,
@@ -277,7 +278,7 @@ def _apply_delay_value(
 
 
 def _apply_side_effects(
-    instruction: InInstruction | JmpInstruction | OutInstruction | None,
+    instruction: Optional[Instruction],
     opcode: int,
     state: State,
     auto_push: bool,

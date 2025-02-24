@@ -13,7 +13,7 @@
 # limitations under the License.
 from dataclasses import dataclass
 from enum import auto, Enum
-from typing import Callable
+from typing import Callable, Optional
 from .state import State
 
 
@@ -24,31 +24,29 @@ class ProgramCounterAdvance(Enum):
     NEVER = auto()
 
 
-@dataclass(frozen=True)
-class InInstruction:
+@dataclass(frozen=True, kw_only=True)
+class Instruction:
     opcode: int
+    delay_cycles: int
+    side_set_value: int
+
+
+@dataclass(frozen=True, kw_only=True)
+class InInstruction(Instruction):
     source: int  # TODO: Use an enumeration instead of an integer?
     bit_count: int
-    delay_cycles: int
-    side_set_value: int
 
 
-@dataclass(frozen=True)
-class JmpInstruction:
-    opcode: int
+@dataclass(frozen=True, kw_only=True)
+class JmpInstruction(Instruction):
     target_address: int
     condition: int  # TODO: Use an enumeration instead of an integer?
-    delay_cycles: int
-    side_set_value: int
 
 
-@dataclass(frozen=True)
-class OutInstruction:
-    opcode: int
+@dataclass(frozen=True, kw_only=True)
+class OutInstruction(Instruction):
     destination: int  # TODO: Use an enumeration instead of an integer?
     bit_count: int
-    delay_cycles: int
-    side_set_value: int
 
 
 @dataclass(frozen=True)
@@ -56,4 +54,4 @@ class Emulation:
     condition: Callable[[State], bool]
     emulate: Callable[[State], State | None]
     program_counter_advance: ProgramCounterAdvance
-    instruction: InInstruction | JmpInstruction | OutInstruction | None = None
+    instruction: Optional[Instruction] = None
