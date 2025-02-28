@@ -19,11 +19,12 @@ from pioemu.instruction import (
     OutInstruction,
     PullInstruction,
     PushInstruction,
+    WaitInstruction,
 )
 from tests.opcodes import Opcodes
 
 
-# TODO: Add invalid opcodes for PULL and PUSH
+# TODO: Add invalid opcodes for PULL, PUSH and WAIT
 @pytest.mark.parametrize("opcode", [Opcodes.nop(), 0x4081, 0x40A1])
 def test_none_returned_for_unsupported_opcodes(opcode: int):
     decoded_instruction = InstructionDecoder().decode(opcode)
@@ -166,8 +167,8 @@ def test_decoding_of_out_instruction(
 def test_decoding_of_pull_instruction(
     opcode: int,
     side_set_count: int,
-    expected_if_empty_flag: int,
-    expected_block_flag: int,
+    expected_if_empty_flag: bool,
+    expected_block_flag: bool,
     expected_delay_cycles: int,
     expected_side_set_value: int,
 ):
@@ -198,8 +199,8 @@ def test_decoding_of_pull_instruction(
 def test_decoding_of_push_instruction(
     opcode: int,
     side_set_count: int,
-    expected_if_full_flag: int,
-    expected_block_flag: int,
+    expected_if_full_flag: bool,
+    expected_block_flag: bool,
     expected_delay_cycles: int,
     expected_side_set_value: int,
 ):
@@ -211,6 +212,44 @@ def test_decoding_of_push_instruction(
         opcode=opcode,
         if_full=expected_if_full_flag,
         block=expected_block_flag,
+        delay_cycles=expected_delay_cycles,
+        side_set_value=expected_side_set_value,
+    )
+
+
+@pytest.mark.parametrize(
+    "opcode, side_set_count, expected_polarity, expected_source, expected_index, expected_delay_cycles, expected_side_set_value",
+    [
+        pytest.param(0x2A00, 1, 0, 0, 0, 10, 0, id="wait 0 gpio 0 side 0b0 [10]"),
+        pytest.param(0x263F, 0, 0, 1, 31, 6, 0, id="wait 0 pin 31 [6]"),
+        pytest.param(0x3CC7, 5, 1, 2, 7, 0, 28, id="wait 1 irq 7 side 0b11100"),
+        pytest.param(0x2540, 2, 0, 2, 0, 5, 0, id="wait 0 irq 0 side 0b00 [5]"),
+        pytest.param(0x34A0, 1, 1, 1, 0, 4, 1, id="wait 1 pin 0 side 0b1 [4]"),
+        pytest.param(0x3E9F, 4, 1, 0, 31, 0, 15, id="wait 1 gpio 31 side 0b1111"),
+        pytest.param(0x2800, 1, 0, 0, 0, 8, 0, id="wait 0 gpio 0 side 0b0 [8]"),
+        pytest.param(0x3047, 3, 0, 2, 7, 0, 4, id="wait 0 irq 7 side 0b100"),
+        pytest.param(0x389F, 2, 1, 0, 31, 0, 3, id="wait 1 gpio 31 side 0b11"),
+        pytest.param(0x20C0, 4, 1, 2, 0, 0, 0, id="wait 1 irq 0 side 0b0000"),
+    ],
+)
+def test_decoding_of_wait_instruction(
+    opcode: int,
+    side_set_count: int,
+    expected_polarity: int,
+    expected_source: int,
+    expected_index: int,
+    expected_delay_cycles: int,
+    expected_side_set_value: int,
+):
+    instruction_decoder = InstructionDecoder(side_set_count)
+
+    decoded_instruction = instruction_decoder.decode(opcode)
+
+    assert decoded_instruction == WaitInstruction(
+        opcode=opcode,
+        source=expected_source,
+        index=expected_index,
+        polarity=expected_polarity,
         delay_cycles=expected_delay_cycles,
         side_set_value=expected_side_set_value,
     )
