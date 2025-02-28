@@ -50,6 +50,12 @@ class OutInstruction(Instruction):
 
 
 @dataclass(frozen=True, kw_only=True)
+class PullInstruction(Instruction):
+    if_empty: bool
+    block: bool
+
+
+@dataclass(frozen=True, kw_only=True)
 class PushInstruction(Instruction):
     if_full: bool
     block: bool
