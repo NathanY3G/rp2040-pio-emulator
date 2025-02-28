@@ -19,6 +19,7 @@ from pioemu.instruction import (
     OutInstruction,
     PullInstruction,
     PushInstruction,
+    WaitInstruction,
 )
 
 
@@ -51,6 +52,8 @@ class InstructionDecoder:
         match (opcode >> 13) & 7:
             case 0:
                 return self._decode_jmp(opcode)
+            case 1:
+                return self._decode_wait(opcode)
             case 2:
                 return self._decode_in(opcode)
             case 3:
@@ -127,6 +130,18 @@ class InstructionDecoder:
             opcode=opcode,
             if_full=bool(opcode & 0x0040),
             block=bool(opcode & 0x0020),
+            delay_cycles=delay_cycles,
+            side_set_value=side_set_value,
+        )
+
+    def _decode_wait(self, opcode: int) -> Optional[WaitInstruction]:
+        delay_cycles, side_set_value = self._extract_delay_cycles_and_side_set(opcode)
+
+        return WaitInstruction(
+            opcode=opcode,
+            source=(opcode >> 5) & 3,
+            index=opcode & 0x1F,
+            polarity=bool(opcode & 0x0080),
             delay_cycles=delay_cycles,
             side_set_value=side_set_value,
         )

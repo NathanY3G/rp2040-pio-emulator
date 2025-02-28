@@ -36,6 +36,7 @@ from .instruction import (
     ProgramCounterAdvance,
     PullInstruction,
     PushInstruction,
+    WaitInstruction,
 )
 from .instructions.pull import (
     pull_blocking,
@@ -96,7 +97,7 @@ class InstructionDecoder:
 
         self.decoding_functions: List[Callable[[int], Optional[Emulation]]] = [
             lambda _: None,
-            self._decode_wait,
+            lambda _: None,
             lambda _: None,
             lambda _: None,
             lambda _: None,
@@ -200,6 +201,8 @@ class InstructionDecoder:
                 return self._decode_pull(instruction)
             case PushInstruction():
                 return self._decode_push(instruction)
+            case WaitInstruction():
+                return self._decode_wait(instruction)
             case _:
                 return None
 
@@ -342,13 +345,11 @@ class InstructionDecoder:
         )
 
     @staticmethod
-    def _decode_wait(opcode: int) -> Emulation:
-        index = opcode & 0x001F
-
-        if opcode & 0x0080:
-            condition = partial(gpio_high, index)
+    def _decode_wait(instruction: WaitInstruction) -> Emulation:
+        if instruction.polarity:
+            condition = partial(gpio_high, instruction.index)
         else:
-            condition = partial(gpio_low, index)
+            condition = partial(gpio_low, instruction.index)
 
         return Emulation(
             always,

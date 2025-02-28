@@ -61,6 +61,13 @@ class PushInstruction(Instruction):
     block: bool
 
 
+@dataclass(frozen=True, kw_only=True)
+class WaitInstruction(Instruction):
+    source: int  # TODO: Use an enumeration instead of an integer?
+    index: int
+    polarity: bool
+
+
 @dataclass(frozen=True)
 class Emulation:
     condition: Callable[[State], bool]
