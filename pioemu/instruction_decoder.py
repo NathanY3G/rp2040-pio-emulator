@@ -34,6 +34,7 @@ from .instruction import (
     JmpInstruction,
     OutInstruction,
     ProgramCounterAdvance,
+    PullInstruction,
     PushInstruction,
 )
 from .instructions.pull import (
@@ -94,11 +95,11 @@ class InstructionDecoder:
         self.shift_osr_method = shift_osr_method
 
         self.decoding_functions: List[Callable[[int], Optional[Emulation]]] = [
-            self._decode_jmp,
+            lambda _: None,
             self._decode_wait,
-            self._decode_in,
-            self._decode_out,
-            self._decode_push_pull,
+            lambda _: None,
+            lambda _: None,
+            lambda _: None,
             self._decode_mov,
             lambda _: None,
             self._decode_set,
@@ -195,8 +196,10 @@ class InstructionDecoder:
                 return self._decode_jmp(instruction)
             case OutInstruction():
                 return self._decode_out(instruction)
+            case PullInstruction():
+                return self._decode_pull(instruction)
             case PushInstruction():
-                return self._decode_push_pull(instruction)
+                return self._decode_push(instruction)
             case _:
                 return None
 
@@ -317,36 +320,26 @@ class InstructionDecoder:
         )
 
     @staticmethod
-    def _decode_push_pull(instruction: PushInstruction | int) -> Emulation:
-        opcode = (
-            instruction.opcode
-            if isinstance(instruction, PushInstruction)
-            else instruction
+    def _decode_pull(instruction: PullInstruction) -> Emulation:
+        condition = output_shift_register_empty if instruction.if_empty else always
+
+        return Emulation(
+            condition,
+            pull_blocking if instruction.block else pull_nonblocking,
+            ProgramCounterAdvance.ALWAYS,
+            instruction,
         )
 
-        if opcode & 0x0080:
-            # Pull
-            block = bool(opcode & 0x0020)
+    @staticmethod
+    def _decode_push(instruction: PushInstruction) -> Emulation:
+        condition = input_shift_register_full if instruction.if_full else always
 
-            condition = output_shift_register_empty if (opcode & 0x0040) else always
-
-            instruction = Emulation(
-                condition,
-                pull_blocking if block else pull_nonblocking,
-                ProgramCounterAdvance.ALWAYS,
-            )
-        else:
-            # Push
-            condition = input_shift_register_full if instruction.if_full else always
-
-            instruction = Emulation(
-                condition,
-                push_blocking if instruction.block else push_nonblocking,
-                ProgramCounterAdvance.ALWAYS,
-                instruction,
-            )
-
-        return instruction
+        return Emulation(
+            condition,
+            push_blocking if instruction.block else push_nonblocking,
+            ProgramCounterAdvance.ALWAYS,
+            instruction,
+        )
 
     @staticmethod
     def _decode_wait(opcode: int) -> Emulation:

@@ -17,12 +17,13 @@ from pioemu.instruction import (
     InInstruction,
     JmpInstruction,
     OutInstruction,
+    PullInstruction,
     PushInstruction,
 )
 from tests.opcodes import Opcodes
 
 
-# TODO: Add invalid opcodes for PUSH
+# TODO: Add invalid opcodes for PULL and PUSH
 @pytest.mark.parametrize("opcode", [Opcodes.nop(), 0x4081, 0x40A1])
 def test_none_returned_for_unsupported_opcodes(opcode: int):
     decoded_instruction = InstructionDecoder().decode(opcode)
@@ -146,6 +147,38 @@ def test_decoding_of_out_instruction(
         opcode=opcode,
         destination=expected_destination,
         bit_count=expected_bit_count,
+        delay_cycles=expected_delay_cycles,
+        side_set_value=expected_side_set_value,
+    )
+
+
+# fmt: off
+@pytest.mark.parametrize(
+    "opcode, side_set_count, expected_if_empty_flag, expected_block_flag, expected_delay_cycles, expected_side_set_value",
+    [
+        pytest.param(0x9080, 5, False, False, 0, 16, id="pull noblock side 0b10000"),
+        pytest.param(0x86C0, 3, True, False, 2, 1, id="pull ifempty noblock side 0b001 [2]"),
+        pytest.param(0x8BE0, 5, True, True, 0, 11, id="pull ifempty block side 0b01011"),
+        pytest.param(0x9FA0, 1, False, True, 15, 1, id="pull block side 0b1 [15]"),
+    ],
+)
+# fmt: on
+def test_decoding_of_pull_instruction(
+    opcode: int,
+    side_set_count: int,
+    expected_if_empty_flag: int,
+    expected_block_flag: int,
+    expected_delay_cycles: int,
+    expected_side_set_value: int,
+):
+    instruction_decoder = InstructionDecoder(side_set_count)
+
+    decoded_instruction = instruction_decoder.decode(opcode)
+
+    assert decoded_instruction == PullInstruction(
+        opcode=opcode,
+        if_empty=expected_if_empty_flag,
+        block=expected_block_flag,
         delay_cycles=expected_delay_cycles,
         side_set_value=expected_side_set_value,
     )

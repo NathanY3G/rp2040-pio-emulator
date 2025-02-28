@@ -17,6 +17,7 @@ from pioemu.instruction import (
     Instruction,
     JmpInstruction,
     OutInstruction,
+    PullInstruction,
     PushInstruction,
 )
 
@@ -54,8 +55,10 @@ class InstructionDecoder:
                 return self._decode_in(opcode)
             case 3:
                 return self._decode_out(opcode)
-            case 4:
+            case 4 if opcode & 0x0080 == 0:
                 return self._decode_push(opcode)
+            case 4 if opcode & 0x0080 != 0:
+                return self._decode_pull(opcode)
             case _:
                 return None
 
@@ -102,6 +105,17 @@ class InstructionDecoder:
             opcode=opcode,
             destination=(opcode >> 5) & 7,
             bit_count=bit_count,
+            delay_cycles=delay_cycles,
+            side_set_value=side_set_value,
+        )
+
+    def _decode_pull(self, opcode: int) -> Optional[PullInstruction]:
+        delay_cycles, side_set_value = self._extract_delay_cycles_and_side_set(opcode)
+
+        return PullInstruction(
+            opcode=opcode,
+            if_empty=bool(opcode & 0x0040),
+            block=bool(opcode & 0x0020),
             delay_cycles=delay_cycles,
             side_set_value=side_set_value,
         )
