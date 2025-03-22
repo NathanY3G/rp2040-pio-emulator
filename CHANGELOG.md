@@ -4,6 +4,7 @@
 
 ### Changed
 - Renamed internal `Instruction` class
+- Updated dependencies used for development.
 
 ## 0.84.0 (2025-02-02)
 
