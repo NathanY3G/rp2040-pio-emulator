@@ -13,7 +13,7 @@
 # limitations under the License.
 from dataclasses import dataclass
 from enum import auto, Enum
-from typing import Callable
+from typing import Callable, Optional
 from .state import State
 
 
@@ -24,8 +24,53 @@ class ProgramCounterAdvance(Enum):
     NEVER = auto()
 
 
+@dataclass(frozen=True, kw_only=True)
+class Instruction:
+    opcode: int
+    delay_cycles: int
+    side_set_value: int
+
+
+@dataclass(frozen=True, kw_only=True)
+class InInstruction(Instruction):
+    source: int  # TODO: Use an enumeration instead of an integer?
+    bit_count: int
+
+
+@dataclass(frozen=True, kw_only=True)
+class JmpInstruction(Instruction):
+    target_address: int
+    condition: int  # TODO: Use an enumeration instead of an integer?
+
+
+@dataclass(frozen=True, kw_only=True)
+class OutInstruction(Instruction):
+    destination: int  # TODO: Use an enumeration instead of an integer?
+    bit_count: int
+
+
+@dataclass(frozen=True, kw_only=True)
+class PullInstruction(Instruction):
+    if_empty: bool
+    block: bool
+
+
+@dataclass(frozen=True, kw_only=True)
+class PushInstruction(Instruction):
+    if_full: bool
+    block: bool
+
+
+@dataclass(frozen=True, kw_only=True)
+class WaitInstruction(Instruction):
+    source: int  # TODO: Use an enumeration instead of an integer?
+    index: int
+    polarity: bool
+
+
 @dataclass(frozen=True)
 class Emulation:
     condition: Callable[[State], bool]
     emulate: Callable[[State], State | None]
     program_counter_advance: ProgramCounterAdvance
+    instruction: Optional[Instruction] = None
