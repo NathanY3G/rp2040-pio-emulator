@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build:
-    runs-on: Ubuntu 22.04
+    runs-on: Ubuntu 24.04
 
     strategy:
       matrix:
