@@ -62,6 +62,8 @@ class InstructionDecoder:
                 return self._decode_push(opcode)
             case 4 if opcode & 0x0080 != 0:
                 return self._decode_pull(opcode)
+
+            # TODO: Add support for MOV, IRQ and SET instructions
             case _:
                 return None
 
