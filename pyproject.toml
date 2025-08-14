@@ -22,12 +22,12 @@ keywords = [
 python = "^3.10.13"
 
 [tool.poetry.group.dev.dependencies]
-pylint = "3.3.7"
-pytest = "8.3.5"
-coverage = "7.8.2"
+pylint = "3.3.8"
+pytest = "8.4.1"
+coverage = "7.10.3"
 black = "25.1.0"
 isort = "6.0.1"
-mypy = "1.15.0"
+mypy = "1.17.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
