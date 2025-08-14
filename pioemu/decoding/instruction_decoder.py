@@ -51,21 +51,23 @@ class InstructionDecoder:
 
         match (opcode >> 13) & 7:
             case 0:
-                return self._decode_jmp(opcode)
+                decoded_instruction = self._decode_jmp(opcode)
             case 1:
-                return self._decode_wait(opcode)
+                decoded_instruction = self._decode_wait(opcode)
             case 2:
-                return self._decode_in(opcode)
+                decoded_instruction = self._decode_in(opcode)
             case 3:
-                return self._decode_out(opcode)
+                decoded_instruction = self._decode_out(opcode)
             case 4 if opcode & 0x0080 == 0:
-                return self._decode_push(opcode)
+                decoded_instruction = self._decode_push(opcode)
             case 4 if opcode & 0x0080 != 0:
-                return self._decode_pull(opcode)
+                decoded_instruction = self._decode_pull(opcode)
 
             # TODO: Add support for MOV, IRQ and SET instructions
             case _:
-                return None
+                decoded_instruction = None
+
+        return decoded_instruction
 
     def _decode_in(self, opcode: int) -> Optional[InInstruction]:
         bit_count = opcode & 0x1F
@@ -75,7 +77,7 @@ class InstructionDecoder:
         source = (opcode >> 5) & 7
 
         # Check if source has been reserved for future use
-        if source == 4 or source == 5:
+        if source in (4, 5):
             return None
 
         delay_cycles, side_set_value = self._extract_delay_cycles_and_side_set(opcode)
