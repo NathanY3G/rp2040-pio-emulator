@@ -192,19 +192,21 @@ class InstructionDecoder:
 
         match instruction:
             case InInstruction():
-                return self._decode_in(instruction)
+                emulation = self._decode_in(instruction)
             case JmpInstruction():
-                return self._decode_jmp(instruction)
+                emulation = self._decode_jmp(instruction)
             case OutInstruction():
-                return self._decode_out(instruction)
+                emulation = self._decode_out(instruction)
             case PullInstruction():
-                return self._decode_pull(instruction)
+                emulation = self._decode_pull(instruction)
             case PushInstruction():
-                return self._decode_push(instruction)
+                emulation = self._decode_push(instruction)
             case WaitInstruction():
-                return self._decode_wait(instruction)
+                emulation = self._decode_wait(instruction)
             case _:
-                return None
+                emulation = None
+
+        return emulation
 
     def decode(self, opcode: int) -> Optional[Emulation]:
         """
