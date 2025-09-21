@@ -1,10 +1,11 @@
-[tool.poetry]
+[project]
 name = "rp2040-pio-emulator"
 version = "0.85.0"
 description = "RP2040 emulator for the testing and debugging of PIO programs"
-authors = ["Nathan Young"]
+authors = [
+    {name = "Nathan Young"}
+]
 license = "Apache-2.0"
-repository = "https://github.com/NathanY3G/rp2040-pio-emulator"
 readme = "README.md"
 packages = [
     { include = "pioemu" }
@@ -17,18 +18,21 @@ keywords = [
     "tdd",
     "debugging",
 ]
+requires-python = ">=3.10.18"
+dependencies = [
+]
 
-[tool.poetry.dependencies]
-python = "^3.10.13"
+[dependency-groups]
+dev = [
+    "pylint (==3.3.8)",
+    "pytest (==8.4.2)",
+    "coverage (==7.10.6)",
+    "black (==25.9.0)",
+    "isort (==6.0.1)",
+    "mypy (==1.18.2)",
+]
 
-[tool.poetry.group.dev.dependencies]
-pylint = "3.3.8"
-pytest = "8.4.2"
-coverage = "7.10.6"
-black = "25.9.0"
-isort = "6.0.1"
-mypy = "1.18.2"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
