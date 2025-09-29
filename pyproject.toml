@@ -7,9 +7,6 @@ authors = [
 ]
 license = "Apache-2.0"
 readme = "README.md"
-packages = [
-    { include = "pioemu" }
-]
 keywords = [
     "rp2040",
     "rp2",
@@ -32,6 +29,8 @@ dev = [
     "mypy (==1.18.2)",
 ]
 
+[tool.poetry]
+packages = [{include = "pioemu"}]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
