@@ -1,10 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.85.0 (2025-09-29)
 
 ### Changed
+- Fixed side-set for GPIO pins 16 through to 31
+- Refactored instruction decoding (part 1)
 - Renamed internal `Instruction` class
-- Updated dependencies used for development.
+- Updated dependencies used for development
+- Replace deprecated fields in pyproject.toml
 
 ## 0.84.0 (2025-02-02)
 
