@@ -336,7 +336,7 @@ def _extract_delay_and_side_set_from_opcode(
 def _apply_side_set_to_pin_values(
     state: State, pin_base: int, pin_count: int, pin_values: int
 ) -> State:
-    bit_mask = ~(((1 << pin_count) - 1) << pin_base) & 0xFFFF
+    bit_mask = ~(((1 << pin_count) - 1) << pin_base) & 0xFFFF_FFFF
     new_pin_values = (state.pin_values & bit_mask) | (pin_values << pin_base)
 
     return replace(state, pin_values=new_pin_values)
