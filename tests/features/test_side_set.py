@@ -39,6 +39,7 @@ def test_side_set_is_not_mistaken_for_delay():
         pytest.param(0x0000, 1, 1, 3, 1, id="jmp 0 side 0"),
         pytest.param(0x1000, 1, 1, 1, 3, id="jmp 0 side 1"),
         pytest.param(0xBC42, 5, 3, 0, 0xE0, id="nop side 7"),
+        pytest.param(0xA042, 24, 5, 0xFFFF_FFFF, 0xE0FF_FFFF, id="nop side 0"),
     ],
 )
 def test_side_set_changes_pin_values(
