@@ -1,6 +1,6 @@
 [project]
 name = "rp2040-pio-emulator"
-version = "0.85.0"
+version = "0.86.0"
 description = "RP2040 emulator for the testing and debugging of PIO programs"
 authors = [
     {name = "Nathan Young"}
