@@ -21,11 +21,11 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "pylint (==3.3.8)",
+    "pylint (==3.3.9)",
     "pytest (==8.4.2)",
     "coverage (==7.10.7)",
     "black (==25.9.0)",
-    "isort (==6.0.1)",
+    "isort (==6.1.0)",
     "mypy (==1.18.2)",
 ]
 
