@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Nathan Young
+# Copyright 2021, 2022, 2023, 2025 Nathan Young
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,12 @@ from .opcodes import Opcodes
 
 
 def instruction_param(
-    description, opcode, initial_state, expected_state, *, expected_program_counter=None
+    description,
+    opcode,
+    initial_state,
+    expected_state,
+    *,
+    expected_program_counter=None,
 ):
     if expected_program_counter is not None:
         expected_state = replace(
@@ -35,7 +40,13 @@ def instruction_param(
 
 
 def emulate_single_instruction(
-    opcode: int, *, initial_state=None, advance_program_counter=False
+    opcode: int,
+    *,
+    initial_state: State | None = None,
+    advance_program_counter: bool = False,
+    shift_osr_right: bool = True,
+    out_base: int = 0,
+    out_count: int = 32,
 ) -> Tuple[State, State]:
     if advance_program_counter:
         opcodes = [opcode, Opcodes.nop()]
@@ -46,6 +57,9 @@ def emulate_single_instruction(
         opcodes,
         initial_state=initial_state if initial_state else None,
         stop_when=clock_cycles_reached(1),
+        shift_osr_right=shift_osr_right,
+        out_base=out_base,
+        out_count=out_count,
     )
 
     return next(instruction_generator)

@@ -42,6 +42,8 @@ def emulate(
     push_threshold: int = 32,
     shift_isr_right: bool = True,
     shift_osr_right: bool = True,
+    out_base: int = 0,
+    out_count: int = 32,
     side_set_base: int = 0,
     side_set_count: int = 0,
     jmp_pin: int = 0,
@@ -73,15 +75,19 @@ def emulate(
         Shift the Input Shift Reigster (ISR) to the right when True and to the left when False.
     shift_osr_right : bool, optional
         Shift the Output Shift Reigster (OSR) to the right when True and to the left when False.
+    out_base : int, optional
+        First pin to use for OUT instructions.
+    out_count : int, optional
+        Number of consecutive pins to write for OUT instructions.
     side_set_base : int, optional
         First pin to use for the side-set.
-    side_set_count : int
+    side_set_count : int, optional
         Number of consecutive pins to include within the side-set.
-    jmp_pin : int
+    jmp_pin : int, optional
         Pin that determines the branch taken by JMP PIN instructions.
-    wrap_target : int
+    wrap_target : int, optional
         Program counter value to wrap to when the program counter reaches the wrap_top value.
-    wrap_top : int
+    wrap_top : int, optional
         Program counter value to wrap from when the program counter reaches the wrap_top value.
         Defaults to len(opcodes) - 1.
 
@@ -100,6 +106,12 @@ def emulate(
     if push_threshold < 1 or push_threshold > 32:
         raise ValueError(
             "emulate() invalid value for keyword argument: 'push_threshold'"
+        )
+
+    # XXX: Restrict the pin mapping for OUT instructions until it has been implemented
+    if out_base != 0 or out_count != 32:
+        raise ValueError(
+            "emulate() invalid value(s) for keyword argument(s): 'out_base' and/or 'out_count'"
         )
 
     if stop_when is None:
