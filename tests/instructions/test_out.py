@@ -146,15 +146,6 @@ def test_out_instruction_when_shifting_right(
         State(output_shift_register=ShiftRegister(0x06f5_6df7, 5), input_shift_register=ShiftRegister(0x0000_000F, 5)),
         id="out isr, 5",
     ),
-
-    pytest.param(
-        0x60C5,
-        0,
-        32,
-        State(output_shift_register=ShiftRegister(0xDEAD_BEEF, 0), input_shift_register=ShiftRegister(0x1234_4567, 32)),
-        State(output_shift_register=ShiftRegister(0x06f5_6df7, 5), input_shift_register=ShiftRegister(0x0000_000F, 5)),
-        id="out isr, 5",
-    ),
 ])
 # fmt: on
 def test_out_instruction(
