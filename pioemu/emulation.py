@@ -16,6 +16,7 @@ import logging
 from dataclasses import replace
 from typing import Callable, Generator, List, Optional, Tuple
 
+from .bit_operations import update_bits_32
 from .decoding.instruction_decoder import InstructionDecoder as NewInstructionDecoder
 from .instruction import (
     Emulation,
@@ -348,7 +349,5 @@ def _extract_delay_and_side_set_from_opcode(
 def _apply_side_set_to_pin_values(
     state: State, pin_base: int, pin_count: int, pin_values: int
 ) -> State:
-    bit_mask = ~(((1 << pin_count) - 1) << pin_base) & 0xFFFF_FFFF
-    new_pin_values = (state.pin_values & bit_mask) | (pin_values << pin_base)
-
+    new_pin_values = update_bits_32(state.pin_values, pin_values, pin_base, pin_count)
     return replace(state, pin_values=new_pin_values)
