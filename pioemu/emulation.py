@@ -109,11 +109,11 @@ def emulate(
             "emulate() invalid value for keyword argument: 'push_threshold'"
         )
 
-    # XXX: Restrict the pin mapping for OUT instructions until it has been implemented
-    if out_base != 0 or out_count != 32:
-        raise ValueError(
-            "emulate() invalid value(s) for keyword argument(s): 'out_base' and/or 'out_count'"
-        )
+    if out_base < 0 or out_base > 31:
+        raise ValueError("emulate() invalid value for keyword argument: 'out_base'")
+
+    if out_count < 0 or out_count > 32:
+        raise ValueError("emulate() invalid value for keyword argument: 'out_count'")
 
     if stop_when is None:
         raise ValueError("emulate() missing value for keyword argument: 'stop_when'")
@@ -131,7 +131,7 @@ def emulate(
     new_instruction_decoder = NewInstructionDecoder(side_set_count)
 
     old_instruction_decoder = InstructionDecoder(
-        shift_isr_method, shift_osr_method, jmp_pin
+        shift_isr_method, shift_osr_method, out_base, out_count, jmp_pin
     )
 
     wrap_top = wrap_top or len(opcodes) - 1

@@ -79,6 +79,8 @@ class InstructionDecoder:
         self,
         shift_isr_method: Callable[[ShiftRegister, int], Tuple[ShiftRegister, int]],
         shift_osr_method: Callable[[ShiftRegister, int], Tuple[ShiftRegister, int]],
+        out_base: int,
+        out_count: int,
         jmp_pin: int,
     ):
         """
@@ -88,12 +90,18 @@ class InstructionDecoder:
             Method to use to shift the contents of the Input Shift Register.
         osr_shift_method : Callable[[ShiftRegister, int], Tuple[ShiftRegister, int]]
             Method to use to shift the contents of the Output Shift Register.
+        out_base : int
+            First pin to use for OUT instructions.
+        out_count : int
+            Number of consecutive pins to write for OUT instructions.
         jmp_pin : int
             Pin that determines the branch taken by JMP PIN instructions.
         """
 
         self.shift_isr_method = shift_isr_method
         self.shift_osr_method = shift_osr_method
+        self.out_base = out_base
+        self.out_count = out_count
 
         self.decoding_functions: List[Callable[[int], Optional[Emulation]]] = [
             lambda _: None,
@@ -142,7 +150,7 @@ class InstructionDecoder:
         self.mov_destinations: List[
             Callable[[Callable[[State], int], State], State] | None
         ] = [
-            write_to_pins,
+            partial(write_to_pins, 0, 32),
             write_to_x,
             write_to_y,
             None,
@@ -154,11 +162,11 @@ class InstructionDecoder:
 
         # FIXME: Different signature used by write_to_isr() conflicts with type-hints
         self.out_destinations = [
-            write_to_pins,
+            partial(write_to_pins, self.out_base, self.out_count),
             write_to_x,
             write_to_y,
             write_to_null,
-            write_to_pin_directions,
+            partial(write_to_pin_directions, self.out_base, self.out_count),
             write_to_program_counter,
             write_to_isr,
             None,
@@ -167,11 +175,11 @@ class InstructionDecoder:
         self.set_destinations: List[
             Callable[[Callable[[State], int], State], State] | None
         ] = [
-            write_to_pins,
+            partial(write_to_pins, 0, 32),
             write_to_x,
             write_to_y,
             None,
-            write_to_pin_directions,
+            partial(write_to_pin_directions, 0, 32),
             None,
             None,
             None,
