@@ -13,6 +13,8 @@
 # limitations under the License.
 from dataclasses import replace
 from typing import Callable, Tuple
+
+from .bit_operations import update_bits_32
 from .shift_register import ShiftRegister
 from .state import State
 
@@ -109,17 +111,29 @@ def write_to_osr(
 
 
 def write_to_pin_directions(
-    data_supplier: Callable[[State], int], state: State
+    pin_base: int, pin_count: int, data_supplier: Callable[[State], int], state: State
 ) -> State:
     """Copies the given data into the pin directions register."""
 
-    return replace(state, pin_directions=data_supplier(state) & 0xFFFF_FFFF)
+    return replace(
+        state,
+        pin_directions=update_bits_32(
+            state.pin_directions, data_supplier(state), pin_base, pin_count
+        ),
+    )
 
 
-def write_to_pins(data_supplier: Callable[[State], int], state: State) -> State:
+def write_to_pins(
+    pin_base: int, pin_count: int, data_supplier: Callable[[State], int], state: State
+) -> State:
     """Copies the given data into the pin values register."""
 
-    return replace(state, pin_values=data_supplier(state) & 0xFFFF_FFFF)
+    return replace(
+        state,
+        pin_values=update_bits_32(
+            state.pin_values, data_supplier(state), pin_base, pin_count
+        ),
+    )
 
 
 def write_to_program_counter(

@@ -65,7 +65,7 @@ This software is under development and currently has limitations - the notable o
 
 1. Not all of the available instructions are supported - please refer to the table above.
 
-1. No support for pin-sets associated with `OUT`, `SET` or `IN`; all pin numbers are with respect to GPIO 0.
+1. No support for pin-sets associated with `SET` or `IN`; all pin numbers are with respect to GPIO 0.
 
 1. Pin-sets do not wrap after GPIO 31.
 
