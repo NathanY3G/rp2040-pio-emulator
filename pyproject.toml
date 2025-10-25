@@ -17,12 +17,12 @@ keywords = [
 ]
 requires-python = ">=3.10.18"
 dependencies = [
-    "pytest (>=8.4.2,<9.0.0)"
+    "pytest (>=8.4.2,<9.0.0)",
 ]
 
 [dependency-groups]
 dev = [
-    "pylint (==4.0.1)",
+    "pylint (==4.0.2)",
     "pytest (==8.4.2)",
     "coverage (==7.11.0)",
     "black (==25.9.0)",
