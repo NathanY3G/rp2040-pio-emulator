@@ -1,7 +1,11 @@
 # Changelog
 
 
-## Unreleased
+## 0.86.0 (2025-10-25)
+
+### Added
+- Pin mapping support for OUT instructions
+- Python 3.14 to the CI build matrix
 
 ### Changed
 - Updated dependencies used for development
