@@ -3,7 +3,8 @@
 
 ## Unreleased Version
 
-- No changes
+### Changed
+- Updated dependencies used for development.
 
 ## 0.86.0 (2025-10-25)
 
