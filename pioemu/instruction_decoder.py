@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from dataclasses import replace
 from functools import partial
 from typing import Callable, List, Optional, Tuple
 
@@ -31,6 +32,7 @@ from .instruction import (
     Emulation,
     InInstruction,
     Instruction,
+    IrqInstruction,
     JmpInstruction,
     OutInstruction,
     ProgramCounterAdvance,
@@ -82,6 +84,9 @@ class InstructionDecoder:
         out_base: int,
         out_count: int,
         jmp_pin: int,
+        *,
+        irq_handler: Optional[Callable[[int, State], State]] = None,
+        irq_flags: Optional[List[int]] = None,
     ):
         """
         Parameters
@@ -102,6 +107,10 @@ class InstructionDecoder:
         self.shift_osr_method = shift_osr_method
         self.out_base = out_base
         self.out_count = out_count
+        self._irq_handler: Callable[[int, State], State] = irq_handler or (
+            lambda idx, state: state
+        )
+        self._irq_flags: List[int] = irq_flags if irq_flags is not None else [0]
 
         self.decoding_functions: List[Callable[[int], Optional[Emulation]]] = [
             lambda _: None,
@@ -201,6 +210,8 @@ class InstructionDecoder:
         match instruction:
             case InInstruction():
                 emulation = self._decode_in(instruction)
+            case IrqInstruction():
+                emulation = self._decode_irq(instruction)
             case JmpInstruction():
                 emulation = self._decode_jmp(instruction)
             case OutInstruction():
@@ -229,6 +240,31 @@ class InstructionDecoder:
 
         decoding_function = self.decoding_functions[(opcode >> 13) & 7]
         return decoding_function(opcode)
+
+    def _decode_irq(self, instruction: IrqInstruction) -> Emulation:
+        index = instruction.index
+
+        def emulate_irq(state: State) -> State | None:
+            if instruction.clear:
+                self._irq_flags[0] &= ~(1 << index)
+            elif not (self._irq_flags[0] & (1 << index)):
+                # Only raise the flag on the first execution cycle
+                self._irq_flags[0] |= (1 << index)
+
+            new_state = replace(state, irq_flags=self._irq_flags[0])
+            returned_state = self._irq_handler(index, new_state)
+            self._irq_flags[0] = returned_state.irq_flags
+
+            if (
+                instruction.wait
+                and not instruction.clear
+                and (self._irq_flags[0] & (1 << index))
+            ):
+                return None  # Stall until flag is cleared
+
+            return replace(returned_state, irq_flags=self._irq_flags[0])
+
+        return Emulation(always, emulate_irq, ProgramCounterAdvance.ALWAYS, instruction)
 
     def _decode_jmp(self, instruction: JmpInstruction) -> Optional[Emulation]:
         condition = self.jmp_conditions[instruction.condition]

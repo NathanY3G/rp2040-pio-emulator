@@ -37,6 +37,7 @@ def emulate(
     stop_when: Callable[[int, State], bool],
     initial_state: State | None = None,
     input_source: Callable[[State], int] | Callable[[int], int] | None = None,
+    irq_handler: Callable[[int, State], State] | None = None,
     auto_pull: bool = False,
     auto_push: bool = False,
     pull_threshold: int = 32,
@@ -130,8 +131,17 @@ def emulate(
 
     new_instruction_decoder = NewInstructionDecoder(side_set_count)
 
+    _initial_irq_flags = initial_state.irq_flags if initial_state else 0
+    _irq_flags = [_initial_irq_flags]
+
     old_instruction_decoder = InstructionDecoder(
-        shift_isr_method, shift_osr_method, out_base, out_count, jmp_pin
+        shift_isr_method,
+        shift_osr_method,
+        out_base,
+        out_count,
+        jmp_pin,
+        irq_handler=irq_handler,
+        irq_flags=_irq_flags,
     )
 
     wrap_top = wrap_top or len(opcodes) - 1
@@ -223,7 +233,9 @@ def emulate(
                 instruction, condition_met, delay_value, current_state
             )
 
-        current_state = replace(current_state, clock=current_state.clock + 1)
+        current_state = replace(
+            current_state, clock=current_state.clock + 1, irq_flags=_irq_flags[0]
+        )
 
         yield (previous_state, current_state)
 
