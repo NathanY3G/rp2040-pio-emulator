@@ -57,7 +57,7 @@ OUT         | :heavy_check_mark: :construction: | EXEC destination not implement
 PUSH        | :heavy_check_mark:                | 
 PULL        | :heavy_check_mark:                | 
 MOV         | :heavy_check_mark: :construction: | Some variants and operations not implemented
-IRQ         | :heavy_multiplication_x:          |
+IRQ         | :heavy_check_mark:                |
 SET         | :heavy_check_mark:                |
 
 ## Known Limitations
