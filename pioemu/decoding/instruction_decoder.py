@@ -15,6 +15,7 @@ from typing import Optional
 from pioemu.instruction import (
     InInstruction,
     Instruction,
+    IrqInstruction,
     JmpInstruction,
     OutInstruction,
     PullInstruction,
@@ -63,7 +64,10 @@ class InstructionDecoder:
             case 4 if opcode & 0x0080 != 0:
                 decoded_instruction = self._decode_pull(opcode)
 
-            # TODO: Add support for MOV, IRQ and SET instructions
+            case 6:
+                decoded_instruction = self._decode_irq(opcode)
+
+            # TODO: Add support for MOV and SET instructions
             case _:
                 decoded_instruction = None
 
@@ -146,6 +150,25 @@ class InstructionDecoder:
             source=(opcode >> 5) & 3,
             index=opcode & 0x1F,
             polarity=bool(opcode & 0x0080),
+            delay_cycles=delay_cycles,
+            side_set_value=side_set_value,
+        )
+
+    def _decode_irq(self, opcode: int) -> Optional[IrqInstruction]:
+        idx_mode = (opcode >> 3) & 3
+
+        # PREV (01) and NEXT (11) indexing modes are not supported
+        if idx_mode in (1, 3):
+            return None
+
+        delay_cycles, side_set_value = self._extract_delay_cycles_and_side_set(opcode)
+
+        return IrqInstruction(
+            opcode=opcode,
+            index=opcode & 0x07,
+            clear=bool(opcode & 0x0040),
+            wait=bool(opcode & 0x0020),
+            idx_mode=idx_mode,
             delay_cycles=delay_cycles,
             side_set_value=side_set_value,
         )
