@@ -403,8 +403,8 @@ class InstructionDecoder:
                 ProgramCounterAdvance.ALWAYS,
             )
 
-        # source == 2: IRQ
-        index = instruction.index
+        # source == 2: IRQ; bit 4 of index is the REL flag, bits [3:0] are the IRQ number
+        index = instruction.index & 0x0F
 
         def emulate_wait_irq(state: State) -> State | None:
             flag_set = bool(self._irq_flags[0] & (1 << index))
