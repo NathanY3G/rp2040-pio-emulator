@@ -48,6 +48,7 @@ def emulate(
     out_count: int = 32,
     side_set_base: int = 0,
     side_set_count: int = 0,
+    side_set_opt: bool = False,
     jmp_pin: int = 0,
     wrap_target: int = 0,
     wrap_top: int = 0,
@@ -162,8 +163,8 @@ def emulate(
 
         opcode = opcodes[current_state.program_counter]
 
-        (side_set_value, delay_value) = _extract_delay_and_side_set_from_opcode(
-            opcode, side_set_count
+        (side_set_value, delay_value, apply_side_set) = _extract_delay_and_side_set_from_opcode(
+            opcode, side_set_count, side_set_opt
         )
 
         instruction = new_instruction_decoder.decode(opcode)
@@ -219,7 +220,7 @@ def emulate(
         )
 
         # TODO: Check that the following still applies when an instruction is stalled
-        if side_set_count > 0:
+        if apply_side_set:
             current_state = _apply_side_set_to_pin_values(
                 current_state, side_set_base, side_set_count, side_set_value
             )
@@ -349,13 +350,20 @@ def _apply_side_effects(
 
 
 def _extract_delay_and_side_set_from_opcode(
-    opcode: int, side_set_count: int
-) -> Tuple[int, int]:
+    opcode: int, side_set_count: int, side_set_opt: bool = False
+) -> Tuple[int, int, bool]:
     combined_values = (opcode >> 8) & 0x1F
+
+    if side_set_count > 0 and side_set_opt:
+        enable = (combined_values >> 4) & 1
+        side_shift = 4 - side_set_count
+        side_set_value = (combined_values >> side_shift) & ((1 << side_set_count) - 1)
+        delay_value = combined_values & ((1 << side_shift) - 1)
+        return (side_set_value, delay_value, bool(enable))
+
     bits_for_delay = 5 - side_set_count
     delay_mask = (1 << bits_for_delay) - 1
-
-    return (combined_values >> bits_for_delay, combined_values & delay_mask)
+    return (combined_values >> bits_for_delay, combined_values & delay_mask, side_set_count > 0)
 
 
 def _apply_side_set_to_pin_values(
