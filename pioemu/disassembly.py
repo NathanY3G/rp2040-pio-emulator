@@ -116,16 +116,30 @@ def _format_set(opcode: int) -> str:
     return f"set {dest_name}, {value}"
 
 
-def _format_suffix(opcode: int, side_set_count: int) -> str:
-    bits_for_delay = 5 - side_set_count
-    delay_mask = (1 << bits_for_delay) - 1
+def _format_suffix(opcode: int, side_set_count: int, side_set_opt: bool = False) -> str:
     delay_and_side = (opcode >> 8) & 0x1F
-    delay = delay_and_side & delay_mask
-    side = delay_and_side >> bits_for_delay
-
     parts = []
-    if side_set_count > 0 and side != 0:
-        parts.append(f" side {side}")
+
+    if side_set_count > 0:
+        if side_set_opt:
+            # MSB (bit 4 of 5-bit field) = enable; next side_set_count bits = side data;
+            # remaining bits = delay. EXECCTRL_SIDE_EN=1 in RP2040.
+            enable = (delay_and_side >> 4) & 1
+            side_shift = 4 - side_set_count
+            side = (delay_and_side >> side_shift) & ((1 << side_set_count) - 1)
+            delay = delay_and_side & ((1 << side_shift) - 1)
+            if enable:
+                parts.append(f" side {side}")
+        else:
+            bits_for_delay = 5 - side_set_count
+            delay_mask = (1 << bits_for_delay) - 1
+            delay = delay_and_side & delay_mask
+            side = delay_and_side >> bits_for_delay
+            if side != 0:
+                parts.append(f" side {side}")
+    else:
+        delay = delay_and_side
+
     if delay > 0:
         parts.append(f" [{delay}]")
     return "".join(parts)
@@ -149,7 +163,7 @@ def _format_instruction(instruction) -> str:
     return formatter(instruction)
 
 
-def disassemble(opcode: int, side_set_count: int = 0) -> str:
+def disassemble(opcode: int, side_set_count: int = 0, side_set_opt: bool = False) -> str:
     """
     Disassemble a PIO opcode into a human-readable assembly string.
 
@@ -160,6 +174,11 @@ def disassemble(opcode: int, side_set_count: int = 0) -> str:
     side_set_count : int
         Number of bits used for side-set (0-5). Affects delay/side-set
         decoding.
+    side_set_opt : bool
+        If True, the MSB of the delay/side-set field is an enable bit
+        (EXECCTRL_SIDE_EN=1). Side-set is only shown when the enable bit
+        is set. MicroPython's rp2.asm_pio uses this mode when sideset_init
+        is specified.
 
     Returns
     -------
@@ -185,5 +204,5 @@ def disassemble(opcode: int, side_set_count: int = 0) -> str:
         else:
             raise ValueError(f"Cannot disassemble opcode 0x{opcode:04X}")
 
-    suffix = _format_suffix(opcode, side_set_count)
+    suffix = _format_suffix(opcode, side_set_count, side_set_opt)
     return f"{body}{suffix}"

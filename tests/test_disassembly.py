@@ -105,3 +105,27 @@ from pioemu import disassemble
 )
 def test_disassemble(opcode: int, side_set_count: int, expected: str):
     assert disassemble(opcode, side_set_count) == expected
+
+
+@pytest.mark.parametrize(
+    "opcode, side_set_count, expected",
+    [
+        # Opt mode: MSB of delay/side-set field = enable bit; side only shown when enabled.
+        # With side_set_count=1: bit12=enable, bit11=side, bits10-8=delay.
+        # Opcodes from MicroPython rp2.asm_pio(sideset_init=rp2.PIO.OUT_LOW) program:
+        pytest.param(0x90A0, 1, "pull block side 0", id="pull block side 0 (opt)"),
+        pytest.param(0xA027, 1, "mov x, osr", id="mov x, osr no side (opt)"),
+        pytest.param(0xB827, 1, "mov x, osr side 1", id="mov x, osr side 1 (opt)"),
+        pytest.param(0xB027, 1, "mov x, osr side 0", id="mov x, osr side 0 (opt)"),
+        pytest.param(0x8020, 1, "push block", id="push block no side (opt)"),
+        pytest.param(0x006F, 1, "jmp !y 15", id="jmp !y 15 no side (opt)"),
+        # Enable=0: no side shown even with side_set_count > 0
+        pytest.param(0x0000, 1, "jmp 0", id="jmp 0 side not enabled (opt)"),
+        # Enable=1, side=1, with 2-bit side-set: bit12=enable, bits11-10=side, bits9-8=delay
+        pytest.param(0x1C00, 2, "jmp 0 side 3", id="jmp 0 side 3 (opt, 2-bit side)"),
+        # Enable=1, side=1, delay=1 with 1-bit side-set: bit12=enable, bit11=side, bits10-8=delay
+        pytest.param(0x1900, 1, "jmp 0 side 1 [1]", id="jmp 0 side 1 delay 1 (opt)"),
+    ],
+)
+def test_disassemble_opt_side_set(opcode: int, side_set_count: int, expected: str):
+    assert disassemble(opcode, side_set_count, side_set_opt=True) == expected
