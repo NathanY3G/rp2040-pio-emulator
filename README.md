@@ -51,7 +51,7 @@ repository, including:
 Instruction | Supported                         | Notes
 :-----------| :---------------------------------| :----
 JMP         | :heavy_check_mark:                | 
-WAIT        | :heavy_check_mark: :warning:      | IRQ variant is not supported
+WAIT        | :heavy_check_mark:                |
 IN          | :heavy_check_mark:                |
 OUT         | :heavy_check_mark: :construction: | EXEC destination not implemented
 PUSH        | :heavy_check_mark:                | 
