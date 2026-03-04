@@ -125,3 +125,32 @@ def test_wait_1_irq_correct_flag_index():
     assert state.program_counter == 1
     # Flag 3 should be cleared; flags 0-2 remain
     assert state.irq_flags == 0x07
+
+
+# REL bit (bit 4 of index) must not affect which IRQ flag is checked
+_WAIT_REL = 0x10  # REL flag bit within the index field
+
+
+def test_wait_1_irq_rel_checks_same_flag_as_direct():
+    """wait 1 irq 0 rel (for SM0) checks IRQ flag 0, not bit 16."""
+    _, state = next(
+        emulate(
+            [_wait_irq(0 | _WAIT_REL, 1), Opcodes.nop()],
+            stop_when=clock_cycles_reached(1),
+            initial_state=State(irq_flags=0x01),
+        )
+    )
+    assert state.program_counter == 1
+    assert state.irq_flags == 0x00
+
+
+def test_wait_0_irq_rel_stalls_when_flag_set():
+    """wait 0 irq 0 rel stalls when IRQ flag 0 is set."""
+    _, state = next(
+        emulate(
+            [_wait_irq(0 | _WAIT_REL, 0), Opcodes.nop()],
+            stop_when=clock_cycles_reached(1),
+            initial_state=State(irq_flags=0x01),
+        )
+    )
+    assert state.program_counter == 0
