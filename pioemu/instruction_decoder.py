@@ -390,15 +390,37 @@ class InstructionDecoder:
             instruction,
         )
 
-    @staticmethod
-    def _decode_wait(instruction: WaitInstruction) -> Emulation:
-        if instruction.polarity:
-            condition = partial(gpio_high, instruction.index)
-        else:
-            condition = partial(gpio_low, instruction.index)
+    def _decode_wait(self, instruction: WaitInstruction) -> Emulation:
+        if instruction.source in (0, 1):  # GPIO or PIN
+            if instruction.polarity:
+                condition = partial(gpio_high, instruction.index)
+            else:
+                condition = partial(gpio_low, instruction.index)
+
+            return Emulation(
+                always,
+                partial(stall_unless_predicate_met, condition),
+                ProgramCounterAdvance.ALWAYS,
+            )
+
+        # source == 2: IRQ
+        index = instruction.index
+
+        def emulate_wait_irq(state: State) -> State | None:
+            flag_set = bool(self._irq_flags[0] & (1 << index))
+
+            if instruction.polarity:
+                # wait 1 irq N: stall until flag is set, then clear it
+                if not flag_set:
+                    return None
+                self._irq_flags[0] &= ~(1 << index)
+            else:
+                # wait 0 irq N: stall until flag is cleared
+                if flag_set:
+                    return None
+
+            return replace(state, irq_flags=self._irq_flags[0])
 
         return Emulation(
-            always,
-            partial(stall_unless_predicate_met, condition),
-            ProgramCounterAdvance.ALWAYS,
+            always, emulate_wait_irq, ProgramCounterAdvance.ALWAYS, instruction
         )
