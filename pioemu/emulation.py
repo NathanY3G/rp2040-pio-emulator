@@ -329,9 +329,9 @@ def _apply_side_effects(
             output_shift_register=new_output_shift_register,
         )
     elif (opcode & 0xE0E0) == 0x0040:
-        return replace(state, x_register=state.x_register - 1)
+        return replace(state, x_register=(state.x_register - 1) & 0xFFFF_FFFF)
     elif (opcode & 0xE0E0) == 0x0080:
-        return replace(state, y_register=state.y_register - 1)
+        return replace(state, y_register=(state.y_register - 1) & 0xFFFF_FFFF)
 
     return state
 

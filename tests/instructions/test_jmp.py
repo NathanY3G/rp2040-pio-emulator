@@ -82,6 +82,16 @@ def test_jump_when_y_is_non_zero_post_decrement():
     assert y_register_series == [0, 3, 2, 1, 0]
 
 
+def test_jump_x_post_decrement_wraps_from_zero_to_max():
+    _, new_state = emulate_single_instruction(0x0041, initial_state=State(x_register=0))
+    assert new_state.x_register == 0xFFFF_FFFF
+
+
+def test_jump_y_post_decrement_wraps_from_zero_to_max():
+    _, new_state = emulate_single_instruction(0x0081, initial_state=State(y_register=0))
+    assert new_state.y_register == 0xFFFF_FFFF
+
+
 @pytest.mark.parametrize(
     "jmp_pin, initial_state, expected_program_counter",
     [
