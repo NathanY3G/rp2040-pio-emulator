@@ -1,5 +1,7 @@
 # Changelog
 
+## Unreleased Version
+- No changes
 
 ## 0.87.0 (2026-03-10)
 
