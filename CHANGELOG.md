@@ -1,9 +1,10 @@
 # Changelog
 
 
-## Unreleased Version
+## 0.87.0 (2026-03-10)
 
 ### Changed
+- Fixed post-decrement of the index registers - they now wrap around to their maximum value. Thanks [bikeNomad](https://github.com/bikeNomad).
 - Updated dependencies used for development.
 
 ## 0.86.0 (2025-10-25)
