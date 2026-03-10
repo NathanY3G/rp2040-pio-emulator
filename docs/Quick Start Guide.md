@@ -23,7 +23,7 @@ from adafruit_pioasm import assemble
 
 # uses the program string from above
 
-generator = emulate(assemble(program), stop_when=lambda _, state: state.x_register < 0)
+generator = emulate(assemble(program), stop_when=lambda _, state: state.x_register == (2 ** 32) - 1)
 
 for before, after in generator:
   print(f"[{after.clock}] X register: {before.x_register} -> {after.x_register}")
@@ -42,7 +42,7 @@ When run, the Python code above should produce output similar to the following:
 [8] X register: 3 -> 2
 [9] X register: 2 -> 1
 [10] X register: 1 -> 0
-[11] X register: 0 -> -1
+[11] X register: 0 -> 4294967295
 ```
 
 NB: The above output highlights that the X register is actually decremented past

@@ -20,7 +20,7 @@ from pioemu import emulate
 
 program = [0xE029, 0x0041, 0x2080]  # Count down from 9 using X register
 
-generator = emulate(program, stop_when=lambda _, state: state.x_register < 0)
+generator = emulate(program, stop_when=lambda _, state: state.x_register == (2 ** 32) - 1)
 
 for before, after in generator:
   print(f"X register: {before.x_register} -> {after.x_register}")
@@ -79,3 +79,4 @@ This software is under development and currently has limitations - the notable o
 * [Josverl](https://github.com/Josverl) for contributing features.
 * [winnylourson](https://github.com/winnylourson) for contributing a bug fix.
 * [Lerc](https://github.com/Lerc) for reporting a bug.
+* [bikeNomad](https://github.com/bikeNomad) for contributing a bug fix.
