@@ -26,7 +26,7 @@ requirement to use this package or even to use strings - the emulator itself onl
 
 ### Initialization
 ```python
-generator = emulate(assemble(program), stop_when=lambda _, state: state.x_register < 0)
+generator = emulate(assemble(program), stop_when=lambda _, state: state.x_register == (2 ** 32) - 1)
 ```
 
 The `emulate()` function is the main entry-point into the `pioemu` library. It effectively
@@ -55,8 +55,8 @@ occurred. The example above simply outputs the before and after values for scrat
 
 The stop condition that was passed to the `emulate()` function prevents the example from looping
 indefinitely. This function is called before each instruction is executed. In the example the lambda
-`state.x_register < 0` returns `True` when the new value for scratch register `X` has been
-decremented past zero.
+`state.x_register == (2 ** 32) - 1` returns `True` when the new value for scratch register `X` has
+been decremented past zero and wraps around to the value `0xFFFF_FFFF`.
 
 
 ### Summary
