@@ -60,3 +60,33 @@ def test_side_set_changes_pin_values(
     )
 
     assert new_state.pin_values == expected_pin_values
+
+
+@pytest.mark.parametrize(
+    "opcode, initial_pin_values, expected_pin_values",
+    [
+        # enable=0 (bit12=0): side-set not applied, pins unchanged
+        pytest.param(0x0000, 0b11, 0b11, id="jmp 0 enable=0 pins unchanged"),
+        # enable=1 (bit12=1), side=0 (bit11=0): side-set applied, pin 1 cleared
+        pytest.param(0x1000, 0b11, 0b01, id="jmp 0 enable=1 side=0 clears pin"),
+        # enable=1 (bit12=1), side=1 (bit11=1): side-set applied, pin 1 set
+        pytest.param(0x1800, 0b00, 0b10, id="jmp 0 enable=1 side=1 sets pin"),
+    ],
+)
+def test_opt_side_set_changes_pin_values(
+    opcode: int,
+    initial_pin_values: int,
+    expected_pin_values: int,
+):
+    _, new_state = next(
+        emulate(
+            [opcode],
+            initial_state=State(pin_values=initial_pin_values),
+            stop_when=clock_cycles_reached(1),
+            side_set_base=1,
+            side_set_count=1,
+            side_set_opt=True,
+        )
+    )
+
+    assert new_state.pin_values == expected_pin_values

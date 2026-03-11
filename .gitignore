@@ -1,1 +1,9 @@
 **/__*
+.venv/
+dist/
+*.egg-info/
+.coverage
+htmlcov/
+.mypy_cache/
+.pytest_cache/
+CLAUDE.md

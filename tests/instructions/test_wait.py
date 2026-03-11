@@ -13,8 +13,9 @@
 # limitations under the License.
 import pytest
 
-from pioemu import State
+from pioemu import State, clock_cycles_reached, emulate
 
+from ..opcodes import Opcodes
 from ..support import emulate_single_instruction
 
 
@@ -46,3 +47,110 @@ def test_wait_advances_when_condition_met(opcode: int, initial_state: State):
     )
 
     assert new_state.program_counter == 1
+
+
+# ---------------------------------------------------------------------------
+# WAIT IRQ variant
+# ---------------------------------------------------------------------------
+
+# Opcode helpers: WAIT base = 0x2000, IRQ source = bits[6:5] = 2 → 0x40
+_WAIT_BASE = 0x2000
+_WAIT_IRQ_SRC = 0x40  # source=2 (IRQ)
+_WAIT_POL1 = 0x80  # polarity=1
+
+
+def _wait_irq(index: int, polarity: int) -> int:
+    """Return a WAIT IRQ opcode."""
+    return _WAIT_BASE | (polarity << 7) | _WAIT_IRQ_SRC | (index & 0x1F)
+
+
+def test_wait_1_irq_stalls_when_flag_not_set():
+    """wait 1 irq 0 stalls when IRQ flag 0 is not set."""
+    _, state = next(
+        emulate(
+            [_wait_irq(0, 1), Opcodes.nop()],
+            stop_when=clock_cycles_reached(1),
+            initial_state=State(irq_flags=0),
+        )
+    )
+    assert state.program_counter == 0
+
+
+def test_wait_1_irq_advances_and_clears_flag():
+    """wait 1 irq 0 advances when flag is set, then clears the flag."""
+    _, state = next(
+        emulate(
+            [_wait_irq(0, 1), Opcodes.nop()],
+            stop_when=clock_cycles_reached(1),
+            initial_state=State(irq_flags=0x01),
+        )
+    )
+    assert state.program_counter == 1
+    assert state.irq_flags == 0x00
+
+
+def test_wait_0_irq_stalls_when_flag_set():
+    """wait 0 irq 0 stalls when IRQ flag 0 is set."""
+    _, state = next(
+        emulate(
+            [_wait_irq(0, 0), Opcodes.nop()],
+            stop_when=clock_cycles_reached(1),
+            initial_state=State(irq_flags=0x01),
+        )
+    )
+    assert state.program_counter == 0
+
+
+def test_wait_0_irq_advances_when_flag_not_set():
+    """wait 0 irq 0 advances when flag is not set."""
+    _, state = next(
+        emulate(
+            [_wait_irq(0, 0), Opcodes.nop()],
+            stop_when=clock_cycles_reached(1),
+            initial_state=State(irq_flags=0),
+        )
+    )
+    assert state.program_counter == 1
+
+
+def test_wait_1_irq_correct_flag_index():
+    """wait 1 irq 3 checks and clears the correct flag bit."""
+    _, state = next(
+        emulate(
+            [_wait_irq(3, 1), Opcodes.nop()],
+            stop_when=clock_cycles_reached(1),
+            initial_state=State(irq_flags=0x0F),
+        )
+    )
+    assert state.program_counter == 1
+    # Flag 3 should be cleared; flags 0-2 remain
+    assert state.irq_flags == 0x07
+
+
+# REL bit (bit 4 of index) must not affect which IRQ flag is checked
+_WAIT_REL = 0x10  # REL flag bit within the index field
+
+
+def test_wait_1_irq_rel_checks_same_flag_as_direct():
+    """wait 1 irq 0 rel (for SM0) checks IRQ flag 0, not bit 16."""
+    _, state = next(
+        emulate(
+            [_wait_irq(0 | _WAIT_REL, 1), Opcodes.nop()],
+            stop_when=clock_cycles_reached(1),
+            initial_state=State(irq_flags=0x01),
+        )
+    )
+    assert state.program_counter == 1
+    assert state.irq_flags == 0x00
+
+
+def test_wait_0_irq_rel_stalls_when_flag_set():
+    """wait 0 irq 0 rel stalls when IRQ flag 0 is set."""
+    _, state = next(
+        emulate(
+            [_wait_irq(0 | _WAIT_REL, 0), Opcodes.nop()],
+            stop_when=clock_cycles_reached(1),
+            initial_state=State(irq_flags=0x01),
+        )
+    )
+    assert state.program_counter == 0

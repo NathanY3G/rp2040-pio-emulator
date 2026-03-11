@@ -34,3 +34,4 @@ class State:
     )
     x_register: int = 0
     y_register: int = 0
+    irq_flags: int = 0
