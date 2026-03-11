@@ -37,6 +37,7 @@ def emulate(
     stop_when: Callable[[int, State], bool],
     initial_state: State | None = None,
     input_source: Callable[[State], int] | Callable[[int], int] | None = None,
+    irq_handler: Callable[[int, State], State] | None = None,
     auto_pull: bool = False,
     auto_push: bool = False,
     pull_threshold: int = 32,
@@ -47,6 +48,7 @@ def emulate(
     out_count: int = 32,
     side_set_base: int = 0,
     side_set_count: int = 0,
+    side_set_opt: bool = False,
     jmp_pin: int = 0,
     wrap_target: int = 0,
     wrap_top: int = 0,
@@ -130,8 +132,17 @@ def emulate(
 
     new_instruction_decoder = NewInstructionDecoder(side_set_count)
 
+    _initial_irq_flags = initial_state.irq_flags if initial_state else 0
+    _irq_flags = [_initial_irq_flags]
+
     old_instruction_decoder = InstructionDecoder(
-        shift_isr_method, shift_osr_method, out_base, out_count, jmp_pin
+        shift_isr_method,
+        shift_osr_method,
+        out_base,
+        out_count,
+        jmp_pin,
+        irq_handler=irq_handler,
+        irq_flags=_irq_flags,
     )
 
     wrap_top = wrap_top or len(opcodes) - 1
@@ -152,8 +163,8 @@ def emulate(
 
         opcode = opcodes[current_state.program_counter]
 
-        (side_set_value, delay_value) = _extract_delay_and_side_set_from_opcode(
-            opcode, side_set_count
+        (side_set_value, delay_value, apply_side_set) = _extract_delay_and_side_set_from_opcode(
+            opcode, side_set_count, side_set_opt
         )
 
         instruction = new_instruction_decoder.decode(opcode)
@@ -209,7 +220,7 @@ def emulate(
         )
 
         # TODO: Check that the following still applies when an instruction is stalled
-        if side_set_count > 0:
+        if apply_side_set:
             current_state = _apply_side_set_to_pin_values(
                 current_state, side_set_base, side_set_count, side_set_value
             )
@@ -223,7 +234,9 @@ def emulate(
                 instruction, condition_met, delay_value, current_state
             )
 
-        current_state = replace(current_state, clock=current_state.clock + 1)
+        current_state = replace(
+            current_state, clock=current_state.clock + 1, irq_flags=_irq_flags[0]
+        )
 
         yield (previous_state, current_state)
 
@@ -337,13 +350,20 @@ def _apply_side_effects(
 
 
 def _extract_delay_and_side_set_from_opcode(
-    opcode: int, side_set_count: int
-) -> Tuple[int, int]:
+    opcode: int, side_set_count: int, side_set_opt: bool = False
+) -> Tuple[int, int, bool]:
     combined_values = (opcode >> 8) & 0x1F
+
+    if side_set_count > 0 and side_set_opt:
+        enable = (combined_values >> 4) & 1
+        side_shift = 4 - side_set_count
+        side_set_value = (combined_values >> side_shift) & ((1 << side_set_count) - 1)
+        delay_value = combined_values & ((1 << side_shift) - 1)
+        return (side_set_value, delay_value, bool(enable))
+
     bits_for_delay = 5 - side_set_count
     delay_mask = (1 << bits_for_delay) - 1
-
-    return (combined_values >> bits_for_delay, combined_values & delay_mask)
+    return (combined_values >> bits_for_delay, combined_values & delay_mask, side_set_count > 0)
 
 
 def _apply_side_set_to_pin_values(

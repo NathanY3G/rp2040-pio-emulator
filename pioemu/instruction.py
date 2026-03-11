@@ -68,6 +68,14 @@ class WaitInstruction(Instruction):
     polarity: bool
 
 
+@dataclass(frozen=True, kw_only=True)
+class IrqInstruction(Instruction):
+    index: int
+    clear: bool
+    wait: bool
+    idx_mode: int
+
+
 @dataclass(frozen=True)
 class Emulation:
     condition: Callable[[State], bool]
