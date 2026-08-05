@@ -47,6 +47,8 @@ def emulate_single_instruction(
     shift_osr_right: bool = True,
     out_base: int = 0,
     out_count: int = 32,
+    set_base: int = 0,
+    set_count: int = 32,
 ) -> Tuple[State, State]:
     if advance_program_counter:
         opcodes = [opcode, Opcodes.nop()]
@@ -60,6 +62,8 @@ def emulate_single_instruction(
         shift_osr_right=shift_osr_right,
         out_base=out_base,
         out_count=out_count,
+        set_base=set_base,
+        set_count=set_count,
     )
 
     return next(instruction_generator)

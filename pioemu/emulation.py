@@ -45,6 +45,8 @@ def emulate(
     shift_osr_right: bool = True,
     out_base: int = 0,
     out_count: int = 32,
+    set_base: int = 0,
+    set_count: int = 32,
     side_set_base: int = 0,
     side_set_count: int = 0,
     jmp_pin: int = 0,
@@ -80,6 +82,10 @@ def emulate(
         First pin to use for OUT instructions.
     out_count : int, optional
         Number of consecutive pins to write for OUT instructions.
+    set_base : int, optional
+        First pin to use for SET instructions.
+    set_count : int, optional
+        Number of consecutive pins to write for SET instructions.
     side_set_base : int, optional
         First pin to use for the side-set.
     side_set_count : int, optional
@@ -115,6 +121,12 @@ def emulate(
     if out_count < 0 or out_count > 32:
         raise ValueError("emulate() invalid value for keyword argument: 'out_count'")
 
+    if set_base < 0 or set_base > 31:
+        raise ValueError("emulate() invalid value for keyword argument: 'set_base'")
+
+    if set_count < 0 or set_count > 32:
+        raise ValueError("emulate() invalid value for keyword argument: 'set_count'")
+
     if stop_when is None:
         raise ValueError("emulate() missing value for keyword argument: 'stop_when'")
 
@@ -131,7 +143,13 @@ def emulate(
     new_instruction_decoder = NewInstructionDecoder(side_set_count)
 
     old_instruction_decoder = InstructionDecoder(
-        shift_isr_method, shift_osr_method, out_base, out_count, jmp_pin
+        shift_isr_method,
+        shift_osr_method,
+        out_base,
+        out_count,
+        set_base,
+        set_count,
+        jmp_pin,
     )
 
     wrap_top = wrap_top or len(opcodes) - 1
