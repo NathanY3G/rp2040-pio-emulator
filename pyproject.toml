@@ -22,12 +22,12 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "pylint (==4.0.5)",
-    "pytest (==9.0.2)",
-    "coverage (==7.13.4)",
-    "black (==26.3.0)",
+    "pylint (==4.0.7)",
+    "pytest (==9.1.1)",
+    "coverage (==7.15.4)",
+    "black (==26.5.1)",
     "isort (==8.0.1)",
-    "mypy (==1.19.1)",
+    "mypy (==2.3.0)",
 ]
 
 [tool.poetry]
