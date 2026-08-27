@@ -48,7 +48,7 @@ def emulate_single_instruction(
     out_base: int = 0,
     out_count: int = 32,
     set_base: int = 0,
-    set_count: int = 32,
+    set_count: int = 5,
 ) -> Tuple[State, State]:
     if advance_program_counter:
         opcodes = [opcode, Opcodes.nop()]

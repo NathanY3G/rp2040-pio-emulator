@@ -46,7 +46,7 @@ def emulate(
     out_base: int = 0,
     out_count: int = 32,
     set_base: int = 0,
-    set_count: int = 32,
+    set_count: int = 5,
     side_set_base: int = 0,
     side_set_count: int = 0,
     jmp_pin: int = 0,
@@ -124,7 +124,7 @@ def emulate(
     if set_base < 0 or set_base > 31:
         raise ValueError("emulate() invalid value for keyword argument: 'set_base'")
 
-    if set_count < 0 or set_count > 32:
+    if set_count < 0 or set_count > 5:
         raise ValueError("emulate() invalid value for keyword argument: 'set_count'")
 
     if stop_when is None:
