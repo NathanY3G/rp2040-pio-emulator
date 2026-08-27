@@ -1,7 +1,9 @@
 # Changelog
 
 ## Unreleased Version
-- No changes
+
+### Changed
+- Updated dependencies used for development.
 
 ## 0.87.0 (2026-03-10)
 
