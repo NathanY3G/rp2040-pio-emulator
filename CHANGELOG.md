@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased Version
+- No changes
+
 ## 0.88.0 (2026-08-28)
 
 ### Added
