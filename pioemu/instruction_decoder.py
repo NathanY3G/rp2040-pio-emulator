@@ -81,6 +81,8 @@ class InstructionDecoder:
         shift_osr_method: Callable[[ShiftRegister, int], Tuple[ShiftRegister, int]],
         out_base: int,
         out_count: int,
+        set_base: int,
+        set_count: int,
         jmp_pin: int,
     ):
         """
@@ -94,6 +96,10 @@ class InstructionDecoder:
             First pin to use for OUT instructions.
         out_count : int
             Number of consecutive pins to write for OUT instructions.
+        set_base : int
+            First pin to use for SET instructions.
+        set_count : int
+            Number of consecutive pins to write for SET instructions.
         jmp_pin : int
             Pin that determines the branch taken by JMP PIN instructions.
         """
@@ -102,6 +108,8 @@ class InstructionDecoder:
         self.shift_osr_method = shift_osr_method
         self.out_base = out_base
         self.out_count = out_count
+        self.set_base = set_base
+        self.set_count = set_count
 
         self.decoding_functions: List[Callable[[int], Optional[Emulation]]] = [
             lambda _: None,
@@ -175,11 +183,11 @@ class InstructionDecoder:
         self.set_destinations: List[
             Callable[[Callable[[State], int], State], State] | None
         ] = [
-            partial(write_to_pins, 0, 32),
+            partial(write_to_pins, self.set_base, self.set_count),
             write_to_x,
             write_to_y,
             None,
-            partial(write_to_pin_directions, 0, 32),
+            partial(write_to_pin_directions, self.set_base, self.set_count),
             None,
             None,
             None,

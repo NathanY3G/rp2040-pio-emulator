@@ -5,6 +5,9 @@
 ### Changed
 - Updated dependencies used for development.
 
+### Added
+- Pin mapping support for SET instructions
+
 ## 0.87.0 (2026-03-10)
 
 ### Changed
