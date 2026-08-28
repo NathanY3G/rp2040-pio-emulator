@@ -1,11 +1,11 @@
-# Emulator for the PIO Blocks within the RP2040 Microcontroller (Python Edition)
+# Emulator for the PIO Blocks within the RP2 Microcontroller Series (Python Edition)
 
 ![Build Status](https://github.com/NathanY3G/rp2040-pio-emulator/actions/workflows/package-ci.yml/badge.svg) ![Coverage](./docs/images/coverage-badge.svg) [![PyPI](https://img.shields.io/pypi/v/rp2040-pio-emulator?color=informational)](https://pypi.org/project/rp2040-pio-emulator/)
 
 ## Introduction
 An emulator for the Programmable Input/Output (PIO) blocks that are present
-within the Raspberry Pi Foundation's RP2040 Microcontroller. It is designed
-to assist in the analysis of PIO programs and to help you by:
+within the Raspberry Pi Foundation's RP2040 and RP2350 Microcontrollers. It is
+designed to assist in the analysis of PIO programs and to help you by:
 
 * Enabling unit tests to be written.
 * Answering questions such as: How many clock cycles are being consumed?
@@ -65,7 +65,7 @@ This software is under development and currently has limitations - the notable o
 
 1. Not all of the available instructions are supported - please refer to the table above.
 
-1. No support for pin-sets associated with `SET` or `IN`; all pin numbers are with respect to GPIO 0.
+1. No support for pin-sets associated with `IN`; all pin numbers are with respect to GPIO 0.
 
 1. Pin-sets do not wrap after GPIO 31.
 
@@ -78,5 +78,7 @@ This software is under development and currently has limitations - the notable o
 * [aaronjamt](https://github.com/aaronjamt) for contributing features and fixes.
 * [Josverl](https://github.com/Josverl) for contributing features.
 * [winnylourson](https://github.com/winnylourson) for contributing a bug fix.
+* [kamocat](https://github.com/kamocat) for reporting issues, contributing examples and ideas.
 * [Lerc](https://github.com/Lerc) for reporting a bug.
 * [bikeNomad](https://github.com/bikeNomad) for contributing a bug fix.
+* [martinhansdk](https://github.com/martinhansdk) for adding a missing feature.

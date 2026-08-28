@@ -1,12 +1,12 @@
 # Changelog
 
-## Unreleased Version
+## 0.88.0 (2026-08-28)
+
+### Added
+- Pin mapping support for SET instructions. Thanks [martinhansdk](https://github.com/martinhansdk).
 
 ### Changed
 - Updated dependencies used for development.
-
-### Added
-- Pin mapping support for SET instructions
 
 ## 0.87.0 (2026-03-10)
 
